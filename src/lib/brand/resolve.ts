@@ -36,14 +36,20 @@ export async function resolveClient(): Promise<Client> {
   const matched = getClientByHost(host);
   if (matched) return matched;
 
-  const fallbackSlug = process.env.PM_SITES_DEFAULT_CLIENT ?? defaultClientSlug;
-  const fallback = getClientBySlug(fallbackSlug);
-  if (!fallback) {
-    throw new Error(
-      `No client configured for host "${host}" and no fallback "${fallbackSlug}".`,
+  const configured = process.env.PM_SITES_DEFAULT_CLIENT;
+  if (configured) {
+    const fallback = getClientBySlug(configured);
+    if (fallback) return fallback;
+    console.error(
+      `[PM-Sites] PM_SITES_DEFAULT_CLIENT="${configured}" matches no client in src/clients. ` +
+        `Known slugs: ${clients.map((c) => c.brand.slug).join(", ")}.`,
     );
   }
-  return fallback;
+
+  // Never throw here. This runs on every route including robots.txt and
+  // sitemap.xml, so a bad env var would take the whole site down rather than
+  // one page. Serving a known brand is always better than serving 500s.
+  return getClientBySlug(defaultClientSlug) ?? clients[0];
 }
 
 export async function resolveBrand() {
