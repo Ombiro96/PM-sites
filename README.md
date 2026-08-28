@@ -60,7 +60,9 @@ Every page is server-rendered on demand because the brand depends on the
 4. Register the client in `src/clients/index.ts`.
 5. Drop logo artwork in `public/clients/<slug>/` and point `logos` at it. Until
    then the site renders a typographic wordmark — a brand can go live without
-   waiting for artwork.
+   waiting for artwork. The browser-tab and iOS icons (`src/app/icon.tsx`,
+   `src/app/apple-icon.tsx`) are generated from `company.shortName` and
+   `theme.primary`, so they are correct for a new client with no assets at all.
 6. Add the domain to the Vercel project and point the client's DNS at it.
 
 No component may reference a client by name. If you find yourself wanting to,
