@@ -73,7 +73,7 @@ increasing order of correctness:
    what the founder brief calls the "shopfront". This is where it should end up:
    a manager will not want every building on the public site.
 
-Ship (1) for Ferrum; (2) belongs with the shopfront/listing model that carries
+Ship (1) for ABC Properties; (2) belongs with the shopfront/listing model that carries
 photos and descriptions.
 
 ## Hardening

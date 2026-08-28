@@ -1,16 +1,16 @@
 import type { ListingContent } from "@/lib/listings/content";
 
 /**
- * Marketing layer for Ferrum's portfolio.
+ * Marketing layer for ABC Properties' portfolio.
  *
  * `propertyMatch` must equal `Property.name` in Bomahut exactly — that is the
  * join key that pulls live availability and rent onto each unit type.
  *
- * TODO(ferrum): replace these placeholders with the real portfolio once the
- * read-only prod query has been run (see docs/ferrum-portfolio-query.sql), and
+ * TODO(abc): replace these placeholders with the real portfolio once the
+ * read-only prod query has been run (see docs/abc-portfolio-query.sql), and
  * swap Unsplash photography for the client's own shoot.
  */
-export const ferrumListings: ListingContent[] = [
+export const abcListings: ListingContent[] = [
   {
     slug: "2-bedroom-apartment",
     propertyMatch: "Riverside Court",

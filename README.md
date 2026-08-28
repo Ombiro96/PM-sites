@@ -33,10 +33,10 @@ Visit http://localhost:3000. With no matching host, the site renders
 `/etc/hosts`:
 
 ```
-127.0.0.1 ferrum.localhost
+127.0.0.1 abc.localhost
 ```
 
-and visit http://ferrum.localhost:3000.
+and visit http://abc.localhost:3000.
 
 ## How a request resolves
 
@@ -53,7 +53,7 @@ Every page is server-rendered on demand because the brand depends on the
 
 ## Adding a client
 
-1. `mkdir src/clients/<slug>` and copy `ferrum/brand.ts` + `ferrum/listings.ts`.
+1. `mkdir src/clients/<slug>` and copy `abc/brand.ts` + `abc/listings.ts`.
 2. Fill in company details, contact, theme tokens, content and
    `accountNumber` (their Bomahut `CustomerAccount.account_number`).
 3. Set `hosts` to their domain(s).
