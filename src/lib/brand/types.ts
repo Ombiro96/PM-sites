@@ -28,6 +28,9 @@ export type BrandLogos = {
   dark: string | null;
   /** Square mark for favicons and compact spaces. */
   mark: string | null;
+  /** Letters drawn in the generated tab, home-screen and wordmark marks.
+   *  `null` falls back to the first two letters of the short name. */
+  monogram: string | null;
   /** Width/height ratio of the wordmark, used to reserve layout space. */
   aspectRatio: number;
 };

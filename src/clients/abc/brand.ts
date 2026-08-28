@@ -23,6 +23,7 @@ export const abcBrand: Brand = {
     light: null,
     dark: null,
     mark: null,
+    monogram: "ABC",
     aspectRatio: 4.4,
   },
   theme: {
