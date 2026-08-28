@@ -1,7 +1,7 @@
 import type { Brand } from "@/lib/brand/types";
 import type { ListingContent } from "@/lib/listings/content";
-import { ferrumBrand } from "./ferrum/brand";
-import { ferrumListings } from "./ferrum/listings";
+import { abcBrand } from "./abc/brand";
+import { abcListings } from "./abc/listings";
 
 export type Client = {
   brand: Brand;
@@ -13,7 +13,7 @@ export type Client = {
  * their own `src/clients/<slug>/` folder.
  */
 export const clients: Client[] = [
-  { brand: ferrumBrand, listings: ferrumListings },
+  { brand: abcBrand, listings: abcListings },
 ];
 
-export const defaultClientSlug = "ferrum";
+export const defaultClientSlug = "abc";

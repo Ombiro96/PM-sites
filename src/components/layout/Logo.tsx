@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Brand } from "@/lib/brand/types";
+import { brandMonogram } from "@/lib/brand/monogram";
 import { cn } from "@/lib/utils";
 
 /**
@@ -44,7 +45,7 @@ export function Logo({
                 : "bg-brand text-brand-contrast",
             )}
           >
-            {brand.company.shortName.slice(0, 2).toUpperCase()}
+            {brandMonogram(brand)}
           </span>
           <span className="flex flex-col leading-none">
             <span

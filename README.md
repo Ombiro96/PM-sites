@@ -33,10 +33,10 @@ Visit http://localhost:3000. With no matching host, the site renders
 `/etc/hosts`:
 
 ```
-127.0.0.1 ferrum.localhost
+127.0.0.1 abc.localhost
 ```
 
-and visit http://ferrum.localhost:3000.
+and visit http://abc.localhost:3000.
 
 ## How a request resolves
 
@@ -53,7 +53,7 @@ Every page is server-rendered on demand because the brand depends on the
 
 ## Adding a client
 
-1. `mkdir src/clients/<slug>` and copy `ferrum/brand.ts` + `ferrum/listings.ts`.
+1. `mkdir src/clients/<slug>` and copy `abc/brand.ts` + `abc/listings.ts`.
 2. Fill in company details, contact, theme tokens, content and
    `accountNumber` (their Bomahut `CustomerAccount.account_number`).
 3. Set `hosts` to their domain(s).
@@ -118,6 +118,9 @@ real availability, the site emits `RealEstateAgent`, and `/about` emits
 src/
   app/                    routes; every page resolves its brand from the Host header
     api/enquiry/          POST → Make.com (rate-limited, honeypot, zod-validated)
+    api/request/          POST → Make.com; tenant requests, validated from the
+                          field config in lib/requests.ts
+    submit-a-request/     hub + one page per request type ([type] dynamic route)
   clients/                per-client configuration — the only place a brand is named
   components/
     forms/ home/ layout/ listings/ seo/ ui/
@@ -125,6 +128,8 @@ src/
     backend/              read-only GraphQL client + vacancy query
     brand/                host resolution, types, theme → CSS variables
     listings/             types, marketing content model, merge, filtering
+    requests.ts           tenant request types + fields; the form renders from
+                          it and the API validates against it
 ```
 
 ## Commands

@@ -28,6 +28,9 @@ export type BrandLogos = {
   dark: string | null;
   /** Square mark for favicons and compact spaces. */
   mark: string | null;
+  /** Letters drawn in the generated tab, home-screen and wordmark marks.
+   *  `null` falls back to the first two letters of the short name. */
+  monogram: string | null;
   /** Width/height ratio of the wordmark, used to reserve layout space. */
   aspectRatio: number;
 };
@@ -145,6 +148,8 @@ export type Brand = {
   tenantPortalUrl: string;
   /** Make.com (or other) webhook that receives enquiries. Falls back to env. */
   enquiryWebhookUrl: string | null;
+  /** Webhook for tenant requests. Falls back to env, then to the enquiry one. */
+  requestWebhookUrl: string | null;
   seo: {
     titleDefault: string;
     titleTemplate: string;

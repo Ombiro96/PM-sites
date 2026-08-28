@@ -2,27 +2,28 @@ import type { Brand } from "@/lib/brand/types";
 
 /**
  * Client #1 — the reference implementation. Everything a second client needs is
- * in this file plus `listings.ts`; no component should ever reference "ferrum".
+ * in this file plus `listings.ts`; no component should ever reference "abc".
  *
- * TODO(ferrum): confirm company details, phone, address and portfolio numbers
+ * TODO(abc): confirm company details, phone, address and portfolio numbers
  * with the client before launch. Photography is placeholder until their shoot.
  */
-export const ferrumBrand: Brand = {
-  slug: "ferrum",
-  hosts: ["ferrumservices.co.ke", "www.ferrumservices.co.ke", "ferrum.localhost"],
+export const abcBrand: Brand = {
+  slug: "abc",
+  hosts: ["abcproperties.co.ke", "www.abcproperties.co.ke", "abc.localhost"],
   company: {
-    name: "Ferrum Services",
-    shortName: "Ferrum",
-    legalName: "Ferrum Services Limited",
+    name: "ABC Properties",
+    shortName: "ABC",
+    legalName: "ABC Properties Limited",
     tagline: "Property management, done properly.",
     foundedYear: null,
   },
   logos: {
-    // TODO(ferrum): drop the real SVGs into public/clients/ferrum/ and point
+    // TODO(abc): drop the real SVGs into public/clients/abc/ and point
     // these at them. Until then the site renders a typographic wordmark.
     light: null,
     dark: null,
     mark: null,
+    monogram: "ABC",
     aspectRatio: 4.4,
   },
   theme: {
@@ -45,8 +46,8 @@ export const ferrumBrand: Brand = {
     phone: "+254700000000",
     phoneDisplay: "0700 000 000",
     whatsapp: "+254700000000",
-    email: "info@ferrumservices.co.ke",
-    addressLines: ["Ferrum House, Ground Floor", "Ngong Road"],
+    email: "info@abcproperties.co.ke",
+    addressLines: ["ABC House, Ground Floor", "Ngong Road"],
     city: "Nairobi",
     officeHours: "Monday - Friday, 8:00am - 5:00pm",
     mapEmbedUrl: null,
@@ -56,6 +57,7 @@ export const ferrumBrand: Brand = {
     { label: "Properties", href: "/properties" },
     { label: "Areas", href: "/areas" },
     { label: "Services", href: "/services" },
+    { label: "Submit a Request", href: "/submit-a-request" },
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
   ],
@@ -82,18 +84,21 @@ export const ferrumBrand: Brand = {
       items: [
         { label: "Tenant login", href: "/tenant-portal" },
         { label: "Report maintenance", href: "/tenant-portal" },
-        { label: "Contact us", href: "/contact" },
+        { label: "Notice to vacate", href: "/submit-a-request/notice-to-vacate" },
+        { label: "Apply to move in", href: "/submit-a-request/apply-to-move-in" },
+        { label: "Submit a complaint", href: "/submit-a-request/submit-a-complaint" },
       ],
     },
   ],
-  accountNumber: "TODO_FERRUM_ACCOUNT_NUMBER",
+  accountNumber: "TODO_ABC_ACCOUNT_NUMBER",
   tenantPortalUrl: "https://app.bomahut.com/t/login",
   enquiryWebhookUrl: null,
+  requestWebhookUrl: null,
   seo: {
-    titleDefault: "Ferrum Services - Property Management in Nairobi",
-    titleTemplate: "%s | Ferrum Services",
+    titleDefault: "ABC Properties - Property Management in Nairobi",
+    titleTemplate: "%s | ABC Properties",
     description:
-      "Ferrum Services manages residential property in Nairobi. Browse available houses and apartments to rent, or hand us the running of yours.",
+      "ABC Properties manages residential property in Nairobi. Browse available houses and apartments to rent, or hand us the running of yours.",
     keywords: [
       "property management Nairobi",
       "houses to rent Nairobi",
@@ -101,7 +106,7 @@ export const ferrumBrand: Brand = {
       "property managers in Kenya",
       "letting agents Nairobi",
     ],
-    ogImage: "/clients/ferrum/og.jpg",
+    ogImage: "/clients/abc/og.jpg",
     locale: "en_KE",
   },
   content: {
@@ -256,10 +261,10 @@ export const ferrumBrand: Brand = {
       },
     ],
     about: {
-      heading: "About Ferrum Services",
+      heading: "About ABC Properties",
       lead: "We manage residential property in Nairobi for landlords who want the job done without being managed themselves.",
       body: [
-        "Ferrum Services was built on a simple observation: most property in Nairobi is not badly built, it is badly run. Buildings fall behind because nobody owns the small decisions - the broken gate, the unpaid water bill, the tenant who has quietly been three months late.",
+        "ABC Properties was built on a simple observation: most property in Nairobi is not badly built, it is badly run. Buildings fall behind because nobody owns the small decisions - the broken gate, the unpaid water bill, the tenant who has quietly been three months late.",
         "We take those decisions off a landlord's desk. Rent is invoiced and followed up. Maintenance is logged, quoted and closed out. Statements arrive monthly, and they reconcile.",
         "For tenants, that shows up as something plainer: a building that works, and someone who answers.",
       ],

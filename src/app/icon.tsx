@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { resolveBrand } from "@/lib/brand/resolve";
+import { brandMonogram } from "@/lib/brand/monogram";
 
 export const size = { width: 32, height: 32 };
 export const contentType = "image/png";
@@ -12,7 +13,7 @@ export const contentType = "image/png";
  */
 export default async function Icon() {
   const brand = await resolveBrand();
-  const initials = brand.company.shortName.slice(0, 2).toUpperCase();
+  const initials = brandMonogram(brand);
 
   return new ImageResponse(
     (
@@ -25,7 +26,7 @@ export default async function Icon() {
           justifyContent: "center",
           background: brand.theme.primary,
           color: brand.theme.primaryContrast,
-          fontSize: initials.length > 1 ? 15 : 20,
+          fontSize: initials.length > 2 ? 11 : initials.length > 1 ? 15 : 20,
           fontWeight: 700,
           letterSpacing: "-0.04em",
           borderRadius: 6,

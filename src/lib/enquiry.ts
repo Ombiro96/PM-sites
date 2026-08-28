@@ -16,8 +16,9 @@ export const enquirySchema = z.object({
   /** Listing the enquiry came from, when it came from one. */
   listingSlug: z.string().trim().max(120).optional(),
   listingTitle: z.string().trim().max(200).optional(),
-  /** Hidden field. Bots fill it, humans never see it. */
-  company: z.string().max(0).optional(),
+  /** Hidden field. Bots fill it, humans never see it. Checked in the route,
+   *  not rejected here, so a bot gets a fake success rather than an error. */
+  company: z.string().max(200).optional(),
 });
 
 export type EnquiryInput = z.infer<typeof enquirySchema>;

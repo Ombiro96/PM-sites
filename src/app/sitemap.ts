@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { resolveClient, canonicalOrigin } from "@/lib/brand/resolve";
 import { getListings } from "@/lib/listings/source";
+import { REQUEST_TYPES } from "@/lib/requests";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const client = await resolveClient();
@@ -12,9 +13,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${origin}/properties`, changeFrequency: "daily", priority: 0.9 },
     { url: `${origin}/areas`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${origin}/services`, changeFrequency: "monthly", priority: 0.6 },
+    {
+      url: `${origin}/submit-a-request`,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
     { url: `${origin}/about`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${origin}/contact`, changeFrequency: "monthly", priority: 0.5 },
   ];
+
+  const requestPages: MetadataRoute.Sitemap = REQUEST_TYPES.map((type) => ({
+    url: `${origin}/submit-a-request/${type.slug}`,
+    changeFrequency: "monthly",
+    priority: 0.5,
+  }));
 
   const areaPages: MetadataRoute.Sitemap = client.brand.content.areas.items.map(
     (area) => ({
@@ -30,5 +42,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: listing.availableUnits > 0 ? 0.8 : 0.4,
   }));
 
-  return [...staticPages, ...areaPages, ...listingPages];
+  return [...staticPages, ...requestPages, ...areaPages, ...listingPages];
 }
