@@ -145,6 +145,8 @@ export type Brand = {
   tenantPortalUrl: string;
   /** Make.com (or other) webhook that receives enquiries. Falls back to env. */
   enquiryWebhookUrl: string | null;
+  /** Webhook for tenant requests. Falls back to env, then to the enquiry one. */
+  requestWebhookUrl: string | null;
   seo: {
     titleDefault: string;
     titleTemplate: string;

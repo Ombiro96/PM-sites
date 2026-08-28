@@ -118,6 +118,9 @@ real availability, the site emits `RealEstateAgent`, and `/about` emits
 src/
   app/                    routes; every page resolves its brand from the Host header
     api/enquiry/          POST → Make.com (rate-limited, honeypot, zod-validated)
+    api/request/          POST → Make.com; tenant requests, validated from the
+                          field config in lib/requests.ts
+    submit-a-request/     hub + one page per request type ([type] dynamic route)
   clients/                per-client configuration — the only place a brand is named
   components/
     forms/ home/ layout/ listings/ seo/ ui/
@@ -125,6 +128,8 @@ src/
     backend/              read-only GraphQL client + vacancy query
     brand/                host resolution, types, theme → CSS variables
     listings/             types, marketing content model, merge, filtering
+    requests.ts           tenant request types + fields; the form renders from
+                          it and the API validates against it
 ```
 
 ## Commands
