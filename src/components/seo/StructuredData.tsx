@@ -1,6 +1,4 @@
-import type { Client } from "@/clients";
-import type { Listing } from "@/lib/listings/types";
-import { canonicalOrigin } from "@/lib/brand/resolve";
+import type { CompanyFacts } from "@/lib/site/types";
 
 function JsonLd({ data }: { data: Record<string, unknown> }) {
   return (
@@ -12,90 +10,49 @@ function JsonLd({ data }: { data: Record<string, unknown> }) {
   );
 }
 
-export function OrganizationSchema({ client }: { client: Client }) {
-  const { brand } = client;
-  const origin = canonicalOrigin(client);
-
+export function OrganizationSchema({
+  facts,
+  origin,
+  description,
+}: {
+  facts: CompanyFacts;
+  origin: string;
+  description?: string;
+}) {
   return (
     <JsonLd
       data={{
         "@context": "https://schema.org",
         "@type": "RealEstateAgent",
-        name: brand.company.legalName,
-        alternateName: brand.company.name,
+        name: facts.display_name,
         url: origin,
-        description: brand.seo.description,
-        telephone: brand.contact.phone,
-        email: brand.contact.email,
-        areaServed: brand.content.areas.items.map((area) => ({
+        description,
+        telephone: facts.phone,
+        email: facts.email ?? undefined,
+        areaServed: facts.areas_served.map((area) => ({
           "@type": "Place",
-          name: area.name,
+          name: area,
         })),
-        address: {
-          "@type": "PostalAddress",
-          streetAddress: brand.contact.addressLines.join(", "),
-          addressLocality: brand.contact.city,
-          addressCountry: "KE",
-        },
-        sameAs: Object.values(brand.social).filter(Boolean),
-      }}
-    />
-  );
-}
-
-export function ListingSchema({
-  client,
-  listing,
-}: {
-  client: Client;
-  listing: Listing;
-}) {
-  const origin = canonicalOrigin(client);
-
-  return (
-    <JsonLd
-      data={{
-        "@context": "https://schema.org",
-        "@type": "Apartment",
-        name: `${listing.title} — ${listing.propertyName}`,
-        description: listing.description,
-        url: `${origin}/properties/${listing.slug}`,
-        image: listing.photos.map((photo) => photo.url),
-        numberOfBedrooms: listing.bedrooms ?? undefined,
-        numberOfBathroomsTotal: listing.bathrooms ?? undefined,
-        floorSize: listing.sizeSqm
-          ? { "@type": "QuantitativeValue", value: listing.sizeSqm, unitCode: "MTK" }
+        address: facts.office_address
+          ? {
+              "@type": "PostalAddress",
+              streetAddress: facts.office_address,
+              addressCountry: "KE",
+            }
           : undefined,
-        address: {
-          "@type": "PostalAddress",
-          addressLocality: listing.area,
-          addressRegion: listing.city || client.brand.contact.city,
-          addressCountry: "KE",
-        },
-        offers: {
-          "@type": "Offer",
-          price: listing.rent,
-          priceCurrency: listing.currency,
-          availability:
-            listing.availableUnits > 0
-              ? "https://schema.org/InStock"
-              : "https://schema.org/OutOfStock",
-          businessFunction: "https://schema.org/LeaseOut",
-        },
+        sameAs: Object.values(facts.social_links),
       }}
     />
   );
 }
 
 export function BreadcrumbSchema({
-  client,
+  origin,
   trail,
 }: {
-  client: Client;
+  origin: string;
   trail: { name: string; href: string }[];
 }) {
-  const origin = canonicalOrigin(client);
-
   return (
     <JsonLd
       data={{

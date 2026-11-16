@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { enquirySchema } from "@/lib/enquiry";
-import { resolveClient } from "@/lib/brand/resolve";
 import { clientIp, rateLimited } from "@/lib/rate-limit";
+import { getSite } from "@/lib/site/source";
 
 /**
  * Enquiries never touch the Bomahut API — this site is read-only against
@@ -42,14 +42,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   }
 
-  const client = await resolveClient();
-  const webhook =
-    client.brand.enquiryWebhookUrl ?? process.env.MAKE_ENQUIRY_WEBHOOK_URL;
+  const site = await getSite();
+  const webhook = process.env.MAKE_ENQUIRY_WEBHOOK_URL;
 
   if (!webhook) {
-    console.error(
-      `[PM-Sites] no enquiry webhook configured for ${client.brand.slug}`,
-    );
+    console.error("[PM-Sites] no enquiry webhook configured");
     return NextResponse.json(
       {
         ok: false,
@@ -66,9 +63,7 @@ export async function POST(request: Request) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...enquiry,
-        client: client.brand.slug,
-        company: client.brand.company.legalName,
-        accountNumber: client.brand.accountNumber,
+        company: site.facts.display_name,
         receivedAt: new Date().toISOString(),
       }),
       signal: AbortSignal.timeout(8_000),

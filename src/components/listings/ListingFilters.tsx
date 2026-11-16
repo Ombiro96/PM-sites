@@ -2,7 +2,6 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useTransition } from "react";
-import type { AreaItem } from "@/lib/brand/types";
 import { cn } from "@/lib/utils";
 
 const CATEGORIES = [
@@ -39,7 +38,7 @@ export function ListingFilters({
   areas,
   resultCount,
 }: {
-  areas: AreaItem[];
+  areas: { slug: string; name: string }[];
   resultCount: number;
 }) {
   const router = useRouter();

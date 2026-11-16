@@ -1,15 +1,22 @@
-import type { Brand } from "@/lib/brand/types";
 import { telHref, whatsappHref } from "@/lib/utils";
 
 /**
  * Kenyan property search happens on a phone, and the enquiry path has to be one
  * thumb-tap away. Pinned to the bottom of the viewport on small screens only.
  */
-export function MobileContactBar({ brand }: { brand: Brand }) {
+export function MobileContactBar({
+  name,
+  phone,
+  whatsapp,
+}: {
+  name: string;
+  phone: string;
+  whatsapp: string | null;
+}) {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-2 border-t border-line bg-surface shadow-[0_-4px_16px_rgba(0,0,0,0.06)] lg:hidden">
+    <div className="fixed inset-x-0 bottom-0 z-40 grid auto-cols-fr grid-flow-col border-t border-line bg-surface shadow-[0_-4px_16px_rgba(0,0,0,0.06)] lg:hidden">
       <a
-        href={telHref(brand.contact.phone)}
+        href={telHref(phone)}
         className="flex items-center justify-center gap-2 py-4 text-sm font-semibold text-brand"
       >
         <svg
@@ -26,11 +33,11 @@ export function MobileContactBar({ brand }: { brand: Brand }) {
         </svg>
         Call us
       </a>
-      {brand.contact.whatsapp ? (
+      {whatsapp ? (
         <a
           href={whatsappHref(
-            brand.contact.whatsapp,
-            `Hello ${brand.company.name}, I would like to enquire about a property.`,
+            whatsapp,
+            `Hello ${name}, I would like to enquire about a property.`,
           )}
           target="_blank"
           rel="noreferrer noopener"
@@ -46,14 +53,7 @@ export function MobileContactBar({ brand }: { brand: Brand }) {
           </svg>
           WhatsApp
         </a>
-      ) : (
-        <a
-          href={`mailto:${brand.contact.email}`}
-          className="flex items-center justify-center gap-2 border-l border-line py-4 text-sm font-semibold text-ink"
-        >
-          Email us
-        </a>
-      )}
+      ) : null}
     </div>
   );
 }

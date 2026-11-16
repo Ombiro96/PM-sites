@@ -3,12 +3,30 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import type { Brand } from "@/lib/brand/types";
-import { cn, telHref } from "@/lib/utils";
-import { Container, ButtonLink } from "@/components/ui/primitives";
+import { ButtonLink, Container } from "@/components/ui/primitives";
+import type { ResolvedButton } from "@/lib/site/actions";
+import type { NavItem } from "@/lib/site/pages";
+import { cn } from "@/lib/utils";
 import { Logo } from "./Logo";
 
-export function Header({ brand }: { brand: Brand }) {
+const TENANT_LOGIN_CLASSES =
+  "rounded-brand border-[1.5px] border-current px-3 py-1.5 text-sm font-semibold";
+
+export function Header({
+  name,
+  monogram,
+  logoUrl,
+  nav,
+  tenantLoginUrl,
+  contact,
+}: {
+  name: string;
+  monogram: string;
+  logoUrl: string | null;
+  nav: NavItem[];
+  tenantLoginUrl: string | null;
+  contact: ResolvedButton;
+}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -19,33 +37,22 @@ export function Header({ brand }: { brand: Brand }) {
     };
   }, [open]);
 
+  const contactProps = {
+    href: contact.href,
+    target: contact.external ? "_blank" : undefined,
+    rel: contact.external ? "noreferrer noopener" : undefined,
+  };
+
   return (
-    <header className="sticky top-0 z-50 border-b border-line bg-surface/95 backdrop-blur">
-      <div className="hidden bg-brand-deep text-brand-contrast lg:block">
-        <Container className="flex h-10 items-center justify-between text-xs">
-          <p className="text-white/70">{brand.contact.officeHours}</p>
-          <div className="flex items-center gap-6">
-            <a
-              href={telHref(brand.contact.phone)}
-              className="font-semibold hover:text-accent"
-            >
-              {brand.contact.phoneDisplay}
-            </a>
-            <a
-              href={`mailto:${brand.contact.email}`}
-              className="text-white/70 hover:text-accent"
-            >
-              {brand.contact.email}
-            </a>
-          </div>
-        </Container>
-      </div>
+    <header className="sticky top-0 z-50 border-b border-black/10 bg-header text-header-ink">
+      <Container className="flex items-center justify-between gap-5 py-[13px]">
+        <Logo name={name} monogram={monogram} logoUrl={logoUrl} />
 
-      <Container className="flex h-18 items-center justify-between gap-6">
-        <Logo brand={brand} />
-
-        <nav aria-label="Main" className="hidden items-center gap-8 lg:flex">
-          {brand.nav.map((item) => {
+        <nav
+          aria-label="Main"
+          className="ml-auto hidden items-center gap-5 lg:flex"
+        >
+          {nav.map((item) => {
             const active =
               item.href === "/"
                 ? pathname === "/"
@@ -56,8 +63,8 @@ export function Header({ brand }: { brand: Brand }) {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "text-sm font-medium transition-colors",
-                  active ? "text-brand" : "text-ink-muted hover:text-brand",
+                  "text-[15px] font-semibold decoration-2 underline-offset-[6px] hover:underline",
+                  active && "underline",
                 )}
               >
                 {item.label}
@@ -67,11 +74,18 @@ export function Header({ brand }: { brand: Brand }) {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <ButtonLink href="/tenant-portal" variant="secondary" size="sm">
-            Tenant login
-          </ButtonLink>
-          <ButtonLink href="/contact" size="sm">
-            Enquire
+          {tenantLoginUrl ? (
+            <a
+              href={tenantLoginUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              className={TENANT_LOGIN_CLASSES}
+            >
+              Tenant login
+            </a>
+          ) : null}
+          <ButtonLink size="sm" {...contactProps}>
+            {contact.label}
           </ButtonLink>
         </div>
 
@@ -81,7 +95,7 @@ export function Header({ brand }: { brand: Brand }) {
           aria-expanded={open}
           aria-controls="mobile-nav"
           aria-label={open ? "Close menu" : "Open menu"}
-          className="grid h-11 w-11 place-items-center rounded-brand border border-line lg:hidden"
+          className="grid h-11 w-11 place-items-center rounded-brand border border-current/30 lg:hidden"
         >
           <svg
             viewBox="0 0 24 24"
@@ -102,34 +116,30 @@ export function Header({ brand }: { brand: Brand }) {
       </Container>
 
       {open ? (
-        <div
-          id="mobile-nav"
-          className="border-t border-line bg-surface lg:hidden"
-        >
+        <div id="mobile-nav" className="border-t border-current/15 lg:hidden">
           <Container className="flex flex-col gap-1 py-4">
-            {brand.nav.map((item) => (
+            {nav.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className="rounded-brand px-3 py-3 text-base font-medium text-ink hover:bg-surface-muted"
+                className="rounded-brand px-3 py-3 text-base font-semibold hover:bg-current/10"
               >
                 {item.label}
               </Link>
             ))}
             <div className="mt-3 grid gap-2">
-              <ButtonLink href="/tenant-portal" variant="secondary" size="md">
-                Tenant login
-              </ButtonLink>
-              <ButtonLink href="/contact" size="md">
-                Send an enquiry
-              </ButtonLink>
-              <a
-                href={telHref(brand.contact.phone)}
-                className="py-2 text-center text-sm font-semibold text-brand"
-              >
-                Call {brand.contact.phoneDisplay}
-              </a>
+              {tenantLoginUrl ? (
+                <a
+                  href={tenantLoginUrl}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className={cn(TENANT_LOGIN_CLASSES, "py-3 text-center")}
+                >
+                  Tenant login
+                </a>
+              ) : null}
+              <ButtonLink {...contactProps}>{contact.label}</ButtonLink>
             </div>
           </Container>
         </div>

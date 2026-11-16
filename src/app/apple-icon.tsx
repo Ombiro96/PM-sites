@@ -1,14 +1,14 @@
 import { ImageResponse } from "next/og";
-import { resolveBrand } from "@/lib/brand/resolve";
-import { brandMonogram } from "@/lib/brand/monogram";
+import { monogram } from "@/lib/site/monogram";
+import { getSite } from "@/lib/site/source";
 
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
 
-/** Home-screen icon for iOS, generated from the same brand tokens as the tab icon. */
+/** Home-screen icon for iOS, drawn the same way as the tab icon. */
 export default async function AppleIcon() {
-  const brand = await resolveBrand();
-  const initials = brandMonogram(brand);
+  const site = await getSite();
+  const initials = monogram(site.facts.display_name);
 
   return new ImageResponse(
     (
@@ -19,8 +19,8 @@ export default async function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: brand.theme.primary,
-          color: brand.theme.primaryContrast,
+          background: site.brand_colour,
+          color: "#ffffff",
           fontSize: initials.length > 2 ? 62 : initials.length > 1 ? 84 : 112,
           fontWeight: 700,
           letterSpacing: "-0.04em",

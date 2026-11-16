@@ -10,7 +10,7 @@ export function Container({
   children: ReactNode;
 }) {
   return (
-    <div className={cn("mx-auto w-full max-w-7xl px-5 sm:px-8", className)}>
+    <div className={cn("mx-auto w-full max-w-(--wide) px-[22px]", className)}>
       {children}
     </div>
   );
@@ -94,22 +94,29 @@ export function SectionHeading({
   );
 }
 
-type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "accent";
+type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "outline"
+  | "ghost"
+  | "accent"
+  | "inverse";
 type ButtonSize = "sm" | "md" | "lg";
 
 const VARIANTS: Record<ButtonVariant, string> = {
-  primary: "bg-brand text-brand-contrast hover:bg-brand-deep",
-  accent: "bg-accent text-accent-contrast hover:brightness-95",
-  secondary: "bg-surface text-ink border border-line hover:bg-surface-muted",
-  outline:
-    "border border-current text-current hover:bg-current/10 bg-transparent",
-  ghost: "text-brand hover:bg-brand/5",
+  primary:
+    "border-brand bg-brand text-brand-contrast hover:border-brand-deep hover:bg-brand-deep",
+  accent: "border-accent bg-accent text-accent-contrast hover:brightness-95",
+  secondary: "border-line bg-surface text-ink hover:bg-surface-muted",
+  outline: "border-current bg-transparent text-current hover:bg-current/10",
+  ghost: "border-transparent text-brand hover:bg-brand/5",
+  inverse: "border-white bg-white text-brand-deep hover:bg-white/90",
 };
 
 const SIZES: Record<ButtonSize, string> = {
-  sm: "h-9 px-4 text-sm",
-  md: "h-11 px-6 text-sm",
-  lg: "h-13 px-8 text-base",
+  sm: "px-3.5 py-[7px] text-[14.5px]",
+  md: "px-5 py-[11px] text-base",
+  lg: "px-7 py-3.5 text-base",
 };
 
 function buttonClasses(
@@ -118,7 +125,7 @@ function buttonClasses(
   className?: string,
 ) {
   return cn(
-    "inline-flex items-center justify-center gap-2 rounded-brand font-semibold transition-colors",
+    "inline-flex items-center justify-center gap-2 rounded-brand border-2 leading-tight font-bold transition-colors",
     "disabled:cursor-not-allowed disabled:opacity-60",
     VARIANTS[variant],
     SIZES[size],

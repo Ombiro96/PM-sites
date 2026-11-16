@@ -30,7 +30,7 @@ export function telHref(phone: string): string {
 }
 
 export function whatsappHref(phone: string, message?: string): string {
-  const number = phone.replace(/[^\d]/g, "");
+  const number = phone.replace(/[^\d]/g, "").replace(/^0/, "254");
   const query = message ? `?text=${encodeURIComponent(message)}` : "";
   return `https://wa.me/${number}${query}`;
 }
