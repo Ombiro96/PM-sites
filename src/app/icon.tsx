@@ -1,19 +1,17 @@
 import { ImageResponse } from "next/og";
-import { resolveBrand } from "@/lib/brand/resolve";
-import { brandMonogram } from "@/lib/brand/monogram";
+import { monogram } from "@/lib/site/monogram";
+import { getSite } from "@/lib/site/source";
 
 export const size = { width: 32, height: 32 };
 export const contentType = "image/png";
 
 /**
- * The tab icon is generated from brand tokens rather than shipped as a file, so
- * a new client gets a correct favicon with no artwork — the same reasoning as
- * the wordmark fallback in `components/layout/Logo.tsx`. Drop a real mark in
- * later by replacing this route with the client's asset.
+ * The tab icon is drawn from the brand colour and the company's initials, so a
+ * site has a correct favicon with no artwork.
  */
 export default async function Icon() {
-  const brand = await resolveBrand();
-  const initials = brandMonogram(brand);
+  const site = await getSite();
+  const initials = monogram(site.facts.display_name);
 
   return new ImageResponse(
     (
@@ -24,8 +22,8 @@ export default async function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: brand.theme.primary,
-          color: brand.theme.primaryContrast,
+          background: site.brand_colour,
+          color: "#ffffff",
           fontSize: initials.length > 2 ? 11 : initials.length > 1 ? 15 : 20,
           fontWeight: 700,
           letterSpacing: "-0.04em",

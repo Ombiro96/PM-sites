@@ -1,69 +1,47 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { Brand } from "@/lib/brand/types";
-import { brandMonogram } from "@/lib/brand/monogram";
 import { cn } from "@/lib/utils";
 
-/**
- * Renders the client's logo, falling back to a typographic wordmark so a brand
- * can go live before its artwork arrives.
- */
+const LOGO_HEIGHT = 36;
+
+/** The company logo, or its initials and name as a wordmark when there is none. */
 export function Logo({
-  brand,
-  variant = "light",
+  name,
+  monogram,
+  logoUrl,
   className,
 }: {
-  brand: Brand;
-  variant?: "light" | "dark";
+  name: string;
+  monogram: string;
+  logoUrl: string | null;
   className?: string;
 }) {
-  const src = variant === "dark" ? brand.logos.dark : brand.logos.light;
-  const height = 36;
-
   return (
     <Link
       href="/"
-      aria-label={`${brand.company.name} home`}
-      className={cn("inline-flex items-center gap-3", className)}
+      aria-label={`${name} home`}
+      className={cn("inline-flex items-center gap-2.5", className)}
     >
-      {src ? (
+      {logoUrl ? (
+        // The logo's proportions are unknown, so it is sized by height alone.
         <Image
-          src={src}
-          alt={brand.company.name}
-          width={Math.round(height * brand.logos.aspectRatio)}
-          height={height}
+          src={logoUrl}
+          alt={name}
+          width={LOGO_HEIGHT * 4}
+          height={LOGO_HEIGHT}
           priority
+          className="h-9 w-auto"
         />
       ) : (
         <>
           <span
             aria-hidden="true"
-            className={cn(
-              "grid h-9 w-9 place-items-center rounded-brand-sm text-sm font-bold",
-              variant === "dark"
-                ? "bg-accent text-accent-contrast"
-                : "bg-brand text-brand-contrast",
-            )}
+            className="grid h-8 w-8 place-items-center rounded-brand bg-brand text-[13px] font-bold text-brand-contrast"
           >
-            {brandMonogram(brand)}
+            {monogram}
           </span>
-          <span className="flex flex-col leading-none">
-            <span
-              className={cn(
-                "font-display text-lg font-semibold tracking-tight",
-                variant === "dark" ? "text-white" : "text-ink",
-              )}
-            >
-              {brand.company.name}
-            </span>
-            <span
-              className={cn(
-                "mt-1 text-[10px] font-medium tracking-[0.16em] uppercase",
-                variant === "dark" ? "text-white/60" : "text-ink-muted",
-              )}
-            >
-              {brand.contact.city}
-            </span>
+          <span className="font-display text-[19px] leading-none font-bold">
+            {name}
           </span>
         </>
       )}

@@ -1,106 +1,99 @@
-import Link from "next/link";
-import type { Brand } from "@/lib/brand/types";
 import { Container } from "@/components/ui/primitives";
+import type { CompanyFacts, SocialNetwork } from "@/lib/site/types";
 import { telHref } from "@/lib/utils";
-import { Logo } from "./Logo";
 
-const SOCIAL_LABELS: Record<string, string> = {
+const SOCIAL_LABELS: Record<SocialNetwork, string> = {
   facebook: "Facebook",
   instagram: "Instagram",
+  tiktok: "TikTok",
   x: "X",
   linkedin: "LinkedIn",
-  tiktok: "TikTok",
   youtube: "YouTube",
 };
 
-export function Footer({ brand }: { brand: Brand }) {
-  const social = Object.entries(brand.social).filter(([, href]) => Boolean(href));
+export function Footer({
+  facts,
+  showSocial,
+  showCredit,
+  reportUrl,
+}: {
+  facts: CompanyFacts;
+  showSocial: boolean;
+  showCredit: boolean;
+  reportUrl: string | null;
+}) {
+  const social = showSocial
+    ? (Object.entries(facts.social_links) as [SocialNetwork, string][])
+    : [];
 
   return (
-    <footer className="bg-brand-deep text-white/70">
-      <Container className="py-16">
-        <div className="grid gap-12 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
-          <div>
-            <Logo brand={brand} variant="dark" />
-            <p className="mt-5 max-w-xs text-sm leading-relaxed">
-              {brand.company.tagline}
-            </p>
-            <address className="mt-6 space-y-1 text-sm not-italic">
-              {brand.contact.addressLines.map((line) => (
-                <p key={line}>{line}</p>
-              ))}
-              <p>{brand.contact.city}</p>
-            </address>
-            <div className="mt-5 space-y-1 text-sm">
-              <p>
-                <a
-                  href={telHref(brand.contact.phone)}
-                  className="font-semibold text-white hover:text-accent"
-                >
-                  {brand.contact.phoneDisplay}
-                </a>
-              </p>
-              <p>
-                <a
-                  href={`mailto:${brand.contact.email}`}
-                  className="hover:text-accent"
-                >
-                  {brand.contact.email}
-                </a>
-              </p>
-            </div>
-          </div>
-
-          {brand.footerLinks.map((group) => (
-            <nav key={group.heading} aria-label={group.heading}>
-              <h2 className="font-display text-sm font-semibold tracking-[0.14em] text-white uppercase">
-                {group.heading}
-              </h2>
-              <ul className="mt-5 space-y-3 text-sm">
-                {group.items.map((item) => (
-                  <li key={`${group.heading}-${item.href}-${item.label}`}>
-                    <Link href={item.href} className="hover:text-accent">
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          ))}
+    <footer className="bg-footer text-[14.5px] text-footer-ink">
+      <Container className="flex flex-wrap justify-between gap-x-10 gap-y-6 py-9">
+        <div>
+          <p className="font-display text-[17px] font-semibold text-white">
+            {facts.display_name}
+          </p>
+          {facts.office_address ? (
+            <address className="mt-1 not-italic">{facts.office_address}</address>
+          ) : null}
         </div>
 
-        <div className="mt-14 flex flex-col gap-4 border-t border-white/10 pt-8 text-xs sm:flex-row sm:items-center sm:justify-between">
+        <div>
           <p>
-            &copy; {new Date().getFullYear()} {brand.company.legalName}. All rights
-            reserved.
+            <a href={telHref(facts.phone)} className="hover:text-white">
+              {facts.phone}
+            </a>
           </p>
+          {facts.email ? (
+            <p>
+              <a href={`mailto:${facts.email}`} className="hover:text-white">
+                {facts.email}
+              </a>
+            </p>
+          ) : null}
           {social.length > 0 ? (
-            <ul className="flex gap-5">
-              {social.map(([key, href]) => (
-                <li key={key}>
+            <ul className="mt-2 flex flex-wrap gap-4">
+              {social.map(([network, href]) => (
+                <li key={network}>
                   <a
-                    href={href as string}
+                    href={href}
                     target="_blank"
                     rel="noreferrer noopener"
-                    className="hover:text-accent"
+                    className="hover:text-white"
                   >
-                    {SOCIAL_LABELS[key] ?? key}
+                    {SOCIAL_LABELS[network]}
                   </a>
                 </li>
               ))}
             </ul>
           ) : null}
-          <p className="text-white/40">
-            Powered by{" "}
-            <a
-              href="https://www.bomahut.com"
-              target="_blank"
-              rel="noreferrer noopener"
-              className="hover:text-accent"
-            >
-              Bomahut
-            </a>
-          </p>
+        </div>
+
+        <div>
+          {showCredit ? (
+            <p>
+              <a
+                href="https://www.bomahut.com"
+                target="_blank"
+                rel="noreferrer noopener"
+                className="hover:text-white"
+              >
+                Website by Bomahut
+              </a>
+            </p>
+          ) : null}
+          {reportUrl ? (
+            <p>
+              <a
+                href={reportUrl}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="hover:text-white"
+              >
+                Report this site
+              </a>
+            </p>
+          ) : null}
         </div>
       </Container>
     </footer>

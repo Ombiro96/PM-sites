@@ -1,5 +1,18 @@
-import type { IconName } from "@/lib/brand/types";
 import { cn } from "@/lib/utils";
+
+export type IconName =
+  | "building"
+  | "key"
+  | "wrench"
+  | "shield"
+  | "chart"
+  | "clock"
+  | "handshake"
+  | "phone"
+  | "document"
+  | "sparkle"
+  | "pin"
+  | "users";
 
 const PATHS: Record<IconName, string> = {
   building:
