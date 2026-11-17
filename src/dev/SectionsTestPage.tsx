@@ -1,8 +1,13 @@
 import { SectionRenderer } from "@/components/sections/SectionRenderer";
-import type { Background, ButtonField, PictureRef, Section } from "@/lib/site/types";
+import type {
+  Background,
+  ButtonField,
+  PictureRef,
+  Section,
+} from "@/lib/site/types";
 
 /**
- * Dev server only (`/__sections?look=…`): every section type in every layout
+ * Dev server only (`/__sections?look=…&only=…`): every section type in every layout
  * and background, with the longest text the rules allow, a very long company
  * name and missing pictures. This is where text limits are checked against
  * the designs.
@@ -16,17 +21,28 @@ const WORDS =
 /** Text of exactly `length` characters. */
 function fill(length: number, start = 0): string {
   let text = "";
-  for (let at = start; text.length < length; at += 1) text += `${WORDS[at % WORDS.length]} `;
+  for (let at = start; text.length < length; at += 1)
+    text += `${WORDS[at % WORDS.length]} `;
   text = text.slice(0, length).trimEnd();
   text = text.padEnd(length, "x");
   return text[0].toUpperCase() + text.slice(1);
 }
 
 const MISSING: PictureRef = { asset: "as_missing", alt: "Missing picture" };
-const picture = (asset: string): PictureRef => ({ asset, alt: "Sample picture", focus: [0.5, 0.5] });
-const button = (to: ButtonField["to"]): ButtonField => ({ label: fill(28, 3), to });
+const picture = (asset: string): PictureRef => ({
+  asset,
+  alt: "Sample picture",
+  focus: [0.5, 0.5],
+});
+const button = (to: ButtonField["to"]): ButtonField => ({
+  label: fill(28, 3),
+  to,
+});
 const items = <Item,>(count: number, make: (index: number) => Item) =>
-  Array.from({ length: count }, (_, index) => ({ id: `it_${index}`, ...make(index) }));
+  Array.from({ length: count }, (_, index) => ({
+    id: `it_${index}`,
+    ...make(index),
+  }));
 
 type Case = { note: string; section: Section };
 
@@ -36,7 +52,10 @@ function make(note: string, section: Omit<Section, "id">): Case {
   return { note, section: { ...section, id: `test_${made}` } as Section };
 }
 
-function withBackgrounds(backgrounds: Background[], build: (background: Background) => [string, Omit<Section, "id">]): Case[] {
+function withBackgrounds(
+  backgrounds: Background[],
+  build: (background: Background) => [string, Omit<Section, "id">],
+): Case[] {
   return backgrounds.map((background) => {
     const [note, section] = build(background);
     return make(`${note} · ${background}`, section);
@@ -52,13 +71,18 @@ function cases(): Case[] {
     secondary: button({ kind: "page", page: "pg_contact" }),
     badge: "houses_available" as const,
   };
-  const banners = (["split", "photo", "centre", "band", "plain"] as const).flatMap((layout) => [
+  const banners = (
+    ["split", "photo", "centre", "band", "plain"] as const
+  ).flatMap((layout) => [
     make(`top_banner · ${layout} · with pictures`, {
       type: "top_banner",
       layout,
       fields: {
         ...bannerFields,
-        pictures: layout === "band" ? [picture("as_block"), picture("as_keys"), picture("as_office")] : [picture("as_skyline")],
+        pictures:
+          layout === "band"
+            ? [picture("as_block"), picture("as_keys"), picture("as_office")]
+            : [picture("as_skyline")],
       },
     }),
     make(`top_banner · ${layout} · pictures missing`, {
@@ -71,7 +95,11 @@ function cases(): Case[] {
   return [
     make("page_title · with picture", {
       type: "page_title",
-      fields: { heading: fill(60), text: fill(160, 4), picture: picture("as_block") },
+      fields: {
+        heading: fill(60),
+        text: fill(160, 4),
+        picture: picture("as_block"),
+      },
     }),
     make("page_title · picture missing", {
       type: "page_title",
@@ -81,12 +109,20 @@ function cases(): Case[] {
     make("top_banner · band · two pictures", {
       type: "top_banner",
       layout: "band",
-      fields: { ...bannerFields, pictures: [picture("as_block"), picture("as_keys")] },
+      fields: {
+        ...bannerFields,
+        pictures: [picture("as_block"), picture("as_keys")],
+      },
     }),
     ...(["cards", "list", "rows"] as const).flatMap((layout) =>
       withBackgrounds(["white", "tinted"], (background) => [
         `houses · ${layout}`,
-        { type: "houses", layout, background, fields: { heading: fill(60), show: 6 } },
+        {
+          type: "houses",
+          layout,
+          background,
+          fields: { heading: fill(60), show: 6 },
+        },
       ]),
     ),
     ...(["picture_left", "picture_right"] as const).flatMap((layout) =>
@@ -107,7 +143,11 @@ function cases(): Case[] {
     make("about · picture missing", {
       type: "about",
       layout: "picture_left",
-      fields: { heading: fill(80), text: `${fill(340)}\n\n${fill(340, 7)}`, picture: MISSING },
+      fields: {
+        heading: fill(80),
+        text: `${fill(340)}\n\n${fill(340, 7)}`,
+        picture: MISSING,
+      },
     }),
     ...(["cards", "list"] as const).flatMap((layout) =>
       withBackgrounds(["white", "tinted"], (background) => [
@@ -121,7 +161,10 @@ function cases(): Case[] {
             { id: "s1", service: "tenant_finding" },
             { id: "s2", service: "rent_collection" },
             { id: "s3", service: "utilities_billing" },
-            ...items(5, (index) => ({ title: fill(40, index), text: fill(140, index + 3) })),
+            ...items(5, (index) => ({
+              title: fill(40, index),
+              text: fill(140, index + 3),
+            })),
           ],
         },
       ]),
@@ -132,7 +175,10 @@ function cases(): Case[] {
         type: "steps",
         background,
         fields: { heading: fill(60) },
-        items: items(5, (index) => ({ title: fill(40, index), text: fill(120, index + 2) })),
+        items: items(5, (index) => ({
+          title: fill(40, index),
+          text: fill(120, index + 2),
+        })),
       },
     ]),
     ...withBackgrounds(["brand", "tinted"], (background) => [
@@ -140,7 +186,10 @@ function cases(): Case[] {
       {
         type: "figures",
         background,
-        fields: { heading: fill(60), show: ["buildings", "units", "towns", "houses_to_let"] },
+        fields: {
+          heading: fill(60),
+          show: ["buildings", "units", "towns", "houses_to_let"],
+        },
       },
     ]),
     ...withBackgrounds(["white", "tinted"], (background) => [
@@ -156,7 +205,12 @@ function cases(): Case[] {
         items: items(8, (index) => ({
           name: fill(40, index),
           role: fill(40, index + 4),
-          picture: index === 0 ? picture("as_keys") : index === 1 ? MISSING : undefined,
+          picture:
+            index === 0
+              ? picture("as_keys")
+              : index === 1
+                ? MISSING
+                : undefined,
         })),
       },
     ]),
@@ -167,7 +221,11 @@ function cases(): Case[] {
         layout: "single",
         background,
         fields: { heading: fill(60) },
-        items: items(1, () => ({ quote: fill(240), by: fill(60, 6), permission: true })),
+        items: items(1, () => ({
+          quote: fill(240),
+          by: fill(60, 6),
+          permission: true,
+        })),
       },
     ]),
     ...withBackgrounds(["tinted", "white"], (background) => [
@@ -177,17 +235,27 @@ function cases(): Case[] {
         layout: "cards",
         background,
         fields: { heading: fill(60) },
-        items: items(6, (index) => ({ quote: fill(240, index), by: fill(60, index + 6), permission: true })),
+        items: items(6, (index) => ({
+          quote: fill(240, index),
+          by: fill(60, index + 6),
+          permission: true,
+        })),
       },
     ]),
-    ...withBackgrounds(["white", "tinted"], (background) => ["areas", { type: "areas", background, fields: { heading: fill(60) } }]),
+    ...withBackgrounds(["white", "tinted"], (background) => [
+      "areas",
+      { type: "areas", background, fields: { heading: fill(60) } },
+    ]),
     ...withBackgrounds(["white", "tinted"], (background) => [
       "questions",
       {
         type: "questions",
         background,
         fields: { heading: fill(60), for: "tenants" },
-        items: items(10, (index) => ({ question: `${fill(99, index)}?`, answer: fill(400, index + 2) })),
+        items: items(10, (index) => ({
+          question: `${fill(99, index)}?`,
+          answer: fill(400, index + 2),
+        })),
       },
     ]),
     ...withBackgrounds(["white", "tinted"], (background) => [
@@ -196,36 +264,67 @@ function cases(): Case[] {
         type: "fees",
         background,
         fields: { heading: fill(60), note: fill(160, 3) },
-        items: items(6, (index) => ({ label: fill(60, index), value: fill(40, index + 5) })),
+        items: items(6, (index) => ({
+          label: fill(60, index),
+          value: fill(40, index + 5),
+        })),
       },
     ]),
     ...withBackgrounds(["tinted", "white", "brand"], (background) => [
       "management_request · form",
-      { type: "management_request", background, fields: { heading: fill(80), text: fill(200, 2), mode: "form" } },
+      {
+        type: "management_request",
+        background,
+        fields: { heading: fill(80), text: fill(200, 2), mode: "form" },
+      },
     ]),
     ...withBackgrounds(["tinted", "brand"], (background) => [
       "management_request · whatsapp",
-      { type: "management_request", background, fields: { heading: fill(80), text: fill(200, 2), mode: "whatsapp" } },
+      {
+        type: "management_request",
+        background,
+        fields: { heading: fill(80), text: fill(200, 2), mode: "whatsapp" },
+      },
     ]),
     ...withBackgrounds(["tinted", "white"], (background) => [
       "message_form",
-      { type: "message_form", background, fields: { heading: fill(60), text: fill(200, 2) } },
+      {
+        type: "message_form",
+        background,
+        fields: { heading: fill(60), text: fill(200, 2) },
+      },
     ]),
-    ...withBackgrounds(["white", "tinted"], (background) => ["contact", { type: "contact", background, fields: { heading: fill(60) } }]),
+    ...withBackgrounds(["white", "tinted"], (background) => [
+      "contact",
+      { type: "contact", background, fields: { heading: fill(60) } },
+    ]),
     make("call_to_action · with picture", {
       type: "call_to_action",
-      fields: { heading: fill(60), text: fill(120, 2), button: button({ kind: "whatsapp", message: "Hello" }), picture: picture("as_keys") },
+      fields: {
+        heading: fill(60),
+        text: fill(120, 2),
+        button: button({ kind: "whatsapp", message: "Hello" }),
+        picture: picture("as_keys"),
+      },
     }),
     make("call_to_action · picture missing", {
       type: "call_to_action",
-      fields: { heading: fill(60), text: fill(120, 2), button: button({ kind: "call" }), picture: MISSING },
+      fields: {
+        heading: fill(60),
+        text: fill(120, 2),
+        button: button({ kind: "call" }),
+        picture: MISSING,
+      },
     }),
     make("hidden section (draws nothing)", {
       type: "areas",
       hidden: true,
       fields: { heading: "Hidden" },
     }),
-    make("unknown type (draws nothing)", { type: "carousel", fields: { heading: "Unknown" } } as unknown as Omit<Section, "id">),
+    make("unknown type (draws nothing)", {
+      type: "carousel",
+      fields: { heading: "Unknown" },
+    } as unknown as Omit<Section, "id">),
   ];
 }
 
@@ -238,9 +337,16 @@ const noteStyle = {
 } as const;
 
 export default function SectionsTestPage() {
+  // `?only=steps,figures` narrows the page to some section types.
+  const only = (new URLSearchParams(window.location.search).get("only") ?? "")
+    .split(",")
+    .filter(Boolean);
+  const shown = cases().filter(
+    ({ section }) => only.length === 0 || only.includes(section.type),
+  );
   return (
     <>
-      {cases().map(({ note, section }) => (
+      {shown.map(({ note, section }) => (
         <div key={section.id}>
           <div style={noteStyle}>{note}</div>
           <SectionRenderer section={section} />

@@ -1,4 +1,10 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 import type { SiteData } from "@/lib/site/types";
 import { searchHouses } from "./api";
 import type { HouseCard } from "./types";
@@ -14,14 +20,25 @@ export type Listings =
 const ListingsContext = createContext<Listings>({ status: "loading" });
 
 /** Asks once for the manager's houses to let; every section shares the answer. */
-export function ListingsProvider({ api, children }: { api: SiteData["api"]; children: ReactNode }) {
+export function ListingsProvider({
+  api,
+  children,
+}: {
+  api: SiteData["api"];
+  children: ReactNode;
+}) {
   const [listings, setListings] = useState<Listings>({ status: "loading" });
 
   useEffect(() => {
     let current = true;
     searchHouses(api, { page_size: SUMMARY_SIZE })
       .then((result) => {
-        if (current) setListings({ status: "ready", count: result.count, houses: result.results });
+        if (current)
+          setListings({
+            status: "ready",
+            count: result.count,
+            houses: result.results,
+          });
       })
       .catch(() => {
         if (current) setListings({ status: "failed" });
@@ -31,7 +48,11 @@ export function ListingsProvider({ api, children }: { api: SiteData["api"]; chil
     };
   }, [api]);
 
-  return <ListingsContext.Provider value={listings}>{children}</ListingsContext.Provider>;
+  return (
+    <ListingsContext.Provider value={listings}>
+      {children}
+    </ListingsContext.Provider>
+  );
 }
 
 export function useListings(): Listings {

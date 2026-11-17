@@ -22,7 +22,9 @@ const SAMPLES: Record<string, SiteData> = {
 export function devSite(): SiteData {
   const params = new URLSearchParams(window.location.search);
   const onTestPage = window.location.pathname.startsWith("/__sections");
-  const base = onTestPage ? stressSite : (SAMPLES[params.get("sample") ?? ""] ?? temboHart);
+  const base = onTestPage
+    ? stressSite
+    : (SAMPLES[params.get("sample") ?? ""] ?? temboHart);
 
   const look = params.get("look") as Look | null;
   const colour = params.get("colour");
@@ -34,10 +36,15 @@ export function devSite(): SiteData {
     site: {
       ...base.site,
       look: look && LOOKS.includes(look) ? look : base.site.look,
-      brand_colour: colour && /^[0-9a-f]{6}$/i.test(colour) ? `#${colour}` : base.site.brand_colour,
+      brand_colour:
+        colour && /^[0-9a-f]{6}$/i.test(colour)
+          ? `#${colour}`
+          : base.site.brand_colour,
     },
     api: {
-      base: listings ? "http://mock.local/api" : (import.meta.env.VITE_DEV_API_BASE ?? "").replace(/\/+$/, ""),
+      base: listings
+        ? "http://mock.local/api"
+        : (import.meta.env.VITE_DEV_API_BASE ?? "").replace(/\/+$/, ""),
       agency: import.meta.env.VITE_DEV_AGENCY ?? base.api.agency,
     },
   };

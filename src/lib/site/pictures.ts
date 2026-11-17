@@ -18,7 +18,9 @@ export function resolvePicture(
   pictures: SiteData["pictures"],
 ): ResolvedPicture | null {
   if (!ref || typeof ref.asset !== "string") return null;
-  const picture = Object.hasOwn(pictures, ref.asset) ? pictures[ref.asset] : null;
+  const picture = Object.hasOwn(pictures, ref.asset)
+    ? pictures[ref.asset]
+    : null;
   if (!picture) return null;
   const large = safeUrl(picture.large) ?? safeUrl(picture.small);
   const small = safeUrl(picture.small) ?? large;

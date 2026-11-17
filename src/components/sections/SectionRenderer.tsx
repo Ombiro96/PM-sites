@@ -21,7 +21,12 @@ import { TopBanner } from "./TopBanner";
  * type this version of the app does not know all draw nothing.
  */
 export function SectionRenderer({ section }: { section: Section }) {
-  if (!section || section.hidden || typeof section.fields !== "object" || section.fields === null) {
+  if (
+    !section ||
+    section.hidden ||
+    typeof section.fields !== "object" ||
+    section.fields === null
+  ) {
     return null;
   }
 

@@ -29,9 +29,12 @@ export function resolveButton(
   return resolveAction(button.to, button.label, context);
 }
 
-export function headerContactButton(context: ActionContext): ResolvedButton | null {
+export function headerContactButton(
+  context: ActionContext,
+): ResolvedButton | null {
   const preferred = context.document.header.contact_action;
-  if (preferred === "call") return resolveAction({ kind: "call" }, "Call us", context);
+  if (preferred === "call")
+    return resolveAction({ kind: "call" }, "Call us", context);
   return resolveAction({ kind: "whatsapp" }, "WhatsApp", context);
 }
 
@@ -51,7 +54,9 @@ export function resolveAction(
   switch (to.kind) {
     case "houses": {
       const contact = document.pages.find((page) => page.kind === "contact");
-      return link(context.noHouses && contact ? PAGE_PATHS.contact : HOUSES_PATH);
+      return link(
+        context.noHouses && contact ? PAGE_PATHS.contact : HOUSES_PATH,
+      );
     }
     case "page": {
       const page = document.pages.find((candidate) => candidate.id === to.page);
@@ -68,7 +73,12 @@ export function resolveAction(
     case "whatsapp":
       if (!facts.whatsapp) {
         if (!facts.phone) return null;
-        return { label: "Call us", href: telHref(facts.phone), external: false, kind: "call" };
+        return {
+          label: "Call us",
+          href: telHref(facts.phone),
+          external: false,
+          kind: "call",
+        };
       }
       return {
         label,
@@ -81,7 +91,12 @@ export function resolveAction(
       };
     case "call":
       if (!facts.phone) return null;
-      return { label, href: telHref(facts.phone), external: false, kind: "call" };
+      return {
+        label,
+        href: telHref(facts.phone),
+        external: false,
+        kind: "call",
+      };
     case "tenant_login":
       return { label, href: TENANT_LOGIN_URL, external: true, kind: "link" };
     default:

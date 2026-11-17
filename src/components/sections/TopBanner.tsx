@@ -10,7 +10,9 @@ const NEEDS_PICTURE = ["split", "photo", "centre"];
 const LAYOUTS = ["split", "photo", "centre", "band", "plain"];
 
 /** The live count of houses to let, when the manager switched the badge on and there are some. */
-function useBadge(section: TopBannerSection): { count: number; label: string } | null {
+function useBadge(
+  section: TopBannerSection,
+): { count: number; label: string } | null {
   const listings = useListings();
   const words = houseWords(useSite().site.look);
   if (section.fields.badge !== "houses_available") return null;
@@ -31,8 +33,11 @@ export function TopBanner({ section }: { section: TopBannerSection }) {
     .map((ref) => resolvePicture(ref, site.pictures))
     .filter((picture): picture is ResolvedPicture => picture !== null);
 
-  let layout = LAYOUTS.includes(section.layout ?? "") ? section.layout : "plain";
-  if (NEEDS_PICTURE.includes(layout ?? "") && pictures.length === 0) layout = "plain";
+  let layout = LAYOUTS.includes(section.layout ?? "")
+    ? section.layout
+    : "plain";
+  if (NEEDS_PICTURE.includes(layout ?? "") && pictures.length === 0)
+    layout = "plain";
 
   const chip = (inline: boolean) =>
     badge ? (
@@ -49,7 +54,10 @@ export function TopBanner({ section }: { section: TopBannerSection }) {
       {fields.text ? <p className="lead">{fields.text}</p> : null}
       <div className="row">
         <ActionLink button={resolveButton(fields.primary, context)} />
-        <ActionLink button={resolveButton(fields.secondary, context)} className="line" />
+        <ActionLink
+          button={resolveButton(fields.secondary, context)}
+          className="line"
+        />
       </div>
     </>
   );
@@ -70,7 +78,10 @@ export function TopBanner({ section }: { section: TopBannerSection }) {
 
   if (layout === "photo" || layout === "centre") {
     return (
-      <section id={section.id} className={layout === "photo" ? "hero-photo" : "hero-center"}>
+      <section
+        id={section.id}
+        className={layout === "photo" ? "hero-photo" : "hero-center"}
+      >
         <Picture picture={pictures[0]} size="large" eager />
         <div className="in">{words}</div>
       </section>
@@ -81,14 +92,22 @@ export function TopBanner({ section }: { section: TopBannerSection }) {
     const strip = pictures.length >= 2 ? pictures.slice(0, 3) : [];
     const areas = site.facts.areas_served.slice(0, 3).join(" · ");
     return (
-      <section id={section.id} className={cx("hero-band", strip.length > 0 && "has-strip")}>
+      <section
+        id={section.id}
+        className={cx("hero-band", strip.length > 0 && "has-strip")}
+      >
         <div className="in">
           {areas ? <span className="eyebrow">{areas}</span> : null}
           {words}
           {strip.length ? (
             <div className={cx("strip", strip.length === 2 && "of-2")}>
               {strip.map((picture, index) => (
-                <Picture key={index} picture={picture} size={index === 0 ? "large" : "small"} eager />
+                <Picture
+                  key={index}
+                  picture={picture}
+                  size={index === 0 ? "large" : "small"}
+                  eager
+                />
               ))}
             </div>
           ) : null}
@@ -98,10 +117,15 @@ export function TopBanner({ section }: { section: TopBannerSection }) {
   }
 
   return (
-    <section id={section.id} className={cx("sec hero-plain", pictures.length === 0 && "bare")}>
+    <section
+      id={section.id}
+      className={cx("sec hero-plain", pictures.length === 0 && "bare")}
+    >
       <div className="in">
         <div className="txt">{words}</div>
-        {pictures[0] ? <Picture picture={pictures[0]} size="large" eager /> : null}
+        {pictures[0] ? (
+          <Picture picture={pictures[0]} size="large" eager />
+        ) : null}
       </div>
     </section>
   );

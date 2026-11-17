@@ -1,16 +1,37 @@
 import { LeadForm } from "@/components/forms/LeadForm";
 import { Eyebrow, SectionShell } from "@/components/ui";
 import { useSite } from "@/lib/site/context";
-import type { ContactSection, ManagementRequestSection, MessageFormSection } from "@/lib/site/types";
+import type {
+  ContactSection,
+  ManagementRequestSection,
+  MessageFormSection,
+} from "@/lib/site/types";
 import { telHref, whatsappHref } from "@/lib/utils";
 
-export function mapHref(latitude: number | string, longitude: number | string): string {
+export function mapHref(
+  latitude: number | string,
+  longitude: number | string,
+): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${latitude},${longitude}`)}`;
 }
 
-export function MapLink({ latitude, longitude, label }: { latitude: number | string; longitude: number | string; label: string }) {
+export function MapLink({
+  latitude,
+  longitude,
+  label,
+}: {
+  latitude: number | string;
+  longitude: number | string;
+  label: string;
+}) {
   return (
-    <a className="map" href={mapHref(latitude, longitude)} target="_blank" rel="noreferrer noopener" aria-label={`${label}: open the map`}>
+    <a
+      className="map"
+      href={mapHref(latitude, longitude)}
+      target="_blank"
+      rel="noreferrer noopener"
+      aria-label={`${label}: open the map`}
+    >
       <span>Open in Google Maps</span>
     </a>
   );
@@ -34,7 +55,11 @@ export function Contact({ section }: { section: ContactSection }) {
         <>
           <dt>WhatsApp</dt>
           <dd>
-            <a href={whatsappHref(facts.whatsapp)} target="_blank" rel="noreferrer noopener">
+            <a
+              href={whatsappHref(facts.whatsapp)}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
               {facts.whatsapp}
             </a>
           </dd>
@@ -67,7 +92,11 @@ export function Contact({ section }: { section: ContactSection }) {
       {hasPin ? (
         <div className="two">
           <div>{details}</div>
-          <MapLink latitude={facts.latitude as number} longitude={facts.longitude as number} label={facts.name} />
+          <MapLink
+            latitude={facts.latitude as number}
+            longitude={facts.longitude as number}
+            label={facts.name}
+          />
         </div>
       ) : (
         <div className="one">{details}</div>
@@ -77,7 +106,11 @@ export function Contact({ section }: { section: ContactSection }) {
 }
 
 /** Owners ask the manager to take on their building, by form or straight to WhatsApp. */
-export function ManagementRequest({ section }: { section: ManagementRequestSection }) {
+export function ManagementRequest({
+  section,
+}: {
+  section: ManagementRequestSection;
+}) {
   const { facts } = useSite();
   const { fields } = section;
   // WhatsApp mode needs a number; without one the form is shown instead.
@@ -96,7 +129,10 @@ export function ManagementRequest({ section }: { section: ManagementRequestSecti
           {words}
           <a
             className="btn wa"
-            href={whatsappHref(facts.whatsapp, "Hello, I own a building and would like you to manage it.")}
+            href={whatsappHref(
+              facts.whatsapp,
+              "Hello, I own a building and would like you to manage it.",
+            )}
             target="_blank"
             rel="noreferrer noopener"
           >
@@ -126,7 +162,12 @@ export function MessageForm({ section }: { section: MessageFormSection }) {
           {fields.text ? <p className="lead">{fields.text}</p> : null}
           <div className="direct">
             {facts.whatsapp ? (
-              <a className="btn wa" href={whatsappHref(facts.whatsapp)} target="_blank" rel="noreferrer noopener">
+              <a
+                className="btn wa"
+                href={whatsappHref(facts.whatsapp)}
+                target="_blank"
+                rel="noreferrer noopener"
+              >
                 WhatsApp {facts.whatsapp}
               </a>
             ) : null}

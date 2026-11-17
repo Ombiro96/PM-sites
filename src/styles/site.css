@@ -416,7 +416,12 @@ body {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0.12) 42%, rgba(0, 0, 0, 0.78));
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.42),
+    rgba(0, 0, 0, 0.12) 42%,
+    rgba(0, 0, 0, 0.78)
+  );
 }
 .hero-center:before {
   background: rgba(6, 34, 36, 0.46);
@@ -430,6 +435,9 @@ body {
   gap: 18px;
   align-items: flex-start;
   padding-block: 60px;
+}
+.hero-photo .in {
+  padding-top: 110px;
 }
 .hero-photo h1,
 .hero-center h1 {
@@ -849,9 +857,27 @@ body {
   overflow: hidden;
   text-decoration: none;
   background:
-    linear-gradient(90deg, transparent 47%, var(--page) 47%, var(--page) 52%, transparent 52%),
-    linear-gradient(0deg, transparent 36%, var(--page) 36%, var(--page) 42%, transparent 42%),
-    linear-gradient(118deg, transparent 62%, var(--page) 62%, var(--page) 65%, transparent 65%),
+    linear-gradient(
+      90deg,
+      transparent 47%,
+      var(--page) 47%,
+      var(--page) 52%,
+      transparent 52%
+    ),
+    linear-gradient(
+      0deg,
+      transparent 36%,
+      var(--page) 36%,
+      var(--page) 42%,
+      transparent 42%
+    ),
+    linear-gradient(
+      118deg,
+      transparent 62%,
+      var(--page) 62%,
+      var(--page) 65%,
+      transparent 65%
+    ),
     color-mix(in oklab, var(--brand) 14%, var(--tintbg));
 }
 .map:after {
@@ -915,7 +941,7 @@ body {
 }
 .costd {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(42%, 1fr) auto;
   gap: 8px 18px;
   margin: 0;
   font-variant-numeric: tabular-nums;
@@ -1392,6 +1418,11 @@ body {
 .look-bold .hd {
   border: 0;
 }
+.look-bold .hd .btn:not(.wa) {
+  background: var(--on);
+  color: var(--brand) !important;
+  border-color: var(--on);
+}
 .look-bold .logo i {
   background: var(--on);
   color: var(--brand);
@@ -1482,6 +1513,11 @@ body {
 .look-coast .rent {
   font-size: 24px;
 }
+.look-coast .fig,
+.look-coast .areas {
+  justify-content: center;
+  text-align: center;
+}
 .look-coast .feesd {
   align-self: center;
 }
@@ -1539,7 +1575,7 @@ body {
   font-size: clamp(30px, 4.4vw, 48px);
 }
 .look-estate .site h3 {
-  font-size: 30px;
+  font-size: 26px;
 }
 .look-estate .site .blk h2 {
   font-size: clamp(24px, 2.8vw, 30px);
@@ -1669,6 +1705,22 @@ body {
 }
 .look-plain .logo {
   font-weight: 600;
+  font-size: 18px;
+}
+.look-plain .hd .in {
+  gap: 14px;
+}
+.look-plain .nav {
+  gap: 14px;
+  font-size: 14.5px;
+}
+.look-plain .hd-actions {
+  gap: 8px;
+}
+.look-plain .tl,
+.look-plain .hd .btn.sm {
+  padding: 6px 10px;
+  font-size: 13.5px;
 }
 .look-plain .logo i {
   display: none;
@@ -1857,9 +1909,6 @@ body {
   }
   .fig {
     gap: 22px 40px;
-  }
-  .look-estate .site h3 {
-    font-size: 26px;
   }
 }
 

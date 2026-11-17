@@ -17,10 +17,22 @@ export const stressSite: SiteData = {
   facts: {
     ...temboHart.facts,
     name: "Wanjiru, Otieno & Kiplagat Property Management and Letting Agents (East Africa) Limited",
-    email: "a-very-long-mailbox-name-for-owners-and-tenants@wanjiru-otieno-kiplagat-properties.example",
-    office_address: "Suite 14B, 4th floor, Prestige Plaza Annex, off Ngong Road near the Junction roundabout, Nairobi",
-    opening_hours: "Monday to Friday 8am to 5pm, Saturday 9am to 1pm, closed on Sundays and public holidays",
-    areas_served: ["Kilimani", "Kileleshwa", "Roysambu", "Kahawa Wendani", "Githurai 44", "Ruaka", "Syokimau", "Athi River"],
+    email:
+      "a-very-long-mailbox-name-for-owners-and-tenants@wanjiru-otieno-kiplagat-properties.example",
+    office_address:
+      "Suite 14B, 4th floor, Prestige Plaza Annex, off Ngong Road near the Junction roundabout, Nairobi",
+    opening_hours:
+      "Monday to Friday 8am to 5pm, Saturday 9am to 1pm, closed on Sundays and public holidays",
+    areas_served: [
+      "Kilimani",
+      "Kileleshwa",
+      "Roysambu",
+      "Kahawa Wendani",
+      "Githurai 44",
+      "Ruaka",
+      "Syokimau",
+      "Athi River",
+    ],
     social_links: {
       facebook: "https://facebook.com/example",
       instagram: "https://instagram.com/example",

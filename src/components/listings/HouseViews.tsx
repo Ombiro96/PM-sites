@@ -1,12 +1,25 @@
 import { NoPicture } from "@/components/ui";
 import { housePath } from "@/lib/listings/api";
-import { availability, coverUrl, money, moveInLine } from "@/lib/listings/format";
+import {
+  availability,
+  coverUrl,
+  money,
+  moveInLine,
+} from "@/lib/listings/format";
 import type { Building, HouseCard, ListingCover } from "@/lib/listings/types";
 import type { HouseWords } from "@/lib/site/pages";
 
-function Cover({ cover, alt, size = "small" }: { cover: ListingCover | null; alt: string; size?: "small" | "large" }) {
+function Cover({
+  cover,
+  alt,
+  size = "small",
+}: {
+  cover: ListingCover | null;
+  alt: string;
+  size?: "small" | "large";
+}) {
   const url = coverUrl(cover, size);
-  return url ? <img src={url} alt={alt} loading="lazy" decoding="async" /> : <NoPicture />;
+  return url ? <img src={url} alt={alt} loading="lazy" /> : <NoPicture />;
 }
 
 function houseName(house: HouseCard): string {
@@ -23,7 +36,13 @@ function Rent({ house }: { house: HouseCard }) {
   );
 }
 
-export function HouseCardView({ house, words }: { house: HouseCard; words: HouseWords }) {
+export function HouseCardView({
+  house,
+  words,
+}: {
+  house: HouseCard;
+  words: HouseWords;
+}) {
   const moveIn = moveInLine(house);
   return (
     <a className="card" href={housePath(house)}>
@@ -41,7 +60,9 @@ export function HouseCardView({ house, words }: { house: HouseCard; words: House
 }
 
 export function HouseListRow({ house }: { house: HouseCard }) {
-  const total = house.move_in_total ? ` · total to move in ${money(house.move_in_total, house.currency)}` : "";
+  const total = house.move_in_total
+    ? ` · total to move in ${money(house.move_in_total, house.currency)}`
+    : "";
   return (
     <a href={housePath(house)}>
       <Cover cover={house.cover} alt="" />
@@ -59,7 +80,13 @@ export function HouseListRow({ house }: { house: HouseCard }) {
   );
 }
 
-export function HouseLargeRow({ house, words }: { house: HouseCard; words: HouseWords }) {
+export function HouseLargeRow({
+  house,
+  words,
+}: {
+  house: HouseCard;
+  words: HouseWords;
+}) {
   const moveIn = moveInLine(house);
   return (
     <div className="frow">
@@ -81,14 +108,21 @@ export function HouseLargeRow({ house, words }: { house: HouseCard; words: House
   );
 }
 
-export function BuildingCard({ building, words }: { building: Building; words: HouseWords }) {
+export function BuildingCard({
+  building,
+  words,
+}: {
+  building: Building;
+  words: HouseWords;
+}) {
   return (
     <article className="card">
       <Cover cover={building.cover} alt="" />
       <div className="b">
         <b style={{ fontSize: 18 }}>{building.name}</b>
         <span className="meta">
-          {building.area} · {building.houseTypes} {building.houseTypes === 1 ? words.one : words.many} to let
+          {building.area} · {building.houseTypes}{" "}
+          {building.houseTypes === 1 ? words.one : words.many} to let
         </span>
       </div>
     </article>

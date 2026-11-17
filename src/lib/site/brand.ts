@@ -50,14 +50,17 @@ function readableOn(background: Rgb): string {
  * shade used for brand-background sections, and `--brand-ink` is the brand
  * colour made readable as text on the look's page background.
  */
-export function brandVariables(brandColour: string, look: Look): Record<string, string> {
+export function brandVariables(
+  brandColour: string,
+  look: Look,
+): Record<string, string> {
   const brand = parseHex(brandColour) ?? (parseHex(FALLBACK_BRAND) as Rgb);
   const dark = look === "estate";
   const page = dark ? DARK_PAGE : LIGHT;
   const deep = dark ? brand : mix(brand, [0, 0, 0], 0.72);
 
   let asText = brand;
-  for (let step = 0; step < 8 && contrast(asText, page) < 3.2; step += 1) {
+  for (let step = 0; step < 12 && contrast(asText, page) < 4.5; step += 1) {
     asText = mix(asText, dark ? LIGHT : [0, 0, 0], 0.8);
   }
 

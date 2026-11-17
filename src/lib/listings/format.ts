@@ -1,16 +1,26 @@
 import { safeUrl } from "@/lib/utils";
 import type { HouseCard, ListingCover } from "./types";
 
-export function money(amount: string | number | null | undefined, currency = "KES"): string {
+export function money(
+  amount: string | number | null | undefined,
+  currency = "KES",
+): string {
   const value = Number(amount);
-  if (amount === null || amount === undefined || amount === "" || !Number.isFinite(value)) {
+  if (
+    amount === null ||
+    amount === undefined ||
+    amount === "" ||
+    !Number.isFinite(value)
+  ) {
     return "";
   }
   const unit = currency === "KES" || !currency ? "KSh" : currency;
   return `${unit} ${value.toLocaleString("en-KE", { maximumFractionDigits: 0 })}`;
 }
 
-export function availability(house: Pick<HouseCard, "available_count" | "available_from">): string {
+export function availability(
+  house: Pick<HouseCard, "available_count" | "available_from">,
+): string {
   if (house.available_from) {
     const date = new Date(`${house.available_from}T00:00:00`);
     if (!Number.isNaN(date.getTime())) {
@@ -30,14 +40,22 @@ export function moveInLine(house: HouseCard): string {
     parts.push(`Deposit ${money(house.deposit_amount, house.currency)}`);
   }
   if (house.move_in_total !== null) {
-    parts.push(`total to move in ${money(house.move_in_total, house.currency)}`);
+    parts.push(
+      `total to move in ${money(house.move_in_total, house.currency)}`,
+    );
   }
   const line = parts.join(" · ");
   return line ? line[0].toUpperCase() + line.slice(1) : "";
 }
 
-export function coverUrl(cover: ListingCover | null, size: "small" | "large"): string | null {
+export function coverUrl(
+  cover: ListingCover | null,
+  size: "small" | "large",
+): string | null {
   if (!cover) return null;
-  const [first, second] = size === "small" ? [cover.small_url, cover.url] : [cover.url, cover.small_url];
+  const [first, second] =
+    size === "small"
+      ? [cover.small_url, cover.url]
+      : [cover.url, cover.small_url];
   return safeUrl(first) ?? safeUrl(second);
 }

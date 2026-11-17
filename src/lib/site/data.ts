@@ -47,7 +47,9 @@ export function parseSiteData(raw: unknown): SiteData | null {
   const wording = isRecord(raw.wording) ? raw.wording : {};
   const header = isRecord(document.header) ? document.header : {};
   const footer = isRecord(document.footer) ? document.footer : {};
-  const look = LOOKS.includes(site.look as Look) ? (site.look as Look) : "plain";
+  const look = LOOKS.includes(site.look as Look)
+    ? (site.look as Look)
+    : "plain";
   const contactAction = text(header.contact_action);
 
   return {

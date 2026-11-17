@@ -6,7 +6,13 @@ import { navItems, TENANT_LOGIN_URL } from "@/lib/site/pages";
 import { cx } from "@/lib/utils";
 import { Logo } from "./Logo";
 
-export function Header({ pathname, over }: { pathname: string; over: boolean }) {
+export function Header({
+  pathname,
+  over,
+}: {
+  pathname: string;
+  over: boolean;
+}) {
   const site = useSite();
   const context = useActionContext();
   // Remembers which address the menu was opened on, so it closes by itself after a link is followed.
@@ -16,20 +22,34 @@ export function Header({ pathname, over }: { pathname: string; over: boolean }) 
   const nav = navItems(site.document, site.site.look);
   const contact = headerContactButton(context);
   const isCurrent = (href: string) =>
-    href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+    href === "/"
+      ? pathname === "/"
+      : pathname === href || pathname.startsWith(`${href}/`);
 
   const links = nav.map((item) => (
-    <a key={item.href} href={item.href} aria-current={isCurrent(item.href) ? "page" : undefined}>
+    <a
+      key={item.href}
+      href={item.href}
+      aria-current={isCurrent(item.href) ? "page" : undefined}
+    >
       {item.label}
     </a>
   ));
   const tenantLogin = site.document.header.show_tenant_login ? (
-    <a className="tl" href={TENANT_LOGIN_URL} target="_blank" rel="noreferrer noopener">
+    <a
+      className="tl"
+      href={TENANT_LOGIN_URL}
+      target="_blank"
+      rel="noreferrer noopener"
+    >
       Tenant login
     </a>
   ) : null;
   const contactButton = (
-    <ActionLink button={contact} className={cx("sm", contact?.kind === "whatsapp" && "wa")} />
+    <ActionLink
+      button={contact}
+      className={cx("sm", contact?.kind === "whatsapp" && "wa")}
+    />
   );
 
   return (

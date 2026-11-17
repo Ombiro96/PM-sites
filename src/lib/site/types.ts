@@ -182,12 +182,7 @@ export type SiteDocument = {
 };
 
 export type SocialNetwork =
-  | "facebook"
-  | "instagram"
-  | "tiktok"
-  | "x"
-  | "linkedin"
-  | "youtube";
+  "facebook" | "instagram" | "tiktok" | "x" | "linkedin" | "youtube";
 
 /** The public company facts, written into the page when the site is published. */
 export type CompanyFacts = {

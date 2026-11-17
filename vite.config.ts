@@ -14,9 +14,7 @@ function blankPlaceholdersInDev(): Plugin {
     name: "pm-sites:blank-placeholders",
     apply: "serve",
     transformIndexHtml: (html) =>
-      html
-        .replace("%SITE_HEAD%", "")
-        .replace("%SITE_DATA%", ""),
+      html.replace("%SITE_HEAD%", "").replace("%SITE_DATA%", ""),
   };
 }
 

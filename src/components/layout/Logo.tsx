@@ -7,7 +7,11 @@ export function Logo() {
   const logo = safeUrl(facts.logo);
   return (
     <a className="logo" href="/" aria-label={`${facts.name}, home`}>
-      {logo ? <img src={logo} alt="" /> : <i aria-hidden="true">{initials(facts.name)}</i>}
+      {logo ? (
+        <img src={logo} alt="" />
+      ) : (
+        <i aria-hidden="true">{initials(facts.name)}</i>
+      )}
       {logo ? null : <span>{facts.name}</span>}
     </a>
   );

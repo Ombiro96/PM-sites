@@ -50,12 +50,17 @@ const PHOTO_TITLE_LOOKS: Look[] = ["classic", "coast", "estate"];
 const OVERLAY_HEADER_LOOKS: Look[] = ["coast", "estate"];
 
 /** Whether a page's opening section is drawn as a photo with text on top. */
-export function opensWithPhoto(section: Section | undefined, site: SiteData): boolean {
+export function opensWithPhoto(
+  section: Section | undefined,
+  site: SiteData,
+): boolean {
   if (!section || section.hidden) return false;
   if (section.type === "top_banner") {
     const layout = section.layout;
     if (layout !== "photo" && layout !== "centre") return false;
-    return resolvePicture(section.fields?.pictures?.[0], site.pictures) !== null;
+    return (
+      resolvePicture(section.fields?.pictures?.[0], site.pictures) !== null
+    );
   }
   if (section.type === "page_title") {
     return (
@@ -66,6 +71,12 @@ export function opensWithPhoto(section: Section | undefined, site: SiteData): bo
   return false;
 }
 
-export function headerOverlays(section: Section | undefined, site: SiteData): boolean {
-  return OVERLAY_HEADER_LOOKS.includes(site.site.look) && opensWithPhoto(section, site);
+export function headerOverlays(
+  section: Section | undefined,
+  site: SiteData,
+): boolean {
+  return (
+    OVERLAY_HEADER_LOOKS.includes(site.site.look) &&
+    opensWithPhoto(section, site)
+  );
 }

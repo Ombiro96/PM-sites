@@ -50,7 +50,8 @@ function read<T>(url: string): Promise<T> {
   if (known) return known as Promise<T>;
   const request = fetcher(url, { credentials: "omit" })
     .then(async (response) => {
-      if (!response.ok) throw new ApiError(response.status, await detailOf(response));
+      if (!response.ok)
+        throw new ApiError(response.status, await detailOf(response));
       return (await response.json()) as T;
     })
     .catch((error: unknown) => {
@@ -73,12 +74,16 @@ export function searchUrl(api: Api, filters: SearchFilters = {}): string {
   if (filters.max_rent) params.set("max_rent", filters.max_rent);
   if (filters.location) params.set("location", filters.location);
   if (filters.sort) params.set("sort", filters.sort);
-  if (filters.page && filters.page > 1) params.set("page", String(filters.page));
+  if (filters.page && filters.page > 1)
+    params.set("page", String(filters.page));
   if (filters.page_size) params.set("page_size", String(filters.page_size));
   return `${api.base}/listings/v1/search/?${params}`;
 }
 
-export async function searchHouses(api: Api, filters: SearchFilters = {}): Promise<SearchResult> {
+export async function searchHouses(
+  api: Api,
+  filters: SearchFilters = {},
+): Promise<SearchResult> {
   if (!api.base || !api.agency) throw new ApiError(0);
   const result = await read<SearchResult>(searchUrl(api, filters));
   if (!result || !Array.isArray(result.results)) throw new ApiError(0);
@@ -90,7 +95,10 @@ export async function searchHouses(api: Api, filters: SearchFilters = {}): Promi
  * One house by the id or short code in its address. Throws `ApiError` with
  * status 404 when the house is no longer advertised.
  */
-export async function getHouse(api: Api, idOrCode: string): Promise<HouseDetail> {
+export async function getHouse(
+  api: Api,
+  idOrCode: string,
+): Promise<HouseDetail> {
   if (!api.base) throw new ApiError(0);
   let id = idOrCode;
   if (!UUID.test(idOrCode)) {
@@ -140,7 +148,10 @@ export function buildingsOf(houses: HouseCard[]): Building[] {
 export type PostResult = { ok: true } | { ok: false; message: string };
 
 /** Sends a form as JSON and turns the answer into words for the visitor. */
-export async function postForm(url: string, body: Record<string, unknown>): Promise<PostResult> {
+export async function postForm(
+  url: string,
+  body: Record<string, unknown>,
+): Promise<PostResult> {
   try {
     const response = await fetcher(url, {
       method: "POST",
@@ -154,12 +165,18 @@ export async function postForm(url: string, body: Record<string, unknown>): Prom
     }
     if (response.status === 400) {
       const detail = await detailOf(response);
-      return { ok: false, message: detail || "Please check what you entered and try again." };
+      return {
+        ok: false,
+        message: detail || "Please check what you entered and try again.",
+      };
     }
   } catch {
     // Falls through to the general message.
   }
-  return { ok: false, message: "We could not send this just now. Please try again." };
+  return {
+    ok: false,
+    message: "We could not send this just now. Please try again.",
+  };
 }
 
 export function enquiryUrl(api: Api): string {
@@ -171,7 +188,11 @@ export function leadsUrl(api: Api, siteId: string): string {
 }
 
 /** Tells the backend a visitor tapped WhatsApp or Call on a house. Never waits or fails. */
-export function recordTap(api: Api, houseId: string, channel: "whatsapp_tap" | "call_tap"): void {
+export function recordTap(
+  api: Api,
+  houseId: string,
+  channel: "whatsapp_tap" | "call_tap",
+): void {
   if (!api.base) return;
   fetcher(enquiryUrl(api), {
     method: "POST",

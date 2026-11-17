@@ -29,13 +29,22 @@ export function Footer() {
           {facts.office_address ? <span>{facts.office_address}</span> : null}
         </div>
         <div>
-          {facts.phone ? <a href={telHref(facts.phone)}>{facts.phone}</a> : null}
-          {facts.email ? <a href={`mailto:${facts.email}`}>{facts.email}</a> : null}
+          {facts.phone ? (
+            <a href={telHref(facts.phone)}>{facts.phone}</a>
+          ) : null}
+          {facts.email ? (
+            <a href={`mailto:${facts.email}`}>{facts.email}</a>
+          ) : null}
         </div>
         {social.length ? (
           <div>
             {social.map((link) => (
-              <a key={link.label} href={link.href} target="_blank" rel="noreferrer noopener">
+              <a
+                key={link.label}
+                href={link.href}
+                target="_blank"
+                rel="noreferrer noopener"
+              >
                 {link.label}
               </a>
             ))}
@@ -43,7 +52,11 @@ export function Footer() {
         ) : null}
         <div className="small">
           {site.show_credit ? (
-            <a href="https://bomahut.com" target="_blank" rel="noreferrer noopener">
+            <a
+              href="https://bomahut.com"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
               Website by Bomahut
             </a>
           ) : null}

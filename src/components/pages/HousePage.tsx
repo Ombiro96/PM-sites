@@ -17,7 +17,9 @@ type State =
   | { status: "gone" }
   | { status: "ready"; house: HouseDetail };
 
-function photosOf(house: HouseDetail): { small: string; large: string; caption: string }[] {
+function photosOf(
+  house: HouseDetail,
+): { small: string; large: string; caption: string }[] {
   const usable = (media: ListingMedia[] | undefined) =>
     (media ?? []).flatMap((item) => {
       if (item.kind !== "photo") return [];
@@ -36,7 +38,11 @@ function Gallery({ house }: { house: HouseDetail }) {
   const shown = photos[Math.min(chosen, photos.length - 1)];
   return (
     <div>
-      <img className="gmain" src={shown.large} alt={shown.caption || house.title} />
+      <img
+        className="gmain"
+        src={shown.large}
+        alt={shown.caption || house.title}
+      />
       {photos.length > 1 ? (
         <div className="thumbs">
           {photos.slice(0, 8).map((photo, index) => (
@@ -56,7 +62,13 @@ function Gallery({ house }: { house: HouseDetail }) {
   );
 }
 
-function Amenities({ title, items }: { title: string; items: { name: string; slug: string }[] }) {
+function Amenities({
+  title,
+  items,
+}: {
+  title: string;
+  items: { name: string; slug: string }[];
+}) {
   if (!items?.length) return null;
   return (
     <div className="blk">
@@ -98,23 +110,42 @@ function Loaded({ house }: { house: HouseDetail }) {
   const whatsapp = building.contact?.whatsapp_number || site.facts.whatsapp;
   const pageUrl = `${window.location.origin}${housePath(house)}`;
   const message = `Hello, I saw the ${house.title} on your website. Is it still available? When can I view it?`;
-  const video = safeUrl(house.media?.find((item) => item.kind === "video_link")?.video_url);
+  const video = safeUrl(
+    house.media?.find((item) => item.kind === "video_link")?.video_url,
+  );
   const pin = building.pin;
-  const serviceCharge = Number(house.service_charge) > 0 ? house.service_charge : null;
+  const serviceCharge =
+    Number(house.service_charge) > 0 ? house.service_charge : null;
   const availableText = availability(house);
 
   const facts: [string, string][] = [];
-  if (house.bedrooms !== null) facts.push([String(house.bedrooms), house.bedrooms === 1 ? "Bedroom" : "Bedrooms"]);
-  if (house.bathrooms !== null) facts.push([String(house.bathrooms), house.bathrooms === 1 ? "Bathroom" : "Bathrooms"]);
-  if (Number(house.size_sqm) > 0) facts.push([`${Number(house.size_sqm).toLocaleString("en-KE")} m²`, "Size"]);
-  facts.push([house.available_from ? availableText.replace("Available from ", "") : "Now", "Available"]);
+  if (house.bedrooms !== null)
+    facts.push([
+      String(house.bedrooms),
+      house.bedrooms === 1 ? "Bedroom" : "Bedrooms",
+    ]);
+  if (house.bathrooms !== null)
+    facts.push([
+      String(house.bathrooms),
+      house.bathrooms === 1 ? "Bathroom" : "Bathrooms",
+    ]);
+  if (Number(house.size_sqm) > 0)
+    facts.push([
+      `${Number(house.size_sqm).toLocaleString("en-KE")} m²`,
+      "Size",
+    ]);
+  facts.push([
+    house.available_from ? availableText.replace("Available from ", "") : "Now",
+    "Available",
+  ]);
 
   return (
     <>
       <section className="sec pagehd">
         <div className="in wider">
           <nav className="crumbs" aria-label="You are here">
-            <a href="/">Home</a>›<a href={HOUSES_PATH}>{words.nav}</a>›<span>{house.title}</span>
+            <a href="/">Home</a>›<a href={HOUSES_PATH}>{words.nav}</a>›
+            <span>{house.title}</span>
           </nav>
           <div className="detail">
             <div>
@@ -126,7 +157,8 @@ function Loaded({ house }: { house: HouseDetail }) {
                 <h1 className="ltitle">{house.title}</h1>
                 <p className="meta">
                   {house.location.full_name || house.location.name}
-                  {house.landmark ? ` · ${house.landmark}` : ""} · {availableText}
+                  {house.landmark ? ` · ${house.landmark}` : ""} ·{" "}
+                  {availableText}
                 </p>
                 <div className="price">
                   {money(house.rent_amount, currency) || "Rent on request"}
@@ -142,7 +174,12 @@ function Loaded({ house }: { house: HouseDetail }) {
                     Share on WhatsApp
                   </a>
                   {video ? (
-                    <a className="btn sm line" href={video} target="_blank" rel="noreferrer noopener">
+                    <a
+                      className="btn sm line"
+                      href={video}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                    >
                       Watch the video
                     </a>
                   ) : null}
@@ -188,15 +225,22 @@ function Loaded({ house }: { house: HouseDetail }) {
                     {house.move_in_total !== null ? (
                       <>
                         <dt className="tot">Total to move in</dt>
-                        <dd className="tot">{money(house.move_in_total, currency)}</dd>
+                        <dd className="tot">
+                          {money(house.move_in_total, currency)}
+                        </dd>
                       </>
                     ) : null}
                   </dl>
-                  {house.deposit_amount === null ? <p className="meta">Ask us about the deposit.</p> : null}
+                  {house.deposit_amount === null ? (
+                    <p className="meta">Ask us about the deposit.</p>
+                  ) : null}
                 </div>
               ) : null}
 
-              <Amenities title={`In the ${words.one}`} items={house.amenities} />
+              <Amenities
+                title={`In the ${words.one}`}
+                items={house.amenities}
+              />
               <Amenities title="In the building" items={building.amenities} />
 
               {house.other_unit_types?.length ? (
@@ -210,7 +254,8 @@ function Loaded({ house }: { house: HouseDetail }) {
                         <span className="meta">{availableText}</span>
                       </span>
                       <span>
-                        {money(house.rent_amount, currency)} <span className="meta">/ month · this one</span>
+                        {money(house.rent_amount, currency)}{" "}
+                        <span className="meta">/ month · this one</span>
                       </span>
                     </div>
                     {house.other_unit_types.map((other) => (
@@ -221,8 +266,13 @@ function Loaded({ house }: { house: HouseDetail }) {
                           <span className="meta">{availability(other)}</span>
                         </span>
                         <span>
-                          {money(other.rent_amount, other.currency)} <span className="meta">/ month</span>{" "}
-                          <a className="btn line sm" href={housePath(other)} style={{ marginLeft: 10 }}>
+                          {money(other.rent_amount, other.currency)}{" "}
+                          <span className="meta">/ month</span>{" "}
+                          <a
+                            className="btn line sm"
+                            href={housePath(other)}
+                            style={{ marginLeft: 10 }}
+                          >
                             View
                           </a>
                         </span>
@@ -235,14 +285,23 @@ function Loaded({ house }: { house: HouseDetail }) {
               <div className="blk">
                 <h2>Location</h2>
                 <p className="meta">
-                  {building.name}, {building.location?.full_name || house.location.name}
+                  {building.name},{" "}
+                  {building.location?.full_name || house.location.name}
                   {building.landmark ? ` · ${building.landmark}` : ""}
                 </p>
                 {building.description ? <p>{building.description}</p> : null}
                 {pin ? (
                   <>
-                    <MapLink latitude={pin.latitude} longitude={pin.longitude} label={building.name} />
-                    {pin.exact ? null : <p className="meta">The pin shows the area, not the exact building.</p>}
+                    <MapLink
+                      latitude={pin.latitude}
+                      longitude={pin.longitude}
+                      label={building.name}
+                    />
+                    {pin.exact ? null : (
+                      <p className="meta">
+                        The pin shows the area, not the exact building.
+                      </p>
+                    )}
                   </>
                 ) : null}
               </div>
@@ -270,7 +329,11 @@ function Loaded({ house }: { house: HouseDetail }) {
                 </a>
               ) : null}
               {phone ? (
-                <a className="btn line" href={telHref(phone)} onClick={() => recordTap(site.api, house.id, "call_tap")}>
+                <a
+                  className="btn line"
+                  href={telHref(phone)}
+                  onClick={() => recordTap(site.api, house.id, "call_tap")}
+                >
                   Call {phone}
                 </a>
               ) : null}
@@ -288,7 +351,9 @@ function Loaded({ house }: { house: HouseDetail }) {
 export function HousePage({ id }: { id: string }) {
   const site = useSite();
   const words = houseWords(site.site.look);
-  const [loaded, setLoaded] = useState<{ id: string; state: State } | null>(null);
+  const [loaded, setLoaded] = useState<{ id: string; state: State } | null>(
+    null,
+  );
   const state: State = loaded?.id === id ? loaded.state : { status: "loading" };
 
   useEffect(() => {
@@ -309,7 +374,8 @@ export function HousePage({ id }: { id: string }) {
     };
   }, [id, site.api, site.facts.name]);
 
-  if (state.status === "ready") return <Loaded key={state.house.id} house={state.house} />;
+  if (state.status === "ready")
+    return <Loaded key={state.house.id} house={state.house} />;
   if (state.status === "gone") {
     return (
       <Status
@@ -321,7 +387,10 @@ export function HousePage({ id }: { id: string }) {
   if (state.status === "failed") {
     return (
       <>
-        <Status title={UNAVAILABLE} text="We could not load this page just now. Please try again shortly, or contact us." />
+        <Status
+          title={UNAVAILABLE}
+          text="We could not load this page just now. Please try again shortly, or contact us."
+        />
         <MobileContactBar />
       </>
     );

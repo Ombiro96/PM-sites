@@ -21,7 +21,9 @@ async function loadSite(): Promise<SiteData | null> {
 function applyLook(site: SiteData): void {
   const root = document.documentElement;
   root.classList.add(`look-${site.site.look}`);
-  for (const [name, value] of Object.entries(brandVariables(site.site.brand_colour, site.site.look))) {
+  for (const [name, value] of Object.entries(
+    brandVariables(site.site.brand_colour, site.site.look),
+  )) {
     root.style.setProperty(name, value);
   }
 }
@@ -32,7 +34,8 @@ loadSite().then((site) => {
   if (!site) {
     document.title = "Site not available";
     container.textContent = "This site is not available.";
-    container.style.cssText = "padding:40px 22px;font-family:system-ui,sans-serif";
+    container.style.cssText =
+      "padding:40px 22px;font-family:system-ui,sans-serif";
     return;
   }
   // The backend writes each page's own title; without it (or in dev) the app sets one.

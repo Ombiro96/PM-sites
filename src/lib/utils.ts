@@ -18,7 +18,10 @@ export function whatsappHref(phone: string, message?: string): string {
  */
 export function safeUrl(value: string | null | undefined): string | null {
   if (!value) return null;
-  if (import.meta.env.DEV && (value.startsWith("/") || value.startsWith("http://"))) {
+  if (
+    import.meta.env.DEV &&
+    (value.startsWith("/") || value.startsWith("http://"))
+  ) {
     return value;
   }
   try {

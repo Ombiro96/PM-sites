@@ -8,7 +8,12 @@ export function MobileContactBar({ enquireHref }: { enquireHref?: string }) {
   return (
     <div className="mbar">
       {facts.whatsapp ? (
-        <a className="btn wa sm" href={whatsappHref(facts.whatsapp)} target="_blank" rel="noreferrer noopener">
+        <a
+          className="btn wa sm"
+          href={whatsappHref(facts.whatsapp)}
+          target="_blank"
+          rel="noreferrer noopener"
+        >
           WhatsApp
         </a>
       ) : null}

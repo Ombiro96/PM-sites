@@ -1,4 +1,10 @@
-import { CardSkeletons, BuildingCard, HouseCardView, HouseLargeRow, HouseListRow } from "@/components/listings/HouseViews";
+import {
+  CardSkeletons,
+  BuildingCard,
+  HouseCardView,
+  HouseLargeRow,
+  HouseListRow,
+} from "@/components/listings/HouseViews";
 import { ActionLink, SectionShell } from "@/components/ui";
 import { buildingsOf } from "@/lib/listings/api";
 import { useListings } from "@/lib/listings/context";
@@ -33,8 +39,14 @@ export function Houses({ section }: { section: HousesSection }) {
       <SectionShell section={section}>
         <div className="notice" role="status">
           <b>{UNAVAILABLE}</b>
-          <span className="meta">Please try again shortly, or contact us and we will tell you what is free.</span>
-          <ActionLink button={resolveAction({ kind: "call" }, "Call us", context)} className="line sm" />
+          <span className="meta">
+            Please try again shortly, or contact us and we will tell you what is
+            free.
+          </span>
+          <ActionLink
+            button={resolveAction({ kind: "call" }, "Call us", context)}
+            className="line sm"
+          />
         </div>
       </SectionShell>
     );
@@ -80,7 +92,10 @@ export function Buildings({ section }: { section: BuildingsSection }) {
   const listings = useListings();
   const words = houseWords(useSite().site.look);
   if (listings.status !== "ready") return null;
-  const buildings = buildingsOf(listings.houses).slice(0, section.fields.show === 6 ? 6 : 3);
+  const buildings = buildingsOf(listings.houses).slice(
+    0,
+    section.fields.show === 6 ? 6 : 3,
+  );
   if (buildings.length === 0) return null;
   return (
     <SectionShell section={section}>

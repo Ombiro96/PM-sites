@@ -30,7 +30,10 @@ export const temboHart: SiteData = {
     opening_hours: "Mon to Fri, 8am to 5pm",
     latitude: -1.3001,
     longitude: 36.7873,
-    social_links: { facebook: "https://facebook.com/tembohart.example", linkedin: "https://linkedin.com/company/tembohart-example" },
+    social_links: {
+      facebook: "https://facebook.com/tembohart.example",
+      linkedin: "https://linkedin.com/company/tembohart-example",
+    },
     areas_served: ["Kilimani", "Kileleshwa", "Roysambu"],
   },
   figures: { buildings: 3, units: 100, towns: 1 },
@@ -64,7 +67,11 @@ export const temboHart: SiteData = {
               text: "Tembo & Hart lets, collects and maintains residential buildings in Nairobi.",
               primary: {
                 label: "Ask for a proposal",
-                to: { kind: "section", page: "pg_owners", section: "sec_request" },
+                to: {
+                  kind: "section",
+                  page: "pg_owners",
+                  section: "sec_request",
+                },
               },
               secondary: { label: "See houses to let", to: { kind: "houses" } },
               pictures: [
@@ -177,7 +184,11 @@ export const temboHart: SiteData = {
             type: "fees",
             fields: { heading: "Our fees" },
             items: [
-              { id: "it_f1", label: "Management", value: "8% of rent collected" },
+              {
+                id: "it_f1",
+                label: "Management",
+                value: "8% of rent collected",
+              },
               {
                 id: "it_f2",
                 label: "Letting a vacant unit",
@@ -228,7 +239,11 @@ export const temboHart: SiteData = {
             fields: {
               heading: "Two partners and a rule about the 5th",
               text: "Tembo & Hart was set up by two people who had each owned a building.\n\nEvery owner gets a clear statement on the 5th.",
-              picture: { asset: "as_office", alt: "Our office", focus: [0.5, 0.5] },
+              picture: {
+                asset: "as_office",
+                alt: "Our office",
+                focus: [0.5, 0.5],
+              },
             },
           },
           {

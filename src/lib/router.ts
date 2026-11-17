@@ -28,7 +28,8 @@ export function matchRoute(pathname: string): Route {
       return { name: "house", id: parts[1].toLowerCase() };
     }
   }
-  if (import.meta.env.DEV && parts.length === 1 && parts[0] === "__sections") return { name: "sections" };
+  if (import.meta.env.DEV && parts.length === 1 && parts[0] === "__sections")
+    return { name: "sections" };
   return { name: "not_found" };
 }
 
@@ -49,7 +50,8 @@ export function inSiteTarget(
   origin: string,
 ): URL | null {
   if (event.defaultPrevented || event.button !== 0) return null;
-  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return null;
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+    return null;
   if (anchor.target && anchor.target !== "_self") return null;
   if (anchor.hasAttribute("download")) return null;
   let url: URL;
@@ -69,7 +71,7 @@ type Listener = () => void;
 type NavigateOptions = { replace?: boolean; keepScroll?: boolean };
 
 /** Query keys the dev server uses to pick a sample; carried from page to page. */
-const DEV_KEYS = ["sample", "look", "listings", "colour"];
+const DEV_KEYS = ["sample", "look", "listings", "colour", "only"];
 
 let scrollIntent: "top" | "keep" | "restore" = "restore";
 const listeners = new Set<Listener>();
@@ -94,13 +96,17 @@ export function takeScrollIntent(): "top" | "keep" | "restore" {
   return intent;
 }
 
-export function navigate(to: string | URL, options: NavigateOptions = {}): void {
+export function navigate(
+  to: string | URL,
+  options: NavigateOptions = {},
+): void {
   const url = new URL(to, window.location.href);
   if (import.meta.env.DEV) {
     const current = new URLSearchParams(window.location.search);
     for (const key of DEV_KEYS) {
       const value = current.get(key);
-      if (value !== null && !url.searchParams.has(key)) url.searchParams.set(key, value);
+      if (value !== null && !url.searchParams.has(key))
+        url.searchParams.set(key, value);
     }
   }
   const target = `${url.pathname}${url.search}${url.hash}`;
@@ -121,7 +127,9 @@ export function startRouter(): () => void {
     const url = inSiteTarget(anchor, event, window.location.origin);
     if (!url) return;
     // A jump within the page that is already showing is left to the browser.
-    const samePage = url.pathname === window.location.pathname && url.search === window.location.search;
+    const samePage =
+      url.pathname === window.location.pathname &&
+      url.search === window.location.search;
     if (samePage && url.hash) return;
     event.preventDefault();
     navigate(url);

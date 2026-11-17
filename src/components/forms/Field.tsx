@@ -40,7 +40,13 @@ export function fieldProps(id: string, error?: string) {
 }
 
 /** A field people never see. Anything typed into it marks the sender as a script. */
-export function TrapField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+export function TrapField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
   return (
     <div className="trap" aria-hidden="true">
       <label>
@@ -58,7 +64,13 @@ export function TrapField({ value, onChange }: { value: string; onChange: (value
   );
 }
 
-export function Sent({ title, children }: { title: string; children: ReactNode }) {
+export function Sent({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
   return (
     <div className="reveal" role="status">
       <b>{title}</b>

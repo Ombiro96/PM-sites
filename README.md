@@ -1,150 +1,155 @@
 # PM-Sites
 
-Branded property-management websites, one codebase, many clients.
+The website a property manager gets from Bomahut. **One static app draws every
+manager's site**, in any of the six looks, from data the backend writes into
+the page when the site is published.
 
-A property manager on Bomahut gets their own domain, brand and public listings
-site. Vacancies are read live from the Bomahut GraphQL API; everything else —
-colours, logo, copy, photography, areas, services — is data in
-`src/clients/<slug>/`. **Onboarding client #2 must be a configuration change,
-not a new project.** That constraint is the point of the whole repo.
+- **Stack:** Vite, React 19, Tailwind 4, TypeScript. No server, no router library.
+- **Hosting:** static files on S3 behind CloudFront. The backend's `websites`
+  app copies a build into each site's folder and fills in the page.
+- **Live data:** houses to let are fetched in the visitor's browser from the
+  backend's public listings endpoints. Enquiries and site forms post to the backend.
 
-- **Framework:** Next.js 16 (App Router) + React 19 + Tailwind 4
-- **Hosting:** Vercel (one project, many custom domains)
-- **Data:** read-only GraphQL against `api.bomahut.com`
-- **Leads:** forwarded to Make.com; nothing is written back to Bomahut
+The contract this app follows is `docs/pm-websites-contract.md` and
+`docs/pm-websites-static-build-plan.md` in the workspace; the section rules are
+`backend/websites/section_rules.py`.
 
-## Read-only, by construction
-
-This site never mutates production data. `src/lib/backend/client.ts` rejects any
-GraphQL document containing `mutation` or `subscription` before it is sent, so a
-write cannot be introduced by accident. Enquiries go to Make.com, not to the
-Bomahut API.
-
-## Quick start
+## Run it
 
 ```bash
 npm install
-cp .env.example .env.local
-npm run dev
+npm run dev          # http://localhost:5173
 ```
 
-Visit http://localhost:3000. With no matching host, the site renders
-`PM_SITES_DEFAULT_CLIENT`. To exercise host resolution locally, add to
-`/etc/hosts`:
+The dev server has no backend in front of it, so it draws a sample site. Choose
+what to draw in the address:
 
-```
-127.0.0.1 abc.localhost
-```
+| Address part                                       | Does                                                                                                                            |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `?sample=tembo-hart` or `sunrise-court`            | Which sample (default `tembo-hart`, the full one; `sunrise-court` is the thin one)                                              |
+| `?look=fresh\|classic\|bold\|coast\|estate\|plain` | Draw the sample in another look                                                                                                 |
+| `?colour=1d4e89`                                   | Another brand colour                                                                                                            |
+| `?listings=sample\|few\|empty`                     | Made-up houses instead of a backend                                                                                             |
+| `/__sections?look=…&only=steps,figures`            | Every section type in every layout and background, with the longest allowed text, a very long company name and missing pictures |
 
-and visit http://abc.localhost:3000.
-
-## How a request resolves
-
-```
-Host header  →  src/lib/brand/resolve.ts  →  Client { brand, listings }
-                                              ├── brand.theme  → CSS variables on :root
-                                              ├── brand.content → every word on the page
-                                              └── brand.accountNumber → which vacancies to fetch
-```
-
-Every page is server-rendered on demand because the brand depends on the
-`Host` header. Vacancy fetches are cached for 5 minutes
-(`next: { revalidate: 300 }`), so traffic does not translate into backend load.
-
-## Adding a client
-
-1. `mkdir src/clients/<slug>` and copy `abc/brand.ts` + `abc/listings.ts`.
-2. Fill in company details, contact, theme tokens, content and
-   `accountNumber` (their Bomahut `CustomerAccount.account_number`).
-3. Set `hosts` to their domain(s).
-4. Register the client in `src/clients/index.ts`.
-5. Drop logo artwork in `public/clients/<slug>/` and point `logos` at it. Until
-   then the site renders a typographic wordmark — a brand can go live without
-   waiting for artwork. The browser-tab and iOS icons (`src/app/icon.tsx`,
-   `src/app/apple-icon.tsx`) are generated from `company.shortName` and
-   `theme.primary`, so they are correct for a new client with no assets at all.
-6. Add the domain to the Vercel project and point the client's DNS at it.
-
-No component may reference a client by name. If you find yourself wanting to,
-the thing you need is a new field on `Brand`.
-
-### Theming
-
-`src/lib/brand/theme.ts` turns brand tokens into CSS custom properties, and
-`globals.css` maps those onto Tailwind utilities (`bg-brand`, `text-ink-muted`,
-`rounded-brand`). Components only ever use the utilities. `contrastRatio()` and
-`readableOn()` are there for when a property manager picks a colour that white
-text cannot sit on.
-
-## Listings: where the data comes from
-
-A listing is a **unit type** ("2 Bedroom Apartment at Riverside Court"), not an
-individual unit. Advertising per-unit would mean 40 near-identical pages for one
-block, and would leak the occupancy of specific units.
-
-| Field | Source |
-|---|---|
-| Availability, rent, property name, city | Bomahut, live, via `publicVacancies` |
-| Photos, description, amenities, beds/baths, size | `src/clients/<slug>/listings.ts` |
-
-`propertyMatch` must equal `Property.name` in Bomahut exactly — that is the join
-key. `match` narrows which vacant units of that property belong to a given unit
-type, by unit-name regex and/or rent band.
-
-If the backend is unreachable the site still renders the full catalogue with
-everything marked unavailable, and shows a notice on `/properties`. It never
-shows an error page over a listings failure.
-
-### Backend dependency
-
-`publicVacancies(accountNumber:)` is an **anonymous, read-only** query that does
-not exist in the backend yet. Its expected shape is in
-`src/lib/backend/vacancies.ts`, and the backend-side design is in
-`docs/backend-public-vacancies.md`. Until it ships, set `BOMAHUT_API_TOKEN` to a
-viewer-role JWT, or run against fixtures.
-
-## SEO
-
-Location pages (`/areas/<slug>`) are first-class: "houses to rent in Kilimani"
-is what people actually type. Each carries its own title, description, canonical
-and `BreadcrumbList`. Listings emit `Apartment` + `Offer` structured data with
-real availability, the site emits `RealEstateAgent`, and `/about` emits
-`FAQPage`. Sitemap and robots are generated per brand; preview deployments are
-`noindex` so they never compete with a client's own domain.
-
-## Project layout
-
-```
-src/
-  app/                    routes; every page resolves its brand from the Host header
-    api/enquiry/          POST → Make.com (rate-limited, honeypot, zod-validated)
-    api/request/          POST → Make.com; tenant requests, validated from the
-                          field config in lib/requests.ts
-    submit-a-request/     hub + one page per request type ([type] dynamic route)
-  clients/                per-client configuration — the only place a brand is named
-  components/
-    forms/ home/ layout/ listings/ seo/ ui/
-  lib/
-    backend/              read-only GraphQL client + vacancy query
-    brand/                host resolution, types, theme → CSS variables
-    listings/             types, marketing content model, merge, filtering
-    requests.ts           tenant request types + fields; the form renders from
-                          it and the API validates against it
-```
-
-## Commands
+Without `?listings=` the samples ask a real backend, set in `.env.local`
+(see `.env.example`):
 
 ```bash
-npm run dev         # local dev server
-npm run build       # production build
-npm run lint        # eslint
-npm run typecheck   # tsc --noEmit
-npm run format      # prettier
+VITE_DEV_API_BASE=http://localhost:8000/api
+VITE_DEV_AGENCY=<an agency slug on that backend>
 ```
 
-## Before a second client goes live
+With neither, the houses sections show their "availability is temporarily
+unavailable" state, which is the right thing to see when checking that state.
 
-`resolveClient()` currently falls back to a default brand for unknown hosts,
-which is right while one client is live and wrong the moment two are: an unknown
-host in production should 404 rather than silently serve someone else's brand.
-Change that in `src/lib/brand/resolve.ts` when client #2 is onboarded.
+Sample sites, made-up listings and the test page live in `src/dev/` and are
+loaded only by the dev server. A build contains none of them.
+
+## Checks
+
+```bash
+npm run typecheck
+npm run lint
+npm test             # router, button destinations, reading page data, picture lookup
+npm run build
+```
+
+## Build and upload
+
+```bash
+npm run build        # dist/index.html + hashed files under dist/assets/
+```
+
+The build is uploaded by the backend, which refuses to overwrite a version:
+
+```bash
+# in the backend repo
+python manage.py upload_site_app <version> <path to PM-sites/dist>
+```
+
+Publishing a site then copies that version's files and writes the pages.
+
+## How data gets into the page
+
+`index.html` keeps two placeholders, and the build leaves them exactly as written:
+
+- `%SITE_HEAD%` inside `<head>`: the backend replaces it with the page's title,
+  description, canonical address and link-preview tags.
+- `%SITE_DATA%` inside `<div hidden>`: the backend replaces it with
+  `<script id="site-data" type="application/json">…</script>`.
+
+The data is one object (`SiteData` in `src/lib/site/types.ts`):
+
+```
+version   1
+site      id, address, look, brand_colour, show_credit, preview
+facts     name, logo, phone, whatsapp, email, office_address, opening_hours,
+          latitude, longitude, social_links, areas_served
+figures   buildings, units, towns
+pictures  { <asset id>: { small, large } }
+wording   { services: { <standard service key>: { title, text } } }
+document  the published document: header, footer, pages[] of sections
+api       base (the backend's /api address), agency (the listings agency slug)
+```
+
+If there is no data in the page the app shows "This site is not available".
+When the head placeholder left no title, the app sets the tab title itself.
+
+## Pages and paths
+
+| Path                                     | Drawn from                                                     |
+| ---------------------------------------- | -------------------------------------------------------------- |
+| `/`, `/for-owners`, `/about`, `/contact` | The document. A page the document lacks shows "page not found" |
+| `/houses`                                | Listings search: filters, count, pages of results              |
+| `/houses/<short code or id>`             | One house type                                                 |
+
+Paths are real paths. `src/lib/router.ts` takes over same-site link clicks,
+uses the history API, scrolls to the top, and scrolls to a section when a
+button's destination is one.
+
+## What the app calls
+
+| Call                                                        | Used for                                                                                                                                   |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET {api.base}/listings/v1/search/?agency=…`               | Houses sections, buildings, the houses badge and figure, the houses page (`category`, `max_rent`, `location`, `sort`, `page`, `page_size`) |
+| `GET {api.base}/listings/v1/unit-types/<id>/`               | One house                                                                                                                                  |
+| `GET {api.base}/listings/v1/links/r/<code>/`                | Turns a short code in the address into an id                                                                                               |
+| `POST {api.base}/listings/v1/enquiries/`                    | Rental enquiry, and WhatsApp and Call taps on a house                                                                                      |
+| `POST {api.base}/websites/v1/public/sites/<site id>/leads/` | Management request and contact message                                                                                                     |
+
+When listings cannot be reached the site says "Availability is temporarily
+unavailable" and never "no houses". With no houses at all, the houses section
+on a page is not drawn and buttons that pointed at houses go to Contact.
+
+## Where things are
+
+```
+index.html                    the page with the two placeholders
+src/main.tsx                  reads the data, sets the look, starts the app
+src/App.tsx                   header, the page for the current path, footer
+src/styles/site.css           look tokens (.look-*) and every section's styling
+src/lib/site/                 data shape, pages, button destinations, pictures, brand colours
+src/lib/listings/             listings requests, their shapes, formatting
+src/lib/router.ts             paths and link handling
+src/components/sections/      the 17 sections and SectionRenderer
+src/components/pages/         stored page, houses, one house, not found
+src/components/forms/         enquiry form, lead form, shared field parts
+src/dev/                      samples, made-up listings, the /__sections test page (dev server only)
+```
+
+## Looks
+
+A look is a class on `<html>` (`look-classic`) plus colours derived from the
+manager's one brand colour (`src/lib/site/brand.ts`). Each look is a set of
+tokens and a few section overrides in `src/styles/site.css`; no section has
+per-look markup. Fonts are bundled with the app.
+
+## Rules the code keeps
+
+- Manager text is never rendered as HTML.
+- Addresses are only built from typed button destinations, and from picture,
+  logo and social addresses that are plain `https`.
+- A picture that is missing from the page's data draws the no-picture design.
+- Hidden sections and section types the app does not know draw nothing.
+- Every form has a hidden `website` field that must stay empty.

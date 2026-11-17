@@ -11,7 +11,9 @@ export function PageTitle({ section }: { section: PageTitleSection }) {
   const site = useSite();
   const page = findPage(site.document, useContext(PageKindContext));
   const { fields } = section;
-  const picture = opensWithPhoto(section, site) ? resolvePicture(fields.picture, site.pictures) : null;
+  const picture = opensWithPhoto(section, site)
+    ? resolvePicture(fields.picture, site.pictures)
+    : null;
 
   const words = (
     <>

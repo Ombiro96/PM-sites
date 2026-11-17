@@ -22,9 +22,21 @@ const KILELESHWA = location("a2", "Kileleshwa");
 const ROYSAMBU = location("a3", "Roysambu");
 
 const BUILDINGS = {
-  arcade: { id: "00000000-0000-4000-8000-0000000000b1", name: "Arcade", short_code: "arc1" },
-  lenana: { id: "00000000-0000-4000-8000-0000000000b2", name: "Lenana Court", short_code: "len1" },
-  vision: { id: "00000000-0000-4000-8000-0000000000b3", name: "Vision Flats", short_code: "vis1" },
+  arcade: {
+    id: "00000000-0000-4000-8000-0000000000b1",
+    name: "Arcade",
+    short_code: "arc1",
+  },
+  lenana: {
+    id: "00000000-0000-4000-8000-0000000000b2",
+    name: "Lenana Court",
+    short_code: "len1",
+  },
+  vision: {
+    id: "00000000-0000-4000-8000-0000000000b3",
+    name: "Vision Flats",
+    short_code: "vis1",
+  },
 };
 
 function house(
@@ -66,12 +78,84 @@ function house(
 }
 
 const TEMBO: HouseCard[] = [
-  house(1, "1_bedroom", "1 bedroom", 1, "arcade", KILIMANI, 45000, 45000, 3000, keys, { count: 2 }),
-  house(2, "2_bedroom", "2 bedroom", 2, "lenana", KILELESHWA, 70000, 70000, 5000, office, { count: 1 }),
-  house(3, "studio", "Studio", 0, "arcade", KILIMANI, 32000, 32000, 3000, block, { count: 1 }),
-  house(4, "bedsitter", "Bedsitter", 0, "vision", ROYSAMBU, 12000, null, 0, null, { count: 3 }),
-  house(5, "3_bedroom", "3 bedroom", 3, "lenana", KILELESHWA, 95000, 95000, 6000, skyline, { from: "2027-01-05" }),
-  house(6, "1_bedroom", "1 bedroom", 1, "vision", ROYSAMBU, 18000, 18000, 0, keys, { count: 2 }),
+  house(
+    1,
+    "1_bedroom",
+    "1 bedroom",
+    1,
+    "arcade",
+    KILIMANI,
+    45000,
+    45000,
+    3000,
+    keys,
+    { count: 2 },
+  ),
+  house(
+    2,
+    "2_bedroom",
+    "2 bedroom",
+    2,
+    "lenana",
+    KILELESHWA,
+    70000,
+    70000,
+    5000,
+    office,
+    { count: 1 },
+  ),
+  house(
+    3,
+    "studio",
+    "Studio",
+    0,
+    "arcade",
+    KILIMANI,
+    32000,
+    32000,
+    3000,
+    block,
+    { count: 1 },
+  ),
+  house(
+    4,
+    "bedsitter",
+    "Bedsitter",
+    0,
+    "vision",
+    ROYSAMBU,
+    12000,
+    null,
+    0,
+    null,
+    { count: 3 },
+  ),
+  house(
+    5,
+    "3_bedroom",
+    "3 bedroom",
+    3,
+    "lenana",
+    KILELESHWA,
+    95000,
+    95000,
+    6000,
+    skyline,
+    { from: "2027-01-05" },
+  ),
+  house(
+    6,
+    "1_bedroom",
+    "1 bedroom",
+    1,
+    "vision",
+    ROYSAMBU,
+    18000,
+    18000,
+    0,
+    keys,
+    { count: 2 },
+  ),
 ];
 
 const SETS: Record<string, HouseCard[]> = {
@@ -81,13 +165,28 @@ const SETS: Record<string, HouseCard[]> = {
 };
 
 function detail(card: HouseCard, all: HouseCard[]): HouseDetail {
-  const photos = [card.cover?.url, office, block, skyline].filter((url): url is string => Boolean(url));
+  const photos = [card.cover?.url, office, block, skyline].filter(
+    (url): url is string => Boolean(url),
+  );
   return {
     ...card,
-    description: "Bright rooms with fitted wardrobes and an open kitchen.\n\nWater is from a borehole and is included in the service charge.",
-    amenities: ["Fitted wardrobes", "Open kitchen", "Balcony", "Fibre ready"].map((name) => ({ name, slug: name.toLowerCase().replace(/ /g, "-") })),
+    description:
+      "Bright rooms with fitted wardrobes and an open kitchen.\n\nWater is from a borehole and is included in the service charge.",
+    amenities: [
+      "Fitted wardrobes",
+      "Open kitchen",
+      "Balcony",
+      "Fibre ready",
+    ].map((name) => ({ name, slug: name.toLowerCase().replace(/ /g, "-") })),
     media: card.cover
-      ? [...new Set(photos)].map((url, index) => ({ id: String(index), kind: "photo" as const, url, small_url: url, video_url: null, caption: "" }))
+      ? [...new Set(photos)].map((url, index) => ({
+          id: String(index),
+          kind: "photo" as const,
+          url,
+          small_url: url,
+          video_url: null,
+          caption: "",
+        }))
       : [],
     property: {
       ...card.property,
@@ -95,16 +194,27 @@ function detail(card: HouseCard, all: HouseCard[]): HouseDetail {
       location: card.location,
       landmark: "Opposite the shopping centre",
       pin: { latitude: "-1.292100", longitude: "36.783900", exact: false },
-      amenities: ["Lift", "Backup generator", "Borehole water", "Parking", "CCTV"].map((name) => ({ name, slug: name.toLowerCase().replace(/ /g, "-") })),
+      amenities: [
+        "Lift",
+        "Backup generator",
+        "Borehole water",
+        "Parking",
+        "CCTV",
+      ].map((name) => ({ name, slug: name.toLowerCase().replace(/ /g, "-") })),
       media: [],
       contact: { phone: null, whatsapp_number: null },
     },
-    other_unit_types: all.filter((other) => other.property.id === card.property.id && other.id !== card.id),
+    other_unit_types: all.filter(
+      (other) => other.property.id === card.property.id && other.id !== card.id,
+    ),
   };
 }
 
 function json(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
 }
 
 export function mockFetcher(set: string) {
@@ -118,12 +228,21 @@ export function mockFetcher(set: string) {
       const params = url.searchParams;
       let found = houses.filter(
         (item) =>
-          (!params.get("category") || item.category === params.get("category")) &&
-          (!params.get("max_rent") || Number(item.rent_amount) <= Number(params.get("max_rent"))) &&
-          (!params.get("location") || item.location.id === params.get("location")),
+          (!params.get("category") ||
+            item.category === params.get("category")) &&
+          (!params.get("max_rent") ||
+            Number(item.rent_amount) <= Number(params.get("max_rent"))) &&
+          (!params.get("location") ||
+            item.location.id === params.get("location")),
       );
-      if (params.get("sort") === "rent_asc") found = [...found].sort((a, b) => Number(a.rent_amount) - Number(b.rent_amount));
-      if (params.get("sort") === "rent_desc") found = [...found].sort((a, b) => Number(b.rent_amount) - Number(a.rent_amount));
+      if (params.get("sort") === "rent_asc")
+        found = [...found].sort(
+          (a, b) => Number(a.rent_amount) - Number(b.rent_amount),
+        );
+      if (params.get("sort") === "rent_desc")
+        found = [...found].sort(
+          (a, b) => Number(b.rent_amount) - Number(a.rent_amount),
+        );
       const size = Number(params.get("page_size")) || 20;
       const page = Number(params.get("page")) || 1;
       return json({
@@ -137,12 +256,16 @@ export function mockFetcher(set: string) {
     const link = /\/links\/r\/([^/]+)\/$/.exec(url.pathname);
     if (link) {
       const match = houses.find((item) => item.short_code === link[1]);
-      return match ? json({ type: "unit_type", id: match.id }) : json({ detail: "Not found." }, 404);
+      return match
+        ? json({ type: "unit_type", id: match.id })
+        : json({ detail: "Not found." }, 404);
     }
     const unit = /\/unit-types\/([^/]+)\/$/.exec(url.pathname);
     if (unit) {
       const match = houses.find((item) => item.id === unit[1]);
-      return match ? json(detail(match, houses)) : json({ detail: "Not found." }, 404);
+      return match
+        ? json(detail(match, houses))
+        : json({ detail: "Not found." }, 404);
     }
     return json({ detail: "Not found." }, 404);
   };

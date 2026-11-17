@@ -41,7 +41,9 @@ export function About({ section }: { section: AboutSection }) {
   return (
     <SectionShell section={section} ownHeading>
       {picture ? (
-        <div className={cx("two", section.layout === "picture_right" && "flip")}>
+        <div
+          className={cx("two", section.layout === "picture_right" && "flip")}
+        >
           <Picture picture={picture} />
           <div>{words}</div>
         </div>
@@ -58,7 +60,9 @@ export function Services({ section }: { section: ServicesSection }) {
     // A standard service takes Bomahut's wording; a custom one is the manager's own.
     const standard = item.service ? wording.services[item.service] : undefined;
     const title = standard?.title ?? item.title;
-    return title ? [{ id: item.id, title, text: standard?.text ?? item.text }] : [];
+    return title
+      ? [{ id: item.id, title, text: standard?.text ?? item.text }]
+      : [];
   });
   if (services.length === 0) return null;
   return (
@@ -104,7 +108,10 @@ export function Steps({ section }: { section: StepsSection }) {
   );
 }
 
-const FIGURE_NAMES: Record<Exclude<Figure, "houses_to_let">, [string, string]> = {
+const FIGURE_NAMES: Record<
+  Exclude<Figure, "houses_to_let">,
+  [string, string]
+> = {
   buildings: ["building", "buildings"],
   units: ["unit", "units"],
   towns: ["town", "towns"],
@@ -117,15 +124,25 @@ export function Figures({ section }: { section: FiguresSection }) {
   const words = houseWords(site.look);
   const shown = Array.isArray(section.fields.show) ? section.fields.show : [];
 
-  const counts = shown.flatMap((figure): { figure: Figure; value: number; label: string }[] => {
-    if (figure === "houses_to_let") {
-      if (listings.status !== "ready" || listings.count === 0) return [];
-      return [{ figure, value: listings.count, label: `${listings.count === 1 ? words.one : words.many} to let` }];
-    }
-    const names = FIGURE_NAMES[figure];
-    const value = names ? figures[figure] : 0;
-    return value > 0 ? [{ figure, value, label: value === 1 ? names[0] : names[1] }] : [];
-  });
+  const counts = shown.flatMap(
+    (figure): { figure: Figure; value: number; label: string }[] => {
+      if (figure === "houses_to_let") {
+        if (listings.status !== "ready" || listings.count === 0) return [];
+        return [
+          {
+            figure,
+            value: listings.count,
+            label: `${listings.count === 1 ? words.one : words.many} to let`,
+          },
+        ];
+      }
+      const names = FIGURE_NAMES[figure];
+      const value = names ? figures[figure] : 0;
+      return value > 0
+        ? [{ figure, value, label: value === 1 ? names[0] : names[1] }]
+        : [];
+    },
+  );
   if (counts.length < 2) return null;
 
   return (
@@ -153,7 +170,11 @@ export function Team({ section }: { section: TeamSection }) {
           const picture = resolvePicture(person.picture, pictures);
           return (
             <div className="who" key={person.id}>
-              {picture ? <Picture picture={picture} /> : <i aria-hidden="true">{initials(person.name ?? "")}</i>}
+              {picture ? (
+                <Picture picture={picture} />
+              ) : (
+                <i aria-hidden="true">{initials(person.name ?? "")}</i>
+              )}
               <span>
                 <b>{person.name}</b>
                 {person.role ? (
@@ -173,7 +194,9 @@ export function Team({ section }: { section: TeamSection }) {
 
 export function Testimonials({ section }: { section: TestimonialsSection }) {
   // A quote is only ever shown when the manager confirmed they may publish it.
-  const quotes = itemsOf(section).filter((item) => item.quote && item.permission === true);
+  const quotes = itemsOf(section).filter(
+    (item) => item.quote && item.permission === true,
+  );
   if (quotes.length === 0) return null;
   const single = section.layout === "single" || quotes.length === 1;
   return (
@@ -212,7 +235,9 @@ export function Areas({ section }: { section: AreasSection }) {
 }
 
 export function Questions({ section }: { section: QuestionsSection }) {
-  const questions = itemsOf(section).filter((item) => item.question && item.answer);
+  const questions = itemsOf(section).filter(
+    (item) => item.question && item.answer,
+  );
   if (questions.length === 0) return null;
   return (
     <SectionShell section={section}>
@@ -241,7 +266,9 @@ export function Fees({ section }: { section: FeesSection }) {
           </div>
         ))}
       </dl>
-      {section.fields.note ? <p className="meta">{section.fields.note}</p> : null}
+      {section.fields.note ? (
+        <p className="meta">{section.fields.note}</p>
+      ) : null}
     </SectionShell>
   );
 }

@@ -12,7 +12,10 @@ describe("matchRoute", () => {
   it("ignores a trailing slash and index.html", () => {
     expect(matchRoute("/about/")).toEqual({ name: "page", kind: "about" });
     expect(matchRoute("/index.html")).toEqual({ name: "page", kind: "home" });
-    expect(matchRoute("/contact/index.html")).toEqual({ name: "page", kind: "contact" });
+    expect(matchRoute("/contact/index.html")).toEqual({
+      name: "page",
+      kind: "contact",
+    });
   });
 
   it("matches the houses list and one house", () => {
@@ -36,25 +39,65 @@ describe("matchRoute", () => {
 
 describe("inSiteTarget", () => {
   const origin = "https://tembo-hart.example";
-  const click = { button: 0, metaKey: false, ctrlKey: false, shiftKey: false, altKey: false, defaultPrevented: false };
-  const anchor = (href: string, extra: { target?: string; download?: boolean } = {}) => ({
+  const click = {
+    button: 0,
+    metaKey: false,
+    ctrlKey: false,
+    shiftKey: false,
+    altKey: false,
+    defaultPrevented: false,
+  };
+  const anchor = (
+    href: string,
+    extra: { target?: string; download?: boolean } = {},
+  ) => ({
     href,
     target: extra.target ?? "",
-    hasAttribute: (name: string) => name === "download" && extra.download === true,
+    hasAttribute: (name: string) =>
+      name === "download" && extra.download === true,
   });
 
   it("takes over plain clicks on same-site pages", () => {
-    expect(inSiteTarget(anchor(`${origin}/about`), click, origin)?.pathname).toBe("/about");
-    expect(inSiteTarget(anchor(`${origin}/for-owners#sec_request`), click, origin)?.hash).toBe("#sec_request");
+    expect(
+      inSiteTarget(anchor(`${origin}/about`), click, origin)?.pathname,
+    ).toBe("/about");
+    expect(
+      inSiteTarget(anchor(`${origin}/for-owners#sec_request`), click, origin)
+        ?.hash,
+    ).toBe("#sec_request");
   });
 
   it("leaves other sites, new tabs, files and modified clicks to the browser", () => {
-    expect(inSiteTarget(anchor("https://wa.me/254711000202"), click, origin)).toBeNull();
+    expect(
+      inSiteTarget(anchor("https://wa.me/254711000202"), click, origin),
+    ).toBeNull();
     expect(inSiteTarget(anchor("tel:0711000202"), click, origin)).toBeNull();
-    expect(inSiteTarget(anchor(`${origin}/about`, { target: "_blank" }), click, origin)).toBeNull();
-    expect(inSiteTarget(anchor(`${origin}/assets/app.js`), click, origin)).toBeNull();
-    expect(inSiteTarget(anchor(`${origin}/about`, { download: true }), click, origin)).toBeNull();
-    expect(inSiteTarget(anchor(`${origin}/about`), { ...click, metaKey: true }, origin)).toBeNull();
-    expect(inSiteTarget(anchor(`${origin}/about`), { ...click, button: 1 }, origin)).toBeNull();
+    expect(
+      inSiteTarget(
+        anchor(`${origin}/about`, { target: "_blank" }),
+        click,
+        origin,
+      ),
+    ).toBeNull();
+    expect(
+      inSiteTarget(anchor(`${origin}/assets/app.js`), click, origin),
+    ).toBeNull();
+    expect(
+      inSiteTarget(
+        anchor(`${origin}/about`, { download: true }),
+        click,
+        origin,
+      ),
+    ).toBeNull();
+    expect(
+      inSiteTarget(
+        anchor(`${origin}/about`),
+        { ...click, metaKey: true },
+        origin,
+      ),
+    ).toBeNull();
+    expect(
+      inSiteTarget(anchor(`${origin}/about`), { ...click, button: 1 }, origin),
+    ).toBeNull();
   });
 });

@@ -42,7 +42,6 @@ export function Picture({
       src={picture[size]}
       alt={picture.alt}
       loading={eager ? "eager" : "lazy"}
-      decoding="async"
       style={{ objectPosition: picture.position }}
     />
   );
@@ -52,7 +51,14 @@ export function Picture({
 export function NoPicture({ className }: { className?: string }) {
   return (
     <div className={cx("nopic", className)} aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.4}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <path d="M3 21h18M5 21V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v16M13 21V10h5a1 1 0 0 1 1 1v10M8 8h2M8 12h2M8 16h2M16 14h1M16 18h1" />
       </svg>
     </div>
@@ -80,7 +86,10 @@ export function SectionShell({
 }) {
   const heading = section.fields?.heading;
   return (
-    <section id={section.id} className={cx("sec", BACKGROUND_CLASS[backgroundOf(section)], className)}>
+    <section
+      id={section.id}
+      className={cx("sec", BACKGROUND_CLASS[backgroundOf(section)], className)}
+    >
       <div className="in">
         {!ownHeading && heading ? (
           <div className="headg">
