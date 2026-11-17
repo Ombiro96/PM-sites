@@ -1,0 +1,3 @@
+/* The site's own stylesheet. The console is built from `console/`, so the site's source is named here. */
+@import "../../src/styles/site.css";
+@source "../../src";

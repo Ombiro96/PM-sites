@@ -153,3 +153,43 @@ per-look markup. Fonts are bundled with the app.
 - A picture that is missing from the page's data draws the no-picture design.
 - Hidden sections and section types the app does not know draw nothing.
 - Every form has a hidden `website` field that must stay empty.
+
+## The console
+
+`console/` is a second, separate app in this repo: where a manager signs in or
+creates an account and sets up their website. It has its own build
+(`vite.console.config.ts`), so a site build never carries it.
+
+```bash
+npm run dev:console      # http://localhost:5174
+npm run test:console
+npm run build:console    # dist-console/
+```
+
+It talks to the backend named in `VITE_CONSOLE_API_BASE` (see `.env.example`).
+
+| Step    | Does                                                 | Kept                                              |
+| ------- | ---------------------------------------------------- | ------------------------------------------------- |
+| Sign in | `tokenAuth` and `register`, exactly as the dashboard | The backend                                       |
+| Look    | One of the six looks                                 | This browser, until the backend has calls for it  |
+| Colour  | The brand colour                                     | This browser, until the backend has calls for it  |
+| Details | Company name, phone, WhatsApp; who the site is for   | `saveAgencyProfile`; the audience in this browser |
+| Review  | Everything chosen, each line changeable              |                                                   |
+
+The backend's `websites` app has no calls for a site's look, colour, audience,
+draft, preview or publish yet. `console/src/lib/website.ts` keeps those choices
+in the browser; its `readWebsite` and `saveWebsite` are the two functions to
+point at the backend when it has them.
+
+**The preview is the real site.** `console/preview.html` loads the site app
+from `src/` in a frame, and the console sends it site data with `postMessage`
+(`console/src/components/SitePreview.tsx`). Until a manager has a draft of
+their own it draws the full sample from `src/dev/`, in their look and colour
+and under their company's name, with made-up houses.
+
+```
+console/index.html, preview.html   the console, and the frame that draws a site
+console/src/pages/                 sign in, create account, the setup steps
+console/src/components/            form fields, choice cards, the site preview
+console/src/lib/                   backend calls, sign-in state, website choices
+```

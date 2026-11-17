@@ -1,0 +1,59 @@
+import { useEffect, useSyncExternalStore } from "react";
+import { locationKey, navigate, subscribe } from "@/lib/router";
+import { useAuth } from "./lib/auth";
+import { PATHS } from "./lib/config";
+import { LoginPage } from "./pages/LoginPage";
+import { RegisterPage } from "./pages/RegisterPage";
+import { WebsitePage } from "./pages/WebsitePage";
+
+function Notice({
+  children,
+  onRetry,
+}: {
+  children: string;
+  onRetry?: () => void;
+}) {
+  return (
+    <main className="flex min-h-dvh flex-col items-center justify-center gap-4 px-4 text-center">
+      <p className="text-ink-muted">{children}</p>
+      {onRetry ? (
+        <button
+          type="button"
+          onClick={onRetry}
+          className="text-brand font-medium hover:underline"
+        >
+          Try again
+        </button>
+      ) : null}
+    </main>
+  );
+}
+
+export function App() {
+  useSyncExternalStore(subscribe, locationKey);
+  const { state, retry } = useAuth();
+  const path = window.location.pathname.replace(/\/+$/, "") || "/";
+
+  const signedOutPaths: string[] = [PATHS.login, PATHS.register];
+  let wanted = path;
+  if (state.status === "signed_in" && !path.startsWith(`${PATHS.website}/`))
+    wanted = `${PATHS.website}/look`;
+  if (state.status === "signed_out" && !signedOutPaths.includes(path))
+    wanted = PATHS.login;
+
+  useEffect(() => {
+    if (wanted !== path)
+      navigate(`${wanted}${window.location.search}`, { replace: true });
+  }, [wanted, path]);
+
+  if (state.status === "checking") return <Notice>Loading…</Notice>;
+  if (state.status === "unreachable")
+    return (
+      <Notice onRetry={retry}>
+        We could not reach Bomahut. Check your connection.
+      </Notice>
+    );
+  if (wanted !== path) return null;
+  if (state.status === "signed_in") return <WebsitePage user={state.user} />;
+  return path === PATHS.register ? <RegisterPage /> : <LoginPage />;
+}

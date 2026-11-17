@@ -1,0 +1,23 @@
+@import "@fontsource/figtree/latin-400.css";
+@import "@fontsource/figtree/latin-500.css";
+@import "@fontsource/figtree/latin-600.css";
+@import "@fontsource/figtree/latin-700.css";
+@import "tailwindcss" source("./");
+
+@theme {
+  --font-sans: "Figtree", system-ui, sans-serif;
+  --color-brand: #000082;
+  --color-brand-deep: #000050;
+  --color-brand-soft: #e4e4ff;
+  --color-ink: #1b1e23;
+  --color-ink-muted: #5a606b;
+  --color-line: #d5d8e0;
+  --color-surface: #f6f7fc;
+  --color-bad: #b42318;
+}
+
+body {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}

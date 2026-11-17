@@ -5,12 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:console": "vite --config vite.console.config.ts",
     "build": "tsc --noEmit && vite build",
+    "build:console": "tsc --noEmit && vite build --config vite.console.config.ts",
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:console": "vitest run --config vite.console.config.ts"
   },
   "dependencies": {
     "@fontsource/bricolage-grotesque": "^5.3.0",

@@ -1,5 +1,7 @@
 @import "./fonts.css";
 @import "tailwindcss";
+/* The console in `console/` is a separate app with its own stylesheet. */
+@source not "../../console";
 
 /*
  * A site's look is a class on <html> (`look-classic`) plus the brand colours
