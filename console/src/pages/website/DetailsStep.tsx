@@ -42,7 +42,7 @@ export function DetailsStep({
       />
       <PhoneField
         id="company-whatsapp"
-        label="WhatsApp number"
+        label="WhatsApp number (optional)"
         hint="Optional. Visitors get a WhatsApp button when you give one."
         value={phoneForInput(company.whatsappNumber)}
         error={errors.whatsappNumber}
