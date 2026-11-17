@@ -12,7 +12,6 @@ import { API_BASE, DASHBOARD_URL, PATHS } from "../lib/config";
 import { signUp, usernameAvailable } from "../lib/session";
 import { registrationSource, takeTrackingCookies } from "../lib/tracking";
 import {
-  DEFAULT_DIAL_CODE,
   emailError,
   formatPhone,
   normalizeUsername,
@@ -30,8 +29,8 @@ export function RegisterPage() {
   const { accept } = useAuth();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [dialCode, setDialCode] = useState(DEFAULT_DIAL_CODE);
-  const [number, setNumber] = useState("");
+  const [phone, setPhone] = useState("");
+  const [dialCode, setDialCode] = useState("");
   const [password, setPassword] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
@@ -42,6 +41,8 @@ export function RegisterPage() {
 
   const setError = (field: Field, error: string | undefined) =>
     setErrors((current) => ({ ...current, [field]: error }));
+
+  const number = phone.slice(dialCode.length);
 
   const usernameProblem = (value: string) =>
     usernameError(value) ??
@@ -142,15 +143,12 @@ export function RegisterPage() {
         <PhoneField
           id="phone"
           label="Phone number"
-          dialCode={dialCode}
-          number={number}
+          hint="The phone number should be in international format: country code then phone number."
+          value={phone}
           error={errors.phone}
-          onDialCode={(value) => {
-            setDialCode(value);
-            setError("phone", undefined);
-          }}
-          onNumber={(value) => {
-            setNumber(value);
+          onChange={(value, code) => {
+            setPhone(value);
+            setDialCode(code);
             setError("phone", undefined);
           }}
           onBlur={() =>

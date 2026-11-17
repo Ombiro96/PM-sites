@@ -1,4 +1,13 @@
 import { useState, type InputHTMLAttributes, type ReactNode } from "react";
+import PhoneInputModule from "react-phone-input-2";
+import { PHONE_COUNTRY } from "../lib/validation";
+
+// The library is CommonJS, and a bundler may hand over the module instead of its default export.
+const PhoneInput =
+  (PhoneInputModule as unknown as { default?: typeof PhoneInputModule })
+    .default ?? PhoneInputModule;
+
+const PHONE_INPUT_STYLE = { width: "100%", height: 46, fontSize: 16 };
 
 const INPUT =
   "border-line focus:border-brand focus:ring-brand-soft w-full rounded-lg border bg-white px-3 py-2.5 text-base outline-none focus:ring-4 aria-invalid:border-bad";
@@ -89,46 +98,32 @@ export function PasswordField({
 export function PhoneField({
   id,
   label,
+  hint,
   error,
-  dialCode,
-  number,
-  onDialCode,
-  onNumber,
+  value,
+  onChange,
   onBlur,
 }: {
   id: string;
   label: string;
+  hint?: string;
   error?: string;
-  dialCode: string;
-  number: string;
-  onDialCode: (value: string) => void;
-  onNumber: (value: string) => void;
+  value: string;
+  onChange: (value: string, dialCode: string) => void;
   onBlur?: () => void;
 }) {
   return (
-    <FieldShell id={id} label={label} error={error}>
-      <div className="flex gap-2">
-        <input
-          aria-label="Country code"
-          inputMode="tel"
-          autoComplete="tel-country-code"
-          className={`${INPUT} w-20 shrink-0 text-center`}
-          value={dialCode}
-          onChange={(event) => onDialCode(event.target.value)}
-          onBlur={onBlur}
-        />
-        <input
-          id={id}
-          type="tel"
-          autoComplete="tel-national"
-          placeholder="0712 345 678"
-          className={INPUT}
-          value={number}
-          onChange={(event) => onNumber(event.target.value)}
-          onBlur={onBlur}
-          {...describedBy(id, error)}
-        />
-      </div>
+    <FieldShell id={id} label={label} error={error} hint={hint}>
+      <PhoneInput
+        country={PHONE_COUNTRY}
+        value={value}
+        onChange={(next, country) =>
+          onChange(next, "dialCode" in country ? country.dialCode : "")
+        }
+        onBlur={onBlur}
+        inputStyle={PHONE_INPUT_STYLE}
+        inputProps={{ id, autoComplete: "tel", ...describedBy(id, error) }}
+      />
     </FieldShell>
   );
 }

@@ -1,4 +1,5 @@
-export const DEFAULT_DIAL_CODE = "+254";
+/** The country the phone field opens on, as in the dashboard. */
+export const PHONE_COUNTRY = "ke";
 const USERNAME_MIN = 5;
 const PASSWORD_MIN = 8;
 const PHONE_MIN_DIGITS = 8;
@@ -40,10 +41,10 @@ export function phoneError(
   number: string,
 ): string | undefined {
   const [code, local] = formatPhone(dialCode, number).slice(1).split("-");
-  if (code.length < 1 || code.length > 3)
-    return "Enter a country code, for example +254.";
   if (local.length < PHONE_MIN_DIGITS || local.length > PHONE_MAX_DIGITS)
     return "Enter your phone number, for example 0712 345 678.";
+  if (code.length < 1 || code.length > 3)
+    return "Enter a country code, for example +254.";
   return undefined;
 }
 
