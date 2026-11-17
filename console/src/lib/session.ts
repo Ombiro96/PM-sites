@@ -39,6 +39,24 @@ const REGISTER = `
   }
 `;
 
+const SEND_PASSWORD_RESET = `
+  mutation SendPasswordReset($username: String!) {
+    sendPasswordResetEmail(username: $username) {
+      success
+      errors
+    }
+  }
+`;
+
+const PASSWORD_RESET = `
+  mutation PasswordReset($token: String!, $newPassword1: String!, $newPassword2: String!) {
+    passwordReset(token: $token, newPassword1: $newPassword1, newPassword2: $newPassword2) {
+      success
+      errors
+    }
+  }
+`;
+
 const FETCH_USER = `
   query {
     fetchUser {
@@ -90,6 +108,53 @@ export async function signUp(details: {
     trackingCookies: JSON.stringify(details.trackingCookies),
   });
   return outcome(data.register, "We could not create your account.");
+}
+
+/** Emails the account's owner a link for choosing a new password. */
+export async function sendPasswordReset(
+  username: string,
+): Promise<{ ok: true } | Refused> {
+  const data = await graphql<{
+    sendPasswordResetEmail: {
+      success: boolean | null;
+      errors: string | null;
+    } | null;
+  }>(SEND_PASSWORD_RESET, { username });
+  if (data.sendPasswordResetEmail?.success) return { ok: true };
+  return {
+    ok: false,
+    message:
+      data.sendPasswordResetEmail?.errors ||
+      "Something went wrong! Please try again later",
+  };
+}
+
+export type ResetField = "newPassword1" | "newPassword2" | "nonFieldErrors";
+type ResetErrors = Partial<Record<ResetField, { message?: string }[]>>;
+
+/** Sets a new password with the token from the emailed link. A refusal names the field it is about. */
+export async function resetPassword(details: {
+  token: string;
+  newPassword1: string;
+  newPassword2: string;
+}): Promise<
+  { ok: true } | { ok: false; errors: Partial<Record<ResetField, string>> }
+> {
+  const data = await graphql<{
+    passwordReset: {
+      success: boolean | null;
+      errors: ResetErrors | null;
+    } | null;
+  }>(PASSWORD_RESET, details);
+  if (data.passwordReset?.success) return { ok: true };
+  const errors: Partial<Record<ResetField, string>> = {};
+  for (const [field, found] of Object.entries(data.passwordReset?.errors ?? {}))
+    errors[field as ResetField] = found
+      .map((error) => error.message ?? "")
+      .join(" ");
+  if (Object.keys(errors).length === 0)
+    errors.nonFieldErrors = "Something went wrong! Please try again later";
+  return { ok: false, errors };
 }
 
 export async function fetchUser(): Promise<User> {

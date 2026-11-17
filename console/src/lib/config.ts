@@ -5,13 +5,11 @@ export const API_BASE = trimmed(
   import.meta.env.VITE_CONSOLE_API_BASE ?? "http://127.0.0.1:8000",
 );
 
-/** The main Bomahut dashboard, which still owns password resets. */
-export const DASHBOARD_URL = trimmed(
-  import.meta.env.VITE_CONSOLE_DASHBOARD_URL ?? "https://app.bomahut.com",
-);
-
 export const PATHS = {
   login: "/login",
   register: "/register",
+  forgotPassword: "/forgot-password",
+  /** Followed by the token from the emailed link, as in the dashboard. */
+  resetPassword: "/reset-password",
   website: "/website",
 } as const;

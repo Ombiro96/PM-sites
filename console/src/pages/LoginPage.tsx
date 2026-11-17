@@ -7,7 +7,7 @@ import {
   TextField,
 } from "../components/fields";
 import { useAuth } from "../lib/auth";
-import { DASHBOARD_URL, PATHS } from "../lib/config";
+import { PATHS } from "../lib/config";
 import { signIn } from "../lib/session";
 import { takeTrackingCookies } from "../lib/tracking";
 import { normalizeUsername } from "../lib/validation";
@@ -47,9 +47,7 @@ export function LoginPage() {
       title="Sign in"
       links={
         <>
-          <TextLink href={`${DASHBOARD_URL}/forgot-password`} external>
-            Forgot Password
-          </TextLink>
+          <TextLink href={PATHS.forgotPassword}>Forgot Password</TextLink>
           <TextLink href={`${PATHS.register}${window.location.search}`}>
             Register
           </TextLink>

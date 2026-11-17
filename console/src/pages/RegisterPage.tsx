@@ -8,7 +8,7 @@ import {
   TextField,
 } from "../components/fields";
 import { useAuth } from "../lib/auth";
-import { API_BASE, DASHBOARD_URL, PATHS } from "../lib/config";
+import { API_BASE, PATHS } from "../lib/config";
 import { signUp, usernameAvailable } from "../lib/session";
 import { registrationSource, takeTrackingCookies } from "../lib/tracking";
 import {
@@ -102,9 +102,7 @@ export function RegisterPage() {
       title="Create Account"
       links={
         <>
-          <TextLink href={`${DASHBOARD_URL}/forgot-password`} external>
-            Forgot Password
-          </TextLink>
+          <TextLink href={PATHS.forgotPassword}>Forgot Password</TextLink>
           <TextLink href={`${PATHS.login}${window.location.search}`}>
             Login
           </TextLink>

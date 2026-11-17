@@ -168,13 +168,13 @@ npm run build:console    # dist-console/
 
 It talks to the backend named in `VITE_CONSOLE_API_BASE` (see `.env.example`).
 
-| Step    | Does                                                 | Kept                                              |
-| ------- | ---------------------------------------------------- | ------------------------------------------------- |
-| Sign in | `tokenAuth` and `register`, exactly as the dashboard | The backend                                       |
-| Look    | One of the six looks                                 | This browser, until the backend has calls for it  |
-| Colour  | The brand colour                                     | This browser, until the backend has calls for it  |
-| Details | Company name, phone, WhatsApp; who the site is for   | `saveAgencyProfile`; the audience in this browser |
-| Review  | Everything chosen, each line changeable              |                                                   |
+| Step    | Does                                                                                            | Kept                                              |
+| ------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| Sign in | `tokenAuth`, `register`, `sendPasswordResetEmail` and `passwordReset`, exactly as the dashboard | The backend                                       |
+| Look    | One of the six looks                                                                            | This browser, until the backend has calls for it  |
+| Colour  | The brand colour                                                                                | This browser, until the backend has calls for it  |
+| Details | Company name, phone, WhatsApp; who the site is for                                              | `saveAgencyProfile`; the audience in this browser |
+| Review  | Everything chosen, each line changeable                                                         |                                                   |
 
 The backend's `websites` app has no calls for a site's look, colour, audience,
 draft, preview or publish yet. `console/src/lib/website.ts` keeps those choices

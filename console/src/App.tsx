@@ -2,8 +2,10 @@ import { useEffect, useSyncExternalStore } from "react";
 import { locationKey, navigate, subscribe } from "@/lib/router";
 import { useAuth } from "./lib/auth";
 import { PATHS } from "./lib/config";
+import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { WebsitePage } from "./pages/WebsitePage";
 
 function Notice({
@@ -34,18 +36,29 @@ export function App() {
   const { state, retry } = useAuth();
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
 
-  const signedOutPaths: string[] = [PATHS.login, PATHS.register];
+  const signedOutPaths: string[] = [
+    PATHS.login,
+    PATHS.register,
+    PATHS.forgotPassword,
+  ];
+  // The emailed link works whether or not this browser is signed in.
+  const resetToken = path.startsWith(`${PATHS.resetPassword}/`)
+    ? path.slice(PATHS.resetPassword.length + 1)
+    : "";
   let wanted = path;
-  if (state.status === "signed_in" && !path.startsWith(`${PATHS.website}/`))
-    wanted = `${PATHS.website}/look`;
-  if (state.status === "signed_out" && !signedOutPaths.includes(path))
-    wanted = PATHS.login;
+  if (resetToken === "") {
+    if (state.status === "signed_in" && !path.startsWith(`${PATHS.website}/`))
+      wanted = `${PATHS.website}/look`;
+    if (state.status === "signed_out" && !signedOutPaths.includes(path))
+      wanted = PATHS.login;
+  }
 
   useEffect(() => {
     if (wanted !== path)
       navigate(`${wanted}${window.location.search}`, { replace: true });
   }, [wanted, path]);
 
+  if (resetToken !== "") return <ResetPasswordPage token={resetToken} />;
   if (state.status === "checking") return <Notice>Loading…</Notice>;
   if (state.status === "unreachable")
     return (
@@ -55,5 +68,7 @@ export function App() {
     );
   if (wanted !== path) return null;
   if (state.status === "signed_in") return <WebsitePage user={state.user} />;
-  return path === PATHS.register ? <RegisterPage /> : <LoginPage />;
+  if (path === PATHS.register) return <RegisterPage />;
+  if (path === PATHS.forgotPassword) return <ForgotPasswordPage />;
+  return <LoginPage />;
 }
