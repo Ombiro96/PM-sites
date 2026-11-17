@@ -5,7 +5,6 @@
  */
 
 export type Look = "fresh" | "classic" | "bold" | "coast" | "estate" | "plain";
-export type SiteStatus = "off" | "draft" | "live";
 export type PageKind = "home" | "owners" | "about" | "contact";
 export type Background = "white" | "tinted" | "brand";
 
@@ -190,30 +189,46 @@ export type SocialNetwork =
   | "linkedin"
   | "youtube";
 
-/** The public company profile (`AgencyProfile` in the backend), always read live. */
+/** The public company facts, written into the page when the site is published. */
 export type CompanyFacts = {
-  display_name: string;
-  logo_url: string | null;
+  name: string;
+  /** Empty when the manager has no logo: the name is shown as a wordmark. */
+  logo: string;
   phone: string;
-  whatsapp_number: string | null;
-  email: string | null;
-  office_address: string | null;
-  opening_hours: string | null;
-  office_latitude: string | null;
-  office_longitude: string | null;
+  whatsapp: string;
+  email: string;
+  office_address: string;
+  opening_hours: string;
+  latitude: number | null;
+  longitude: number | null;
   social_links: Partial<Record<SocialNetwork, string>>;
   areas_served: string[];
 };
 
-export type SitePicture = { url: string; width: number; height: number };
+export type SitePicture = { small: string; large: string };
 
-/** Everything a page needs to draw one manager's site. */
+export type StoredFigures = { buildings: number; units: number; towns: number };
+
+export type ServiceWording = { title: string; text: string };
+
+/**
+ * Everything the backend writes into a published page
+ * (`<script id="site-data" type="application/json">`).
+ */
 export type SiteData = {
-  status: SiteStatus;
-  look: Look;
-  brand_colour: string;
-  show_credit: boolean;
-  document: SiteDocument;
+  version: 1;
+  site: {
+    id: string;
+    address: string;
+    look: Look;
+    brand_colour: string;
+    show_credit: boolean;
+    preview: boolean;
+  };
   facts: CompanyFacts;
+  figures: StoredFigures;
   pictures: Record<string, SitePicture>;
+  wording: { services: Partial<Record<string, ServiceWording>> };
+  document: SiteDocument;
+  api: { base: string; agency: string };
 };

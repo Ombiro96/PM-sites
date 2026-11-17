@@ -1,61 +1,94 @@
-export type ListingCategory =
-  | "apartment"
-  | "bedsitter"
-  | "studio"
-  | "house"
-  | "maisonette"
-  | "townhouse"
-  | "office"
-  | "shop"
-  | "godown";
-
-export type ListingPhoto = { url: string; alt: string };
-
 /**
- * A listing is a *unit type* within a property ("2 Bedroom Apartment at Riverside
- * Court"), not an individual unit. Availability and rent come from Bomahut;
- * photos, copy and amenities come from the marketing layer.
+ * What the backend's public listings endpoints return
+ * (`backend/listings/utilities/public.py`). Amounts are decimal strings.
  */
-export type Listing = {
-  /** `${propertySlug}--${unitTypeSlug}` — stable across syncs. */
+
+export type ListingLocation = {
   id: string;
-  slug: string;
+  name: string;
+  full_name: string;
+  level: string;
+  path: string;
+};
+
+export type ListingCover = { url: string | null; small_url: string | null };
+
+export type HouseCard = {
+  id: string;
+  short_code: string | null;
   title: string;
-  propertyName: string;
-  propertySlug: string;
-  area: string;
-  areaSlug: string;
-  city: string;
-  category: ListingCategory;
+  category: string;
+  category_label: string;
+  label: string;
   bedrooms: number | null;
   bathrooms: number | null;
-  sizeSqm: number | null;
-  /** Monthly rent in the account's currency. */
-  rent: number;
+  size_sqm: string | null;
   currency: string;
-  depositMonths: number | null;
-  availableUnits: number;
-  availableFrom: string | null;
-  amenities: string[];
+  rent_amount: string | null;
+  /** Null when the manager has not stated a deposit. */
+  deposit_amount: string | null;
+  service_charge: string | null;
+  move_in_total: string | null;
+  available_count: number | null;
+  available_from: string | null;
+  cover: ListingCover | null;
+  location: ListingLocation;
+  landmark: string;
+  property: { id: string; name: string; short_code: string | null };
+};
+
+export type ListingMedia = {
+  id: string;
+  kind: "photo" | "video_link";
+  url: string | null;
+  small_url: string | null;
+  video_url: string | null;
+  caption: string;
+};
+
+export type Amenity = { name: string; slug: string };
+
+export type HouseDetail = Omit<HouseCard, "property"> & {
   description: string;
-  photos: ListingPhoto[];
-  featured: boolean;
+  amenities: Amenity[];
+  media: ListingMedia[];
+  property: {
+    id: string;
+    short_code: string | null;
+    name: string;
+    description: string;
+    location: ListingLocation;
+    landmark: string;
+    pin: { latitude: string; longitude: string; exact: boolean } | null;
+    amenities: Amenity[];
+    media: ListingMedia[];
+    contact: { phone: string | null; whatsapp_number: string | null };
+  };
+  other_unit_types: HouseCard[];
 };
 
-export type ListingFilters = {
-  q?: string;
-  area?: string;
-  category?: ListingCategory;
-  bedrooms?: number;
-  minRent?: number;
-  maxRent?: number;
-  sort?: "newest" | "rent-asc" | "rent-desc" | "beds-desc";
+export type SearchResult = {
+  count: number;
+  page: number;
+  page_size: number;
+  num_pages: number;
+  results: HouseCard[];
 };
 
-export type ListingsResult = {
-  listings: Listing[];
-  /** Where the data came from — surfaced in dev, never rendered in prod. */
-  source: "backend" | "fixtures";
-  /** Set when the backend was reachable but returned an error. */
-  warning: string | null;
+export type SearchFilters = {
+  category?: string;
+  max_rent?: string;
+  location?: string;
+  sort?: string;
+  page?: number;
+  page_size?: number;
+};
+
+/** A building, as far as the listings of its house types describe it. */
+export type Building = {
+  id: string;
+  name: string;
+  area: string;
+  cover: ListingCover | null;
+  houseTypes: number;
 };

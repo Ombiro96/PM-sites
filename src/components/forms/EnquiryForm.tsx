@@ -1,181 +1,95 @@
-"use client";
+import { useId, useState, type FormEvent } from "react";
+import { enquiryUrl, postForm } from "@/lib/listings/api";
+import { hasErrors, lengthError, nameError, phoneError, type Errors } from "@/lib/forms";
+import { useSite } from "@/lib/site/context";
+import { Field, fieldProps, Sent, TrapField } from "./Field";
 
-import { useState } from "react";
-import { SUBJECT_LABELS, type EnquiryInput } from "@/lib/enquiry";
-import { Button } from "@/components/ui/primitives";
-import { cn } from "@/lib/utils";
+type Name = "name" | "phone" | "message";
 
-const FIELD =
-  "h-11 w-full rounded-brand border border-line bg-surface px-3 text-sm text-ink placeholder:text-ink-muted/70";
+/** An enquiry about one house, sent to the backend's listings enquiries endpoint. */
+export function EnquiryForm({ houseId, startMessage }: { houseId: string; startMessage: string }) {
+  const site = useSite();
+  const id = useId();
+  const [values, setValues] = useState({ name: "", phone: "", message: startMessage, website: "" });
+  const [errors, setErrors] = useState<Errors<Name>>({});
+  const [state, setState] = useState<"idle" | "sending" | "sent">("idle");
+  const [failure, setFailure] = useState("");
 
-type Status = "idle" | "submitting" | "sent" | "error";
+  const set = (name: keyof typeof values) => (value: string) =>
+    setValues((current) => ({ ...current, [name]: value }));
 
-export function EnquiryForm({
-  listingSlug,
-  listingTitle,
-  defaultSubject = "general",
-  defaultMessage = "",
-  compact = false,
-}: {
-  listingSlug?: string;
-  listingTitle?: string;
-  defaultSubject?: EnquiryInput["subject"];
-  defaultMessage?: string;
-  compact?: boolean;
-}) {
-  const [status, setStatus] = useState<Status>("idle");
-  const [error, setError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
-
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent) {
     event.preventDefault();
-    setStatus("submitting");
-    setError(null);
-    setFieldErrors({});
-
-    const formData = new FormData(event.currentTarget);
-    const payload = {
-      name: String(formData.get("name") ?? ""),
-      phone: String(formData.get("phone") ?? ""),
-      email: String(formData.get("email") ?? ""),
-      message: String(formData.get("message") ?? ""),
-      subject: String(formData.get("subject") ?? "general"),
-      company: String(formData.get("company") ?? ""),
-      listingSlug,
-      listingTitle,
+    if (state === "sending") return;
+    const found: Errors<Name> = {
+      name: nameError(values.name),
+      phone: phoneError(values.phone),
+      message: lengthError(values.message, 2000),
     };
+    setErrors(found);
+    setFailure("");
+    if (hasErrors(found)) return;
+    if (site.site.preview) {
+      setFailure("This is a preview. The form works once the site is published.");
+      return;
+    }
+    // A filled trap field is a script: it is told the enquiry went, and nothing is sent.
+    if (values.website) {
+      setState("sent");
+      return;
+    }
 
-    try {
-      const response = await fetch("/api/enquiry", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const body = await response.json();
-
-      if (!response.ok || !body.ok) {
-        setFieldErrors(body.fieldErrors ?? {});
-        setError(body.error ?? "Something went wrong. Please try again.");
-        setStatus("error");
-        return;
-      }
-      setStatus("sent");
-    } catch {
-      setError("We could not reach the server. Please check your connection.");
-      setStatus("error");
+    setState("sending");
+    const result = await postForm(enquiryUrl(site.api), {
+      unit_type_id: houseId,
+      channel: "form",
+      name: values.name.trim(),
+      phone: values.phone.trim(),
+      message: values.message.trim(),
+    });
+    if (result.ok) {
+      setState("sent");
+    } else {
+      setState("idle");
+      setFailure(result.message);
     }
   }
 
-  if (status === "sent") {
+  if (state === "sent") {
     return (
-      <div className="rounded-brand-lg border border-emerald-200 bg-emerald-50 p-6">
-        <h3 className="font-display text-lg font-semibold text-emerald-900">
-          Thank you — your enquiry is with us.
-        </h3>
-        <p className="mt-2 text-sm text-emerald-800">
-          We reply during office hours, usually the same working day. If it is
-          urgent, please call us.
-        </p>
-      </div>
+      <Sent title="Enquiry sent">
+        Thank you. {site.facts.name} has your details and will get back to you.
+      </Sent>
     );
   }
 
+  const input = (name: Name) => ({
+    ...fieldProps(`${id}-${name}`, errors[name]),
+    value: values[name],
+    onChange: (event: { target: { value: string } }) => set(name)(event.target.value),
+  });
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-      {listingTitle ? (
-        <p className="rounded-brand bg-surface-muted px-3 py-2 text-sm text-ink-muted">
-          Enquiring about <span className="font-semibold text-ink">{listingTitle}</span>
+    <form onSubmit={submit} noValidate>
+      <b>Send an enquiry</b>
+      <Field id={`${id}-name`} label="Your name" error={errors.name}>
+        <input {...input("name")} type="text" autoComplete="name" required />
+      </Field>
+      <Field id={`${id}-phone`} label="Phone number" error={errors.phone}>
+        <input {...input("phone")} type="tel" inputMode="tel" autoComplete="tel" required />
+      </Field>
+      <Field id={`${id}-message`} label="Message" optional error={errors.message}>
+        <textarea {...input("message")} rows={4} />
+      </Field>
+      <TrapField value={values.website} onChange={set("website")} />
+      {failure ? (
+        <p className="form-err" role="alert">
+          {failure}
         </p>
       ) : null}
-
-      <div className={cn("grid gap-4", !compact && "sm:grid-cols-2")}>
-        <label>
-          <span className="mb-1.5 block text-xs font-semibold text-ink-muted">
-            Your name
-          </span>
-          <input name="name" required autoComplete="name" className={FIELD} />
-          <FieldError errors={fieldErrors.name} />
-        </label>
-        <label>
-          <span className="mb-1.5 block text-xs font-semibold text-ink-muted">
-            Phone number
-          </span>
-          <input
-            name="phone"
-            required
-            type="tel"
-            inputMode="tel"
-            autoComplete="tel"
-            placeholder="07xx xxx xxx"
-            className={FIELD}
-          />
-          <FieldError errors={fieldErrors.phone} />
-        </label>
-      </div>
-
-      <div className={cn("grid gap-4", !compact && "sm:grid-cols-2")}>
-        <label>
-          <span className="mb-1.5 block text-xs font-semibold text-ink-muted">
-            Email <span className="font-normal">(optional)</span>
-          </span>
-          <input name="email" type="email" autoComplete="email" className={FIELD} />
-          <FieldError errors={fieldErrors.email} />
-        </label>
-        <label>
-          <span className="mb-1.5 block text-xs font-semibold text-ink-muted">
-            What is this about?
-          </span>
-          <select name="subject" defaultValue={defaultSubject} className={FIELD}>
-            {Object.entries(SUBJECT_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-
-      <label className="block">
-        <span className="mb-1.5 block text-xs font-semibold text-ink-muted">
-          Message
-        </span>
-        <textarea
-          name="message"
-          required
-          rows={compact ? 3 : 5}
-          defaultValue={defaultMessage}
-          placeholder="Tell us what you are looking for, and when you would like to view."
-          className="w-full rounded-brand border border-line bg-surface px-3 py-2.5 text-sm text-ink placeholder:text-ink-muted/70"
-        />
-        <FieldError errors={fieldErrors.message} />
-      </label>
-
-      {/* Honeypot — hidden from people, irresistible to bots. */}
-      <div aria-hidden="true" className="absolute -left-[9999px]">
-        <label>
-          Company
-          <input name="company" tabIndex={-1} autoComplete="off" />
-        </label>
-      </div>
-
-      {error ? (
-        <p role="alert" className="text-sm font-medium text-red-700">
-          {error}
-        </p>
-      ) : null}
-
-      <Button type="submit" size="lg" disabled={status === "submitting"} className="w-full">
-        {status === "submitting" ? "Sending…" : "Send enquiry"}
-      </Button>
-
-      <p className="text-xs leading-relaxed text-ink-muted">
-        We use your details only to respond to this enquiry.
-      </p>
+      <button type="submit" className="btn" disabled={state === "sending"}>
+        {state === "sending" ? "Sending…" : "Send enquiry"}
+      </button>
     </form>
   );
-}
-
-function FieldError({ errors }: { errors?: string[] }) {
-  if (!errors?.length) return null;
-  return <p className="mt-1 text-xs font-medium text-red-700">{errors[0]}</p>;
 }

@@ -1,101 +1,55 @@
-import { Container } from "@/components/ui/primitives";
-import type { CompanyFacts, SocialNetwork } from "@/lib/site/types";
-import { telHref } from "@/lib/utils";
+import { useSite } from "@/lib/site/context";
+import type { SocialNetwork } from "@/lib/site/types";
+import { safeUrl, telHref } from "@/lib/utils";
 
-const SOCIAL_LABELS: Record<SocialNetwork, string> = {
-  facebook: "Facebook",
-  instagram: "Instagram",
-  tiktok: "TikTok",
-  x: "X",
-  linkedin: "LinkedIn",
-  youtube: "YouTube",
-};
+const NETWORKS: [SocialNetwork, string][] = [
+  ["facebook", "Facebook"],
+  ["instagram", "Instagram"],
+  ["tiktok", "TikTok"],
+  ["x", "X"],
+  ["linkedin", "LinkedIn"],
+  ["youtube", "YouTube"],
+];
 
-export function Footer({
-  facts,
-  showSocial,
-  showCredit,
-  reportUrl,
-}: {
-  facts: CompanyFacts;
-  showSocial: boolean;
-  showCredit: boolean;
-  reportUrl: string | null;
-}) {
-  const social = showSocial
-    ? (Object.entries(facts.social_links) as [SocialNetwork, string][])
+export function Footer() {
+  const { facts, site, document } = useSite();
+  const social = document.footer.show_social
+    ? NETWORKS.flatMap(([key, label]) => {
+        const href = safeUrl(facts.social_links[key]);
+        return href ? [{ href, label }] : [];
+      })
     : [];
+  const report = `mailto:abuse@bomahut.com?subject=${encodeURIComponent(`Report site: ${site.address}`)}`;
 
   return (
-    <footer className="bg-footer text-[14.5px] text-footer-ink">
-      <Container className="flex flex-wrap justify-between gap-x-10 gap-y-6 py-9">
+    <footer className="ft">
+      <div className="in">
         <div>
-          <p className="font-display text-[17px] font-semibold text-white">
-            {facts.display_name}
-          </p>
-          {facts.office_address ? (
-            <address className="mt-1 not-italic">{facts.office_address}</address>
-          ) : null}
+          <b>{facts.name}</b>
+          {facts.office_address ? <span>{facts.office_address}</span> : null}
         </div>
-
         <div>
-          <p>
-            <a href={telHref(facts.phone)} className="hover:text-white">
-              {facts.phone}
+          {facts.phone ? <a href={telHref(facts.phone)}>{facts.phone}</a> : null}
+          {facts.email ? <a href={`mailto:${facts.email}`}>{facts.email}</a> : null}
+        </div>
+        {social.length ? (
+          <div>
+            {social.map((link) => (
+              <a key={link.label} href={link.href} target="_blank" rel="noreferrer noopener">
+                {link.label}
+              </a>
+            ))}
+          </div>
+        ) : null}
+        <div className="small">
+          {site.show_credit ? (
+            <a href="https://bomahut.com" target="_blank" rel="noreferrer noopener">
+              Website by Bomahut
             </a>
-          </p>
-          {facts.email ? (
-            <p>
-              <a href={`mailto:${facts.email}`} className="hover:text-white">
-                {facts.email}
-              </a>
-            </p>
           ) : null}
-          {social.length > 0 ? (
-            <ul className="mt-2 flex flex-wrap gap-4">
-              {social.map(([network, href]) => (
-                <li key={network}>
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    className="hover:text-white"
-                  >
-                    {SOCIAL_LABELS[network]}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          ) : null}
+          <a href={report}>Report this site</a>
         </div>
-
-        <div>
-          {showCredit ? (
-            <p>
-              <a
-                href="https://www.bomahut.com"
-                target="_blank"
-                rel="noreferrer noopener"
-                className="hover:text-white"
-              >
-                Website by Bomahut
-              </a>
-            </p>
-          ) : null}
-          {reportUrl ? (
-            <p>
-              <a
-                href={reportUrl}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="hover:text-white"
-              >
-                Report this site
-              </a>
-            </p>
-          ) : null}
-        </div>
-      </Container>
+      </div>
     </footer>
   );
 }
