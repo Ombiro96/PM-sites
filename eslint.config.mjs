@@ -1,10 +1,19 @@
-import coreWebVitals from "eslint-config-next/core-web-vitals";
-import typescript from "eslint-config-next/typescript";
+import js from "@eslint/js";
+import reactHooks from "eslint-plugin-react-hooks";
+import globals from "globals";
+import tseslint from "typescript-eslint";
 
-const eslintConfig = [
-  ...coreWebVitals,
-  ...typescript,
-  { ignores: [".next/**", "node_modules/**", "next-env.d.ts"] },
-];
-
-export default eslintConfig;
+export default tseslint.config(
+  { ignores: ["dist/**", "node_modules/**"] },
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  {
+    files: ["**/*.{ts,tsx}"],
+    languageOptions: { globals: globals.browser },
+    plugins: { "react-hooks": reactHooks },
+    rules: {
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
+    },
+  },
+);
