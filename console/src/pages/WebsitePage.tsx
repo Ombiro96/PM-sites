@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { navigate } from "@/lib/router";
 import logo from "../assets/bomahut.svg";
-import { TextLink } from "../components/AuthLayout";
+import { Chevron } from "../components/Chevron";
 import { FormError, SubmitButton } from "../components/fields";
 import { SitePreview } from "../components/SitePreview";
 import { useAuth } from "../lib/auth";
@@ -277,11 +277,20 @@ export function WebsitePage({ user }: { user: User }) {
           ) : null}
           <div className="mt-8 flex items-center gap-5">
             {current > 0 ? (
-              <TextLink href={pathOf(STEPS[current - 1].key)}>Back</TextLink>
+              <a
+                href={pathOf(STEPS[current - 1].key)}
+                className="border-brand text-brand hover:bg-brand-soft flex items-center gap-1.5 rounded-lg border bg-white py-3 pr-5 pl-3.5 font-semibold"
+              >
+                <Chevron direction="left" />
+                Back
+              </a>
             ) : null}
             {isLast ? null : (
               <div className="ml-auto w-44">
-                <SubmitButton busy={busy}>Continue</SubmitButton>
+                <SubmitButton busy={busy}>
+                  Continue
+                  <Chevron direction="right" />
+                </SubmitButton>
               </div>
             )}
           </div>

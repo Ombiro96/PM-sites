@@ -141,7 +141,7 @@ export function SubmitButton({
     <button
       type="submit"
       disabled={busy || disabled}
-      className="bg-brand hover:bg-brand-deep w-full rounded-lg px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+      className="bg-brand hover:bg-brand-deep flex w-full items-center justify-center gap-1.5 rounded-lg px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
     >
       {busy ? "Please wait…" : children}
     </button>
