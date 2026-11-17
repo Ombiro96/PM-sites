@@ -1,4 +1,5 @@
 import { API_BASE } from "./config";
+import { whileLoading } from "./loading";
 import { readToken } from "./token";
 
 const TIMEOUT_MS = 20000;
@@ -8,7 +9,7 @@ export const NOT_SIGNED_IN = "You must be logged in to perform this action";
 
 export class ApiError extends Error {}
 
-async function send(path: string, body: unknown): Promise<unknown> {
+async function request(path: string, body: unknown): Promise<unknown> {
   const token = readToken();
   let response: Response;
   try {
@@ -29,6 +30,11 @@ async function send(path: string, body: unknown): Promise<unknown> {
   return parsed;
 }
 
+/** Every backend call goes through here. Unless `quiet`, the loading indicator shows until it answers. */
+function send(path: string, body: unknown, quiet = false): Promise<unknown> {
+  return quiet ? request(path, body) : whileLoading(() => request(path, body));
+}
+
 /** Runs one GraphQL document and returns its `data`. A refusal from the server is thrown. */
 export async function graphql<Data>(
   query: string,
@@ -44,6 +50,10 @@ export async function graphql<Data>(
   return result.data;
 }
 
-export async function post<Data>(path: string, body: unknown): Promise<Data> {
-  return (await send(path, body)) as Data;
+export async function post<Data>(
+  path: string,
+  body: unknown,
+  { quiet = false } = {},
+): Promise<Data> {
+  return (await send(path, body, quiet)) as Data;
 }

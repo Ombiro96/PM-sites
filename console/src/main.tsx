@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { startRouter } from "@/lib/router";
 import { App } from "./App";
+import { LoadingIndicator } from "./components/LoadingIndicator";
 import { AuthProvider } from "./lib/auth";
 import "./styles.css";
 
@@ -12,6 +13,7 @@ if (container) {
     <StrictMode>
       <AuthProvider>
         <App />
+        <LoadingIndicator />
       </AuthProvider>
     </StrictMode>,
   );

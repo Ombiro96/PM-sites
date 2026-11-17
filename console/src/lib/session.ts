@@ -163,8 +163,11 @@ export async function fetchUser(): Promise<User> {
 }
 
 export async function usernameAvailable(username: string): Promise<boolean> {
-  const data = await post<{ available?: boolean }>("/api/auth/check-username", {
-    username,
-  });
+  // Asked while the person carries on filling in the form, so it does not cover the page.
+  const data = await post<{ available?: boolean }>(
+    "/api/auth/check-username",
+    { username },
+    { quiet: true },
+  );
   return data.available !== false;
 }
