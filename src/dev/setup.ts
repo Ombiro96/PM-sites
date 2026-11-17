@@ -29,7 +29,8 @@ export function devSite(): SiteData {
   const look = params.get("look") as Look | null;
   const colour = params.get("colour");
   const listings = params.get("listings") ?? (onTestPage ? "sample" : null);
-  if (listings) setFetcher(mockFetcher(listings));
+  const agency = import.meta.env.VITE_DEV_AGENCY ?? base.api.agency;
+  if (listings) setFetcher(mockFetcher(listings, agency));
 
   return {
     ...base,
@@ -45,7 +46,7 @@ export function devSite(): SiteData {
       base: listings
         ? "http://mock.local/api"
         : (import.meta.env.VITE_DEV_API_BASE ?? "").replace(/\/+$/, ""),
-      agency: import.meta.env.VITE_DEV_AGENCY ?? base.api.agency,
+      agency,
     },
   };
 }

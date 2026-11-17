@@ -74,6 +74,7 @@ function house(
     location: area,
     landmark: "",
     property,
+    agency: { name: "", slug: "" },
   };
 }
 
@@ -217,12 +218,69 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
-export function mockFetcher(set: string) {
-  const houses = SETS[set] ?? TEMBO;
+function overview(houses: HouseCard[], size: number) {
+  const rents = houses.map((item) => Number(item.rent_amount));
+  const types = new Map(
+    houses.map((item) => [item.category, item.category_label]),
+  );
+  const areas = new Map(
+    houses.map((item) => [item.location.id, item.location.name]),
+  );
+  const counts = new Map<string, number>();
+  for (const item of houses)
+    counts.set(item.property.id, (counts.get(item.property.id) ?? 0) + 1);
+  // One more than the houses show: a building that is full today is still advertised.
+  const advertised = houses.length
+    ? [...new Map(houses.map((item) => [item.property.id, item])).values()].map(
+        (item) => ({
+          ...item.property,
+          location: item.location,
+          cover: item.cover,
+          unit_types_to_let: counts.get(item.property.id) ?? 0,
+        }),
+      )
+    : [];
+  if (advertised.length)
+    advertised.push({
+      id: "00000000-0000-4000-8000-0000000000b9",
+      name: "Jacaranda House",
+      short_code: "jac1",
+      location: KILIMANI,
+      cover: { url: skyline, small_url: skyline },
+      unit_types_to_let: 0,
+    });
+  return {
+    listings: {
+      count: houses.length,
+      page: 1,
+      page_size: size,
+      num_pages: Math.max(1, Math.ceil(houses.length / size)),
+      results: houses.slice(0, size),
+    },
+    buildings: advertised,
+    filters: {
+      categories: [...types].map(([value, label]) => ({ value, label })),
+      locations: [...areas].map(([id, name]) => ({ id, name })),
+      lowest_rent: rents.length ? `${Math.min(...rents)}.00` : null,
+      highest_rent: rents.length ? `${Math.max(...rents)}.00` : null,
+    },
+  };
+}
+
+export function mockFetcher(set: string, agency: string) {
+  const houses = (SETS[set] ?? TEMBO).map((item) => ({
+    ...item,
+    agency: { name: agency, slug: agency },
+  }));
   return async (address: string, init?: RequestInit): Promise<Response> => {
     await new Promise((resolve) => setTimeout(resolve, 150));
     const url = new URL(address, "http://mock.local");
     if (init?.method === "POST") return json({ id: "mock" }, 201);
+
+    if (/\/agencies\/[^/]+\/$/.test(url.pathname))
+      return json(
+        overview(houses, Number(url.searchParams.get("page_size")) || 20),
+      );
 
     if (url.pathname.endsWith("/search/")) {
       const params = url.searchParams;

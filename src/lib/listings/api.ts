@@ -1,6 +1,6 @@
 import type { SiteData } from "@/lib/site/types";
 import type {
-  Building,
+  AgencyOverview,
   HouseCard,
   HouseDetail,
   SearchFilters,
@@ -28,7 +28,13 @@ export function setFetcher(next: Fetcher): void {
   reads.clear();
 }
 
-const reads = new Map<string, Promise<unknown>>();
+/**
+ * How long an answer is reused. Houses are let and rents change, so a page
+ * opened again after this asks afresh; the backend caches for the same time.
+ */
+export const FRESH_FOR_MS = 60_000;
+
+const reads = new Map<string, { at: number; request: Promise<unknown> }>();
 const idsByShortCode = new Map<string, string>();
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -44,10 +50,14 @@ async function detailOf(response: Response): Promise<string> {
   return "";
 }
 
-/** One GET per address; a failed read is forgotten so the next visit tries again. */
+/**
+ * One GET per address while its answer is fresh, so sections drawn together
+ * share it. A failed read is forgotten so the next visit tries again.
+ */
 function read<T>(url: string): Promise<T> {
   const known = reads.get(url);
-  if (known) return known as Promise<T>;
+  if (known && Date.now() - known.at < FRESH_FOR_MS)
+    return known.request as Promise<T>;
   const request = fetcher(url, { credentials: "omit" })
     .then(async (response) => {
       if (!response.ok)
@@ -58,7 +68,7 @@ function read<T>(url: string): Promise<T> {
       reads.delete(url);
       throw error instanceof ApiError ? error : new ApiError(0);
     });
-  reads.set(url, request);
+  reads.set(url, { at: Date.now(), request });
   return request;
 }
 
@@ -116,6 +126,8 @@ export async function getHouse(
     `${api.base}/listings/v1/unit-types/${encodeURIComponent(id)}/`,
   );
   if (!house || typeof house.id !== "string") throw new ApiError(0);
+  // The backend finds any company's house by id; this site shows only its own.
+  if (!api.agency || house.agency?.slug !== api.agency) throw new ApiError(404);
   remember(house.other_unit_types ?? []);
   return house;
 }
@@ -124,25 +136,44 @@ export function housePath(house: Pick<HouseCard, "id" | "short_code">): string {
   return `/houses/${encodeURIComponent(house.short_code || house.id)}`;
 }
 
-/** The buildings behind a set of houses, in the order they first appear. */
-export function buildingsOf(houses: HouseCard[]): Building[] {
-  const buildings = new Map<string, Building>();
-  for (const house of houses) {
-    const known = buildings.get(house.property.id);
-    if (known) {
-      known.houseTypes += 1;
-      known.cover = known.cover ?? house.cover;
-    } else {
-      buildings.set(house.property.id, {
-        id: house.property.id,
-        name: house.property.name,
-        area: house.location.full_name || house.location.name,
-        cover: house.cover,
-        houseTypes: 1,
-      });
-    }
+const NOTHING: AgencyOverview = {
+  listings: { count: 0, page: 1, page_size: 0, num_pages: 1, results: [] },
+  buildings: [],
+  filters: {
+    categories: [],
+    locations: [],
+    lowest_rent: null,
+    highest_rent: null,
+  },
+};
+
+/**
+ * The company's first houses to let, every building it advertises and the
+ * choices its filters offer. A company that is not advertising has nothing,
+ * which is different from the backend being out of reach.
+ */
+export async function getAgencyOverview(
+  api: Api,
+  pageSize: number,
+): Promise<AgencyOverview> {
+  if (!api.base || !api.agency) throw new ApiError(0);
+  let overview: AgencyOverview;
+  try {
+    overview = await read<AgencyOverview>(
+      `${api.base}/listings/v1/agencies/${encodeURIComponent(api.agency)}/?page_size=${pageSize}`,
+    );
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return NOTHING;
+    throw error;
   }
-  return [...buildings.values()];
+  if (!overview || !Array.isArray(overview.listings?.results))
+    throw new ApiError(0);
+  remember(overview.listings.results);
+  return {
+    listings: overview.listings,
+    buildings: Array.isArray(overview.buildings) ? overview.buildings : [],
+    filters: { ...NOTHING.filters, ...overview.filters },
+  };
 }
 
 export type PostResult = { ok: true } | { ok: false; message: string };

@@ -98,8 +98,7 @@ export function LeadForm({ kind }: { kind: Kind }) {
     return (
       <div className="formcard">
         <Sent title={kind === "message" ? "Message sent" : "Request sent"}>
-          Thank you. {site.facts.name} has your details and will get back to
-          you.
+          Thank you. {site.facts.name} has received your details.
         </Sent>
       </div>
     );

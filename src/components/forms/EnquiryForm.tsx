@@ -77,7 +77,7 @@ export function EnquiryForm({
   if (state === "sent") {
     return (
       <Sent title="Enquiry sent">
-        Thank you. {site.facts.name} has your details and will get back to you.
+        Thank you. {site.facts.name} has received your details.
       </Sent>
     );
   }

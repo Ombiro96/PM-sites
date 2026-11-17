@@ -100,7 +100,7 @@ export function App({
         <div className={hasBar ? "site has-mbar" : "site"}>
           {site.site.preview ? (
             <div className="preview-note">
-              Preview. This page is not public.
+              Unpublished preview. Anyone with this link can view it.
             </div>
           ) : null}
           <Header pathname={pathname} over={headerOverlays(visible, site)} />

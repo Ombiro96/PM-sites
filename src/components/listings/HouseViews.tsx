@@ -121,8 +121,12 @@ export function BuildingCard({
       <div className="b">
         <b style={{ fontSize: 18 }}>{building.name}</b>
         <span className="meta">
-          {building.area} · {building.houseTypes}{" "}
-          {building.houseTypes === 1 ? words.one : words.many} to let
+          {building.location.full_name || building.location.name}
+          {building.unit_types_to_let > 0
+            ? ` · ${building.unit_types_to_let} ${
+                building.unit_types_to_let === 1 ? words.one : words.many
+              } to let`
+            : ""}
         </span>
       </div>
     </article>

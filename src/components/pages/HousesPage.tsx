@@ -6,7 +6,7 @@ import { searchHouses } from "@/lib/listings/api";
 import { useListings } from "@/lib/listings/context";
 import { money } from "@/lib/listings/format";
 import type {
-  HouseCard,
+  FilterChoices,
   SearchFilters,
   SearchResult,
 } from "@/lib/listings/types";
@@ -70,32 +70,30 @@ function filtersHref(filters: Filters): string {
   return query ? `${HOUSES_PATH}?${query}` : HOUSES_PATH;
 }
 
-/** The choices each filter offers, taken from what this manager actually has to let. */
-function options(houses: HouseCard[] | null) {
-  if (!houses || houses.length === 0)
+/** The choices each filter offers, from everything this manager has to let. */
+function options(choices: FilterChoices | null) {
+  if (!choices || choices.categories.length === 0)
     return {
       types: FALLBACK_TYPES,
       areas: [] as [string, string][],
       rents: RENT_STEPS,
     };
-  const types = new Map<string, string>();
-  const areas = new Map<string, string>();
-  const rents = houses
-    .map((house) => Number(house.rent_amount))
-    .filter((rent) => rent > 0);
-  for (const house of houses) {
-    types.set(house.category, house.category_label);
-    areas.set(house.location.id, house.location.name);
-  }
-  const lowest = Math.min(...rents);
-  const highest = Math.max(...rents);
+  const lowest = Number(choices.lowest_rent);
+  const highest = Number(choices.highest_rent);
   const top = RENT_STEPS.find((step) => step >= highest) ?? Infinity;
   return {
-    types: FALLBACK_TYPES.filter(([value]) => types.has(value)),
-    areas: [...areas.entries()].sort((a, b) => a[1].localeCompare(b[1])),
-    rents: rents.length
-      ? RENT_STEPS.filter((step) => step >= lowest && step <= top)
-      : RENT_STEPS,
+    types: choices.categories.map(({ value, label }): [string, string] => [
+      value,
+      label,
+    ]),
+    areas: choices.locations.map(({ id, name }): [string, string] => [
+      id,
+      name,
+    ]),
+    rents:
+      lowest > 0 && highest > 0
+        ? RENT_STEPS.filter((step) => step >= lowest && step <= top)
+        : RENT_STEPS,
   };
 }
 
@@ -148,7 +146,7 @@ export function HousesPage({ search }: { search: string }) {
         { replace: true, keepScroll: true },
       );
 
-  const choices = options(summary.status === "ready" ? summary.houses : null);
+  const choices = options(summary.status === "ready" ? summary.filters : null);
   const filtered = Boolean(filters.type || filters.max_rent || filters.area);
   const nothingToLet = summary.status === "ready" && summary.count === 0;
   const call = resolveAction({ kind: "call" }, "Call us", context);
@@ -262,7 +260,7 @@ export function HousesPage({ search }: { search: string }) {
             <span className="meta">
               {filtered
                 ? "Try a different area, type or rent."
-                : "Everything is let at the moment. Contact us and we will tell you when something comes up."}
+                : "Nothing is advertised at the moment. Contact us and we will tell you when something comes up."}
             </span>
             <div className="row">
               {filtered ? (

@@ -35,6 +35,8 @@ export type HouseCard = {
   location: ListingLocation;
   landmark: string;
   property: { id: string; name: string; short_code: string | null };
+  /** The company advertising the house. A site shows only its own company's houses. */
+  agency: { name: string; slug: string };
 };
 
 export type ListingMedia = {
@@ -84,11 +86,27 @@ export type SearchFilters = {
   page_size?: number;
 };
 
-/** A building, as far as the listings of its house types describe it. */
+/** A building the company advertises, whether or not it has a house to let today. */
 export type Building = {
   id: string;
+  short_code: string | null;
   name: string;
-  area: string;
+  location: ListingLocation;
   cover: ListingCover | null;
-  houseTypes: number;
+  unit_types_to_let: number;
+};
+
+/** The choices the filters offer, from everything the company has to let, not one page of it. */
+export type FilterChoices = {
+  categories: { value: string; label: string }[];
+  locations: { id: string; name: string }[];
+  lowest_rent: string | null;
+  highest_rent: string | null;
+};
+
+/** The company's answer: a first page of its houses, all its buildings and its filter choices. */
+export type AgencyOverview = {
+  listings: SearchResult;
+  buildings: Building[];
+  filters: FilterChoices;
 };

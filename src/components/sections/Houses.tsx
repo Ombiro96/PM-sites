@@ -6,7 +6,6 @@ import {
   HouseListRow,
 } from "@/components/listings/HouseViews";
 import { ActionLink, SectionShell } from "@/components/ui";
-import { buildingsOf } from "@/lib/listings/api";
 import { useListings } from "@/lib/listings/context";
 import { resolveAction, useActionContext, useSite } from "@/lib/site/context";
 import { HOUSES_PATH, houseWords } from "@/lib/site/pages";
@@ -87,12 +86,12 @@ export function Houses({ section }: { section: HousesSection }) {
   );
 }
 
-/** Buildings with a public advert, taken from the same live feed. Drawn only when there are some. */
+/** Buildings with a public advert, full or not, from the live feed. Drawn only when there are some. */
 export function Buildings({ section }: { section: BuildingsSection }) {
   const listings = useListings();
   const words = houseWords(useSite().site.look);
   if (listings.status !== "ready") return null;
-  const buildings = buildingsOf(listings.houses).slice(
+  const buildings = listings.buildings.slice(
     0,
     section.fields.show === 6 ? 6 : 3,
   );
