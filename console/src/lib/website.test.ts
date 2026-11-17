@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { parseSiteData } from "@/lib/site/data";
-import { companyNameError, companyPhoneError } from "./company";
+import {
+  companyNameError,
+  companyPhoneError,
+  companyWhatsappError,
+} from "./company";
 import { exampleSite } from "./preview";
 import { brandColourError, parseWebsite } from "./website";
 
@@ -40,6 +44,13 @@ describe("the company details", () => {
     expect(companyNameError("ABC Properties")).toBeUndefined();
     expect(companyPhoneError("")).toBeDefined();
     expect(companyPhoneError("0712 345 678")).toBeUndefined();
+    expect(companyPhoneError("+254-712345678")).toBeUndefined();
+  });
+
+  it("refuse a number from the phone input that is too short", () => {
+    expect(companyPhoneError("+254-7123")).toBeDefined();
+    expect(companyWhatsappError("+254-7123")).toBeDefined();
+    expect(companyWhatsappError("")).toBeUndefined();
   });
 });
 

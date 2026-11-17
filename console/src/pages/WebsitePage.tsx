@@ -8,6 +8,7 @@ import { useAuth } from "../lib/auth";
 import {
   companyNameError,
   companyPhoneError,
+  companyWhatsappError,
   readCompany,
   saveCompany,
   type Company,
@@ -161,6 +162,7 @@ export function WebsitePage({ user }: { user: User }) {
         const found: CompanyErrors = {
           displayName: companyNameError(company.displayName),
           phone: companyPhoneError(company.phone),
+          whatsappNumber: companyWhatsappError(company.whatsappNumber),
         };
         setErrors(found);
         if (Object.values(found).some(Boolean)) return;

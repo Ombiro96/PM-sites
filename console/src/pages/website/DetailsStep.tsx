@@ -1,11 +1,8 @@
 import { ChoiceCard } from "../../components/ChoiceCard";
-import { TextField } from "../../components/fields";
-import {
-  COMPANY_NAME_MAX,
-  COMPANY_PHONE_MAX,
-  type Company,
-} from "../../lib/company";
+import { PhoneField, TextField } from "../../components/fields";
+import { COMPANY_NAME_MAX, type Company } from "../../lib/company";
 import { AUDIENCE_DETAILS } from "../../lib/looks";
+import { phoneForInput, phoneFromInput } from "../../lib/validation";
 import { AUDIENCES, type Audience } from "../../lib/website";
 
 export type CompanyErrors = Partial<Record<keyof Company, string>>;
@@ -34,25 +31,24 @@ export function DetailsStep({
         error={errors.displayName}
         onChange={(event) => onCompany({ displayName: event.target.value })}
       />
-      <TextField
+      <PhoneField
         id="company-phone"
         label="Phone number"
-        type="tel"
-        autoComplete="tel"
-        maxLength={COMPANY_PHONE_MAX}
-        value={company.phone}
+        value={phoneForInput(company.phone)}
         error={errors.phone}
-        onChange={(event) => onCompany({ phone: event.target.value })}
+        onChange={(value, dialCode) =>
+          onCompany({ phone: phoneFromInput(value, dialCode) })
+        }
       />
-      <TextField
+      <PhoneField
         id="company-whatsapp"
         label="WhatsApp number"
-        type="tel"
         hint="Optional. Visitors get a WhatsApp button when you give one."
-        maxLength={COMPANY_PHONE_MAX}
-        value={company.whatsappNumber}
+        value={phoneForInput(company.whatsappNumber)}
         error={errors.whatsappNumber}
-        onChange={(event) => onCompany({ whatsappNumber: event.target.value })}
+        onChange={(value, dialCode) =>
+          onCompany({ whatsappNumber: phoneFromInput(value, dialCode) })
+        }
       />
       <fieldset className="mt-6">
         <legend className="mb-2.5 text-sm font-medium">

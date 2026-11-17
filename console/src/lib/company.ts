@@ -1,4 +1,5 @@
 import { graphql } from "./api";
+import { storedPhoneError } from "./validation";
 
 /** The company details the public sees, kept on the account's agency profile. */
 export type Company = {
@@ -8,7 +9,6 @@ export type Company = {
 };
 
 export const COMPANY_NAME_MAX = 100;
-export const COMPANY_PHONE_MAX = 20;
 
 type Saved = { ok: true; company: Company } | { ok: false; message: string };
 
@@ -62,7 +62,14 @@ export function companyNameError(value: string): string | undefined {
   return undefined;
 }
 
+/** A number typed into the dashboard's plain box is left as it is; one from the phone input is checked. */
+const FROM_PHONE_INPUT = /^\+\d*-\d*$/;
+
 export function companyPhoneError(value: string): string | undefined {
   if (value.trim() === "") return "Add the phone number the public will see.";
-  return undefined;
+  return companyWhatsappError(value);
+}
+
+export function companyWhatsappError(value: string): string | undefined {
+  return FROM_PHONE_INPUT.test(value) ? storedPhoneError(value) : undefined;
 }

@@ -48,6 +48,27 @@ export function phoneError(
   return undefined;
 }
 
+/** What the phone input holds, as the number to store; empty until a number follows the country code. */
+export function phoneFromInput(value: string, dialCode: string): string {
+  const number = value.slice(dialCode.length);
+  return number === "" ? "" : formatPhone(dialCode, number);
+}
+
+/**
+ * A stored number as the phone input should show it. One typed elsewhere as a
+ * local number (0712 345 678) is shown as Kenyan, the way the site dials it.
+ */
+export function phoneForInput(stored: string): string {
+  if (stored.startsWith("+")) return stored;
+  return stored.replace(/\D/g, "").replace(/^0/, "254");
+}
+
+/** Checks a number already in the stored form, such as +254-712345678. */
+export function storedPhoneError(value: string): string | undefined {
+  const [code, number = ""] = value.replace(/^\+/, "").split("-");
+  return phoneError(code, number);
+}
+
 type LoginErrors =
   | string
   | {

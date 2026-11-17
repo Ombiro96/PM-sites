@@ -6,6 +6,8 @@ import {
   loginErrorMessage,
   passwordError,
   phoneError,
+  phoneForInput,
+  phoneFromInput,
   usernameError,
 } from "./validation";
 
@@ -30,6 +32,17 @@ describe("sign-up checks", () => {
   it("sends the phone number as country code, dash, number without its zero", () => {
     expect(formatPhone("+254", "0712 345 678")).toBe("+254-712345678");
     expect(formatPhone("254", "712345678")).toBe("+254-712345678");
+  });
+
+  it("stores nothing until a number follows the country code", () => {
+    expect(phoneFromInput("254", "254")).toBe("");
+    expect(phoneFromInput("2540712345678", "254")).toBe("+254-712345678");
+  });
+
+  it("shows a local number saved elsewhere as a Kenyan one", () => {
+    expect(phoneForInput("0712 345 678")).toBe("254712345678");
+    expect(phoneForInput("+1-2025550123")).toBe("+1-2025550123");
+    expect(phoneForInput("")).toBe("");
   });
 
   it("refuses a phone number that is too short or has no country code", () => {
