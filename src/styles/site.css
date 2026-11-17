@@ -324,8 +324,11 @@ body {
   background: none;
   border: 1.5px solid currentColor;
   border-radius: var(--rb);
-  padding: 6px 13px;
+  padding: 6px 8px;
   cursor: pointer;
+}
+.menu-btn svg {
+  display: block;
 }
 .menu {
   display: none;
