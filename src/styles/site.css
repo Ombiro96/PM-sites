@@ -1,5 +1,7 @@
 @import "./fonts.css";
 @import "tailwindcss";
+/* The console in `console/` is a separate app with its own stylesheet. */
+@source not "../../console";
 
 /*
  * A site's look is a class on <html> (`look-classic`) plus the brand colours
@@ -322,8 +324,11 @@ body {
   background: none;
   border: 1.5px solid currentColor;
   border-radius: var(--rb);
-  padding: 6px 13px;
+  padding: 6px 8px;
   cursor: pointer;
+}
+.menu-btn svg {
+  display: block;
 }
 .menu {
   display: none;
