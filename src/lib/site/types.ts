@@ -4,7 +4,23 @@
  * so a stored document can be passed straight through.
  */
 
-export type Look = "fresh" | "classic" | "bold" | "coast" | "estate" | "plain";
+export type Look =
+  | "fresh"
+  | "classic"
+  | "bold"
+  | "coast"
+  | "estate"
+  | "plain"
+  | "midnight"
+  | "studio"
+  | "parchment"
+  | "lab"
+  | "moss"
+  | "dusk"
+  | "gallery"
+  | "catalogue"
+  | "neon"
+  | "collage";
 export type PageKind = "home" | "owners" | "about" | "contact";
 export type Background = "white" | "tinted" | "brand";
 

@@ -1765,6 +1765,614 @@ body {
   grid-template-columns: repeat(2, 1fr);
 }
 
+/* ---- shared by the dark looks after Estate ---- */
+.look-midnight .hd,
+.look-moss .hd,
+.look-dusk .hd,
+.look-neon .hd {
+  border-bottom: 1px solid var(--rule);
+}
+.look-midnight .ft,
+.look-moss .ft,
+.look-dusk .ft,
+.look-neon .ft {
+  border-top: 1px solid var(--rule);
+}
+.look-midnight .chip.inline,
+.look-moss .chip.inline,
+.look-dusk .chip.inline,
+.look-neon .chip.inline {
+  background: transparent;
+  color: var(--ink);
+}
+.look-midnight .chip.inline b,
+.look-moss .chip.inline b,
+.look-dusk .chip.inline b,
+.look-neon .chip.inline b {
+  color: var(--brand-text);
+}
+
+/* ---- look: Midnight (dark) ---- */
+.look-midnight {
+  color-scheme: dark;
+  --page: #0b0c0e;
+  --tintbg: #111215;
+  --ink: #f4f5f7;
+  --soft: #9a9fa9;
+  --rule: #24262b;
+  --card: #131417;
+  --cink: #f4f5f7;
+  --csoft: #9a9fa9;
+  --crule: #24262b;
+  --field-rule: #3a3d44;
+  --bad: #ff8f84;
+  --disp: "Inter", system-ui, sans-serif;
+  --body: "Inter", system-ui, sans-serif;
+  --hw: 500;
+  --r: 12px;
+  --rb: 7px;
+  --pad: 80px;
+  --deep: var(--brand);
+  --hbg: #0b0c0e;
+  --hfg: #f4f5f7;
+}
+.look-midnight .site h1 {
+  font-size: clamp(36px, 6.4vw, 68px);
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+}
+.look-midnight .site h1.ltitle {
+  font-size: clamp(28px, 4.2vw, 46px);
+}
+.look-midnight .site h2 {
+  letter-spacing: -0.02em;
+}
+.look-midnight .eyebrow {
+  display: block;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  font-size: 13.5px;
+  color: var(--soft);
+}
+.look-midnight .btn {
+  font-weight: 500;
+  font-size: 14.5px;
+}
+.look-midnight .ft {
+  background: #08090a;
+}
+
+/* ---- look: Studio ---- */
+.look-studio {
+  --tintbg: #f3f3f6;
+  --ink: #0c0d10;
+  --soft: #5f636b;
+  --rule: #dcdde3;
+  --cink: #0c0d10;
+  --csoft: #5f636b;
+  --crule: #dcdde3;
+  --disp: "Space Grotesk", system-ui, sans-serif;
+  --body: "Inter", system-ui, sans-serif;
+  --hw: 500;
+  --r: 12px;
+  --rb: 12px;
+  --pad: 76px;
+  --hfg: #0c0d10;
+}
+.look-studio .site h1 {
+  font-size: clamp(36px, 6.6vw, 70px);
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+.look-studio .site h1.ltitle {
+  font-size: clamp(28px, 4.4vw, 48px);
+}
+.look-studio .site h2 {
+  letter-spacing: -0.025em;
+}
+.look-studio .btn {
+  font-weight: 600;
+}
+.look-studio .ft {
+  background: #0c0d10;
+}
+
+/* ---- look: Parchment ---- */
+.look-parchment {
+  --page: #faf8f3;
+  --tintbg: #f1ede5;
+  --ink: #1a1814;
+  --soft: #5d5a52;
+  --rule: #dedad2;
+  --cink: #1a1814;
+  --csoft: #5d5a52;
+  --crule: #dedad2;
+  --field-rule: #bdb8ad;
+  --disp: "Newsreader", Georgia, serif;
+  --body: "DM Sans", system-ui, sans-serif;
+  --hw: 400;
+  --r: 4px;
+  --rb: 4px;
+  --pad: 80px;
+  --hbg: #faf8f3;
+  --hfg: #1a1814;
+}
+.look-parchment .site h1 {
+  font-size: clamp(38px, 7vw, 78px);
+  letter-spacing: -0.025em;
+  line-height: 1;
+}
+.look-parchment .site h1.ltitle {
+  font-size: clamp(30px, 4.6vw, 52px);
+}
+.look-parchment .site h2 {
+  font-size: clamp(28px, 4vw, 44px);
+  letter-spacing: -0.015em;
+}
+.look-parchment .site h3 {
+  font-size: 23px;
+}
+.look-parchment .eyebrow {
+  display: block;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  font-size: 12px;
+}
+.look-parchment .btn {
+  font-weight: 500;
+}
+.look-parchment .quote p {
+  font-style: italic;
+}
+.look-parchment .af input,
+.look-parchment .af textarea,
+.look-parchment .af select {
+  background: #fff;
+}
+
+/* ---- look: Lab ---- */
+.look-lab {
+  --tintbg: #f6f6f6;
+  --ink: #0d0d0d;
+  --soft: #626262;
+  --rule: #e6e6e6;
+  --cink: #0d0d0d;
+  --csoft: #626262;
+  --crule: #e6e6e6;
+  --disp: "Inter", system-ui, sans-serif;
+  --body: "Inter", system-ui, sans-serif;
+  --hw: 400;
+  --r: 16px;
+  --rb: 999px;
+  --pad: 96px;
+  --wide: 980px;
+  --hfg: #0d0d0d;
+}
+.look-lab .site h1 {
+  font-size: clamp(36px, 6vw, 64px);
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+.look-lab .site h1.ltitle {
+  font-size: clamp(28px, 4.2vw, 44px);
+}
+.look-lab .site h2 {
+  letter-spacing: -0.02em;
+}
+.look-lab .site h3 {
+  font-weight: 500;
+}
+.look-lab .hd {
+  border: 0;
+}
+.look-lab .btn {
+  font-weight: 500;
+}
+.look-lab .card {
+  border: 0;
+  background: var(--tintbg);
+}
+.look-lab .bg-tint .card {
+  background: #fff;
+}
+.look-lab .ft {
+  background: #0d0d0d;
+}
+
+/* ---- look: Moss (dark) ---- */
+.look-moss {
+  color-scheme: dark;
+  --page: #10261d;
+  --tintbg: #153226;
+  --ink: #f0f5e9;
+  --soft: #b3c2b0;
+  --rule: #264536;
+  --card: #183a2c;
+  --cink: #f0f5e9;
+  --csoft: #b3c2b0;
+  --crule: #2c5140;
+  --field-rule: #3d6450;
+  --bad: #ffa093;
+  --disp: "Sora", system-ui, sans-serif;
+  --body: "Figtree", system-ui, sans-serif;
+  --hw: 800;
+  --r: 24px;
+  --rb: 999px;
+  --pad: 76px;
+  --deep: var(--brand);
+  --hbg: #10261d;
+  --hfg: #f0f5e9;
+}
+.look-moss .site h1 {
+  font-size: clamp(38px, 7.4vw, 80px);
+  letter-spacing: -0.035em;
+  line-height: 0.98;
+}
+.look-moss .site h1.ltitle {
+  font-size: clamp(30px, 4.6vw, 52px);
+}
+.look-moss .site h2 {
+  letter-spacing: -0.025em;
+}
+.look-moss .site h3 {
+  font-weight: 700;
+}
+.look-moss .eyebrow {
+  display: block;
+}
+.look-moss .card {
+  border: 0;
+}
+.look-moss .formcard,
+.look-moss .aside {
+  border-radius: 24px;
+}
+.look-moss .af input,
+.look-moss .af textarea,
+.look-moss .af select {
+  border-radius: 12px;
+}
+.look-moss .ft {
+  background: #0b1c15;
+}
+
+/* ---- look: Dusk (dark) ---- */
+.look-dusk {
+  color-scheme: dark;
+  --page: #0e1322;
+  --tintbg: #131a2d;
+  --ink: #e9ecf6;
+  --soft: #a3abc2;
+  --rule: #252e47;
+  --card: #161e33;
+  --cink: #e9ecf6;
+  --csoft: #a3abc2;
+  --crule: #252e47;
+  --field-rule: #3a4566;
+  --bad: #ff9c9c;
+  --disp: "Jost", system-ui, sans-serif;
+  --body: "DM Sans", system-ui, sans-serif;
+  --hw: 400;
+  --r: 14px;
+  --rb: 999px;
+  --pad: 88px;
+  --deep: var(--brand);
+  --hbg: #0e1322;
+  --hfg: #e9ecf6;
+}
+.look-dusk .site h1 {
+  font-size: clamp(38px, 6.6vw, 72px);
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+}
+.look-dusk .site h1.ltitle {
+  font-size: clamp(30px, 4.4vw, 50px);
+}
+.look-dusk .site h2 {
+  font-size: clamp(27px, 3.8vw, 42px);
+}
+.look-dusk .site h3 {
+  font-weight: 500;
+}
+.look-dusk .eyebrow {
+  display: block;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  font-size: 12px;
+}
+.look-dusk .btn {
+  font-weight: 500;
+  padding-inline: 24px;
+}
+.look-dusk .hero-photo {
+  min-height: 600px;
+}
+.look-dusk .ft {
+  background: #0a0e1a;
+}
+
+/* ---- look: Gallery ---- */
+.look-gallery {
+  --page: #e9e4d9;
+  --tintbg: #dfd9cb;
+  --ink: #24201a;
+  --soft: #5c564b;
+  --rule: #c9c2b2;
+  --card: #f3efe6;
+  --cink: #24201a;
+  --csoft: #5c564b;
+  --crule: #c9c2b2;
+  --field-rule: #a39b89;
+  --disp: "Cormorant Garamond", Georgia, serif;
+  --body: "Jost", system-ui, sans-serif;
+  --hw: 500;
+  --r: 0px;
+  --rb: 0px;
+  --pad: 88px;
+  --hbg: #e9e4d9;
+  --hfg: #24201a;
+}
+.look-gallery .site h1 {
+  font-size: clamp(44px, 8vw, 96px);
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+}
+.look-gallery .site h1.ltitle {
+  font-size: clamp(34px, 5vw, 58px);
+}
+.look-gallery .site h2 {
+  font-size: clamp(32px, 4.6vw, 52px);
+}
+.look-gallery .site h3 {
+  font-size: 26px;
+}
+.look-gallery .site .blk h2 {
+  font-size: clamp(24px, 2.8vw, 30px);
+}
+.look-gallery .eyebrow {
+  display: block;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  font-size: 12px;
+}
+.look-gallery .logo {
+  font-family: var(--disp);
+  font-weight: 600;
+  font-size: 23px;
+}
+.look-gallery .logo i {
+  display: none;
+}
+.look-gallery .nav {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 13px;
+}
+.look-gallery .btn {
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 13px;
+  padding: 13px 24px;
+}
+.look-gallery .btn.sm {
+  padding: 9px 16px;
+  font-size: 12px;
+}
+.look-gallery .hero-photo {
+  min-height: 620px;
+}
+.look-gallery .fact b,
+.look-gallery .rent,
+.look-gallery .price {
+  font-weight: 500;
+}
+.look-gallery .af input,
+.look-gallery .af textarea,
+.look-gallery .af select {
+  background: #fbf9f4;
+}
+.look-gallery .ft {
+  background: #24201a;
+}
+
+/* ---- look: Catalogue ---- */
+.look-catalogue {
+  --page: #f1f1ee;
+  --tintbg: #e6e6e2;
+  --ink: #111111;
+  --soft: #55554f;
+  --rule: #111111;
+  --cink: #111111;
+  --csoft: #55554f;
+  --crule: #111111;
+  --field-rule: #111111;
+  --disp: "IBM Plex Sans", system-ui, sans-serif;
+  --body: "IBM Plex Sans", system-ui, sans-serif;
+  --hw: 600;
+  --r: 0px;
+  --rb: 0px;
+  --pad: 56px;
+  --hbg: #f1f1ee;
+  --hfg: #111111;
+}
+.look-catalogue .site h1,
+.look-catalogue .site h2 {
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+.look-catalogue .site h1 {
+  font-size: clamp(30px, 5.4vw, 56px);
+  line-height: 1.04;
+}
+.look-catalogue .site h1.ltitle {
+  font-size: clamp(26px, 3.8vw, 40px);
+}
+.look-catalogue .site h2 {
+  font-size: clamp(22px, 3vw, 30px);
+}
+.look-catalogue .eyebrow {
+  display: block;
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  font-size: 12.5px;
+  color: var(--soft);
+}
+.look-catalogue .hd {
+  border-bottom: 1px solid var(--ink);
+}
+.look-catalogue .logo i {
+  border-radius: 0;
+}
+.look-catalogue .nav,
+.look-catalogue .tl,
+.look-catalogue .btn {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 13px;
+}
+.look-catalogue .sec {
+  border-top: 1px solid var(--ink);
+}
+.look-catalogue main > .sec:first-child {
+  border-top: 0;
+}
+.look-catalogue .rent,
+.look-catalogue .price,
+.look-catalogue .fact b {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 500;
+}
+.look-catalogue .areas li {
+  border-radius: 0;
+}
+.look-catalogue .ft {
+  background: #111111;
+}
+
+/* ---- look: Neon (dark) ---- */
+.look-neon {
+  color-scheme: dark;
+  --page: #0c0c11;
+  --tintbg: #121219;
+  --ink: #f5f5fa;
+  --soft: #a0a0b2;
+  --rule: #26262f;
+  --card: #15151d;
+  --cink: #f5f5fa;
+  --csoft: #a0a0b2;
+  --crule: #26262f;
+  --field-rule: #3b3b49;
+  --bad: #ff8fa0;
+  --disp: "Sora", system-ui, sans-serif;
+  --body: "DM Sans", system-ui, sans-serif;
+  --hw: 700;
+  --r: 18px;
+  --rb: 12px;
+  --pad: 80px;
+  --deep: var(--brand);
+  --hbg: #0c0c11;
+  --hfg: #f5f5fa;
+}
+.look-neon .site h1 {
+  font-size: clamp(36px, 6.8vw, 72px);
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+}
+.look-neon .site h1.ltitle {
+  font-size: clamp(28px, 4.4vw, 48px);
+}
+.look-neon .site h2 {
+  letter-spacing: -0.02em;
+}
+.look-neon .eyebrow {
+  display: block;
+}
+.look-neon .sec.bg-tint {
+  background: radial-gradient(
+    60% 90% at 50% 0%,
+    color-mix(in oklab, var(--brand) 18%, var(--tintbg)),
+    var(--tintbg)
+  );
+}
+.look-neon .card,
+.look-neon .formcard {
+  border-color: color-mix(in oklab, var(--brand) 38%, var(--crule));
+  box-shadow: 0 18px 50px -22px
+    color-mix(in oklab, var(--brand) 60%, transparent);
+}
+.look-neon .btn:not(.wa) {
+  box-shadow: 0 0 26px -6px var(--brand);
+}
+.look-neon .ft {
+  background: #08080c;
+}
+
+/* ---- look: Collage ---- */
+.look-collage {
+  --page: #fffcf5;
+  --tintbg: color-mix(in oklab, var(--brand) 12%, #fffcf5);
+  --ink: #1c1a17;
+  --soft: #5b574f;
+  --rule: #d9d3c5;
+  --cink: #1c1a17;
+  --csoft: #5b574f;
+  --crule: #1c1a17;
+  --disp: "Bricolage Grotesque", system-ui, sans-serif;
+  --body: "Figtree", system-ui, sans-serif;
+  --r: 18px;
+  --rb: 14px;
+  --pad: 68px;
+  --hbg: #fffcf5;
+  --hfg: #1c1a17;
+}
+.look-collage .site h1 {
+  font-size: clamp(36px, 6.6vw, 68px);
+  letter-spacing: -0.025em;
+  line-height: 1.02;
+}
+.look-collage .site h1.ltitle {
+  font-size: clamp(28px, 4.4vw, 48px);
+}
+.look-collage .eyebrow {
+  display: inline-block;
+  background: var(--brand);
+  color: var(--on);
+  padding: 3px 11px;
+  border-radius: 99px;
+  rotate: -2deg;
+}
+.look-collage .hd {
+  border-bottom: 2px solid var(--ink);
+}
+.look-collage .card,
+.look-collage .formcard,
+.look-collage .aside {
+  border: 2px solid var(--ink);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+.look-collage .card:nth-child(odd) {
+  rotate: -0.6deg;
+}
+.look-collage .card:nth-child(even) {
+  rotate: 0.6deg;
+}
+.look-collage .btn:not(.wa) {
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.look-collage .areas li {
+  background: #fff;
+  border: 2px solid var(--ink);
+}
+.look-collage .ft {
+  background: #1c1a17;
+}
+
 @media (min-width: 761px) and (max-width: 980px) {
   .grid3 {
     grid-template-columns: 1fr 1fr;
@@ -1867,8 +2475,14 @@ body {
   .hero-center {
     min-height: 460px;
   }
-  .look-estate .hero-photo {
+  .look-estate .hero-photo,
+  .look-dusk .hero-photo,
+  .look-gallery .hero-photo {
     min-height: 520px;
+  }
+  .look-collage .card:nth-child(odd),
+  .look-collage .card:nth-child(even) {
+    rotate: none;
   }
   .pagebanner,
   .look-estate .pagebanner {

@@ -45,9 +45,16 @@ export function backgroundOf(section: Section): Background {
 }
 
 /** Looks that put a page title's picture behind the title. */
-const PHOTO_TITLE_LOOKS: Look[] = ["classic", "coast", "estate"];
+const PHOTO_TITLE_LOOKS: Look[] = [
+  "classic",
+  "coast",
+  "estate",
+  "moss",
+  "dusk",
+  "gallery",
+];
 /** Looks whose header sits on top of a photo banner instead of above it. */
-const OVERLAY_HEADER_LOOKS: Look[] = ["coast", "estate"];
+const OVERLAY_HEADER_LOOKS: Look[] = ["coast", "estate", "dusk", "gallery"];
 
 /** Whether a page's opening section is drawn as a photo with text on top. */
 export function opensWithPhoto(

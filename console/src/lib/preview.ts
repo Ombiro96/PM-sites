@@ -1,11 +1,17 @@
 import { temboHart } from "@/dev/tembo-hart";
-import type { Look, SiteData } from "@/lib/site/types";
+import { STANDARD_SERVICES } from "@/dev/wording";
+import type { Look, SiteData, SiteDocument } from "@/lib/site/types";
 import type { Company } from "./company";
+import type { Picture } from "./site";
 
 /** The page that draws a site inside a frame, and the two messages it trades with the console. */
 export const PREVIEW_PAGE = "/preview.html";
 export const PREVIEW_READY = "preview-ready";
 export const PREVIEW_SITE = "preview-site";
+/** Sent by the frame once the site it was given is on the screen with its fonts. */
+export const PREVIEW_DRAWN = "preview-drawn";
+/** Sent by the frame when a section is clicked while the console is editing. */
+export const PREVIEW_PICK = "preview-pick";
 /** Not a real address: the frame answers listings calls with made-up houses. */
 export const EXAMPLE_API_BASE = "http://mock.local/api";
 
@@ -35,5 +41,61 @@ export function exampleSite({
         }
       : temboHart.facts,
     api: { ...temboHart.api, base: EXAMPLE_API_BASE },
+  };
+}
+
+/**
+ * The manager's own pages, as they stand in the editor. Their name, numbers
+ * and pictures are real. What the backend fills in at publish (houses,
+ * buildings, figures and the other company facts) is not known here, so the
+ * houses are made up and the figures are examples.
+ */
+export function draftSite({
+  id,
+  addressName,
+  look,
+  brandColour,
+  document,
+  company,
+  pictures,
+}: {
+  id: string;
+  addressName: string;
+  look: Look;
+  brandColour: string;
+  document: SiteDocument;
+  company: Company | null;
+  pictures: readonly Picture[];
+}): SiteData {
+  return {
+    version: 1,
+    site: {
+      id,
+      address: addressName,
+      look,
+      brand_colour: brandColour,
+      show_credit: true,
+      preview: true,
+    },
+    facts: {
+      name: company?.displayName || "Your company",
+      logo: "",
+      phone: company?.phone ?? "",
+      whatsapp: company?.whatsappNumber ?? "",
+      email: "",
+      office_address: "",
+      opening_hours: "",
+      latitude: null,
+      longitude: null,
+      social_links: {},
+      areas_served: [],
+    },
+    figures: temboHart.figures,
+    pictures: Object.fromEntries(
+      pictures.map(({ id: asset, url }) => [asset, { small: url, large: url }]),
+    ),
+    wording: { services: STANDARD_SERVICES },
+    document,
+    api: { base: EXAMPLE_API_BASE, agency: addressName },
   };
 }

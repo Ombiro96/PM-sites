@@ -6,7 +6,7 @@ import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
-import { WebsitePage } from "./pages/WebsitePage";
+import { SiteGate } from "./pages/SiteGate";
 
 function Notice({
   children,
@@ -47,8 +47,12 @@ export function App() {
     : "";
   let wanted = path;
   if (resetToken === "") {
-    if (state.status === "signed_in" && !path.startsWith(`${PATHS.website}/`))
-      wanted = `${PATHS.website}/look`;
+    if (
+      state.status === "signed_in" &&
+      !path.startsWith(`${PATHS.website}/`) &&
+      !path.startsWith(`${PATHS.setup}/`)
+    )
+      wanted = `${PATHS.website}/pages`;
     if (state.status === "signed_out" && !signedOutPaths.includes(path))
       wanted = PATHS.login;
   }
@@ -67,7 +71,7 @@ export function App() {
       </Notice>
     );
   if (wanted !== path) return null;
-  if (state.status === "signed_in") return <WebsitePage user={state.user} />;
+  if (state.status === "signed_in") return <SiteGate user={state.user} />;
   if (path === PATHS.register) return <RegisterPage />;
   if (path === PATHS.forgotPassword) return <ForgotPasswordPage />;
   return <LoginPage />;

@@ -2,38 +2,46 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { navigate } from "@/lib/router";
 import logo from "../assets/bomahut.svg";
 import { Chevron } from "../components/Chevron";
-import { FormError, SubmitButton } from "../components/fields";
-import { SitePreview } from "../components/SitePreview";
-import { useAuth } from "../lib/auth";
 import {
-  companyNameError,
-  companyPhoneError,
-  companyWhatsappError,
-  readCompany,
-  saveCompany,
-  type Company,
-} from "../lib/company";
+  companyErrors,
+  hasErrors,
+  NO_COMPANY,
+  trimmedCompany,
+  type CompanyErrors,
+} from "../components/CompanyFields";
+import { FormError, SubmitButton } from "../components/fields";
+import { PreviewPanel } from "../components/PreviewPanel";
+import { useAuth } from "../lib/auth";
+import { readCompany, saveCompany, type Company } from "../lib/company";
 import { PATHS } from "../lib/config";
 import { exampleSite } from "../lib/preview";
 import type { User } from "../lib/session";
-import { readWebsite, saveWebsite, type Website } from "../lib/website";
+import { createSite, setLook, type Site } from "../lib/site";
+import {
+  aboutTextError,
+  clearWebsite,
+  readWebsite,
+  saveWebsite,
+  type Website,
+} from "../lib/website";
+import { AboutStep } from "./website/AboutStep";
 import { ColourStep } from "./website/ColourStep";
-import { DetailsStep, type CompanyErrors } from "./website/DetailsStep";
+import { DetailsStep } from "./website/DetailsStep";
 import { LookStep } from "./website/LookStep";
 import { ReviewStep } from "./website/ReviewStep";
 
 const STEPS = [
   {
     key: "look",
-    label: "Look",
-    title: "Choose a look",
+    label: "Theme",
+    title: "Choose a theme",
     intro:
-      "Each look is a complete design. Pick the one that suits your company; you can change it at any time.",
+      "Each theme is a complete design. Pick the one that suits your company; you can change it at any time.",
   },
   {
     key: "colour",
-    label: "Colour",
-    title: "Choose your colour",
+    label: "Theme colour",
+    title: "Choose your theme colour",
     intro: "Buttons, links and highlights across your website use this colour.",
   },
   {
@@ -43,28 +51,27 @@ const STEPS = [
     intro: "This is what the public sees on your website.",
   },
   {
+    key: "about",
+    label: "About you",
+    title: "Tell us about your company",
+    intro:
+      "We use your answers to write the first draft of your website, so you do not start from an empty page.",
+  },
+  {
     key: "review",
     label: "Review",
     title: "Review your choices",
-    intro: "Check everything below. Each line can still be changed.",
+    intro:
+      "Check everything below. Each line can still be changed, now or after your first draft is written.",
   },
 ] as const;
 
 type StepKey = (typeof STEPS)[number]["key"];
 
-const DEVICES = {
-  desktop: { label: "Computer", width: 1280, height: 800 },
-  phone: { label: "Phone", width: 390, height: 780 },
-} as const;
-
-type Device = keyof typeof DEVICES;
-
-const NO_COMPANY: Company = { displayName: "", phone: "", whatsappNumber: "" };
-
-const pathOf = (step: StepKey) => `${PATHS.website}/${step}`;
+const pathOf = (step: StepKey) => `${PATHS.setup}/${step}`;
 
 function stepAt(pathname: string): number {
-  const key = pathname.slice(PATHS.website.length + 1);
+  const key = pathname.slice(PATHS.setup.length + 1);
   return Math.max(
     STEPS.findIndex((step) => step.key === key),
     0,
@@ -110,7 +117,14 @@ function Steps({ current }: { current: number }) {
   );
 }
 
-export function WebsitePage({ user }: { user: User }) {
+/** The steps a manager goes through once, ending with their first draft. */
+export function SetupPage({
+  user,
+  onCreated,
+}: {
+  user: User;
+  onCreated: (site: Site) => void;
+}) {
   const { signOut } = useAuth();
   const current = stepAt(window.location.pathname);
   const step = STEPS[current];
@@ -120,7 +134,7 @@ export function WebsitePage({ user }: { user: User }) {
   const [loadProblem, setLoadProblem] = useState("");
   const [problem, setProblem] = useState("");
   const [busy, setBusy] = useState(false);
-  const [device, setDevice] = useState<Device>("desktop");
+  const [aboutError, setAboutError] = useState<string>();
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
@@ -159,26 +173,42 @@ export function WebsitePage({ user }: { user: User }) {
     setBusy(true);
     try {
       if (step.key === "details") {
-        const found: CompanyErrors = {
-          displayName: companyNameError(company.displayName),
-          phone: companyPhoneError(company.phone),
-          whatsappNumber: companyWhatsappError(company.whatsappNumber),
-        };
+        const found = companyErrors(company);
         setErrors(found);
-        if (Object.values(found).some(Boolean)) return;
-        const saved = await saveCompany({
-          displayName: company.displayName.trim(),
-          phone: company.phone.trim(),
-          whatsappNumber: company.whatsappNumber.trim(),
-        });
+        if (hasErrors(found)) return;
+        const saved = await saveCompany(trimmedCompany(company));
         if (!saved.ok) {
           setProblem(saved.message);
           return;
         }
         setCompany(saved.company);
       }
+      if (step.key === "about") {
+        const found = aboutTextError(website.answers.about_text);
+        setAboutError(found);
+        if (found) return;
+      }
       await saveWebsite(user.username, website);
-      navigate(pathOf(STEPS[current + 1].key));
+      if (step.key !== "review") {
+        navigate(pathOf(STEPS[current + 1].key));
+        return;
+      }
+      const created = await createSite({
+        audience: website.audience,
+        answers: website.answers,
+      });
+      if (!created.ok) {
+        setProblem(created.message);
+        return;
+      }
+      // The first draft comes in the look the backend picks; the manager's own choice is set straight after.
+      const styled = await setLook({
+        expectedRevision: created.site.draftRevision,
+        look: website.look,
+        brandColour: website.brandColour,
+      });
+      clearWebsite(user.username);
+      onCreated(styled.ok ? styled.site : created.site);
     } catch (error) {
       setProblem(error instanceof Error ? error.message : String(error));
     } finally {
@@ -274,6 +304,20 @@ export function WebsitePage({ user }: { user: User }) {
               onAudience={(audience) => setWebsite({ ...website, audience })}
             />
           ) : null}
+          {step.key === "about" ? (
+            <AboutStep
+              answers={website.answers}
+              audience={website.audience}
+              error={aboutError}
+              onChange={(changes) => {
+                setWebsite({
+                  ...website,
+                  answers: { ...website.answers, ...changes },
+                });
+                setAboutError(undefined);
+              }}
+            />
+          ) : null}
           {step.key === "review" ? (
             <ReviewStep website={website} company={company} pathOf={pathOf} />
           ) : null}
@@ -287,50 +331,18 @@ export function WebsitePage({ user }: { user: User }) {
                 Back
               </a>
             ) : null}
-            {isLast ? null : (
-              <div className="ml-auto w-44">
-                <SubmitButton busy={busy}>
-                  Continue
-                  <Chevron direction="right" />
-                </SubmitButton>
-              </div>
-            )}
-          </div>
-        </form>
-        <section
-          aria-label="Preview"
-          className="lg:sticky lg:top-20 lg:self-start"
-        >
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <p className="text-ink-muted text-sm">
-              An example website in your look and colour.
-            </p>
-            <div className="border-line flex rounded-lg border bg-white p-0.5 text-sm">
-              {(Object.keys(DEVICES) as Device[]).map((each) => (
-                <button
-                  key={each}
-                  type="button"
-                  aria-pressed={each === device}
-                  onClick={() => setDevice(each)}
-                  className={`rounded-md px-3 py-1 font-medium ${each === device ? "bg-brand text-white" : "text-ink-muted"}`}
-                >
-                  {DEVICES[each].label}
-                </button>
-              ))}
+            <div className={`ml-auto ${isLast ? "w-56" : "w-44"}`}>
+              <SubmitButton busy={busy}>
+                {isLast ? "Write my first draft" : "Continue"}
+                {isLast ? null : <Chevron direction="right" />}
+              </SubmitButton>
             </div>
           </div>
-          <div
-            className={`border-line mx-auto overflow-hidden rounded-xl border shadow-lg ${device === "phone" ? "max-w-sm" : ""}`}
-          >
-            <SitePreview
-              site={site}
-              title="Preview of your website"
-              interactive
-              width={DEVICES[device].width}
-              height={DEVICES[device].height}
-            />
-          </div>
-        </section>
+        </form>
+        <PreviewPanel
+          site={site}
+          caption="An example website in your theme and colour."
+        />
       </main>
     </div>
   );

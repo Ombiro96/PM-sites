@@ -14,11 +14,14 @@ export function LookStep({
   brandColour,
   company,
   onChoose,
+  opens = false,
 }: {
   look: Look;
   brandColour: string;
   company: Company | null;
   onChoose: (look: Look) => void;
+  /** In the console a theme opens on the manager's own pages, and there is room for more in a row. */
+  opens?: boolean;
 }) {
   const sites = useMemo(
     () =>
@@ -31,8 +34,10 @@ export function LookStep({
 
   return (
     <fieldset>
-      <legend className="sr-only">Look</legend>
-      <div className="grid grid-cols-2 gap-3.5">
+      <legend className="sr-only">Theme</legend>
+      <div
+        className={`grid gap-3.5 ${opens ? "grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4" : "grid-cols-2"}`}
+      >
         {sites.map(({ look: each, site }) => (
           <ChoiceCard
             key={each}
@@ -42,11 +47,12 @@ export function LookStep({
             onChoose={() => onChoose(each)}
             name={LOOK_DETAILS[each].name}
             summary={LOOK_DETAILS[each].summary}
+            opens={opens}
           >
             <span className="border-line block border-b">
               <SitePreview
                 site={site}
-                title={`${LOOK_DETAILS[each].name} look`}
+                title={`${LOOK_DETAILS[each].name} theme`}
                 {...THUMBNAIL}
               />
             </span>

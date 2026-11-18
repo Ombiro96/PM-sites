@@ -14,6 +14,7 @@ describe("a manager's website choices", () => {
       look: "fresh",
       brandColour: "#1d4e89",
       audience: "tenants",
+      answers: { about_text: "", services: [], show_figures: false },
     };
     expect(parseWebsite(null)).toEqual(fresh);
     expect(parseWebsite("not json")).toEqual(fresh);
@@ -21,13 +22,33 @@ describe("a manager's website choices", () => {
   });
 
   it("keep what was stored and replace only what cannot be used", () => {
-    const stored = { look: "estate", brandColour: "#7a1f2b", audience: "both" };
+    const answers = {
+      about_text: "We let and manage apartments for their owners.",
+      services: ["rent_collection", "repairs"],
+      show_figures: true,
+    };
+    const stored = {
+      look: "estate",
+      brandColour: "#7a1f2b",
+      audience: "both",
+      answers,
+    };
     expect(parseWebsite(JSON.stringify(stored))).toEqual(stored);
     expect(
       parseWebsite(
-        JSON.stringify({ look: "neon", brandColour: "red", audience: "both" }),
+        JSON.stringify({
+          look: "no-such-look",
+          brandColour: "red",
+          audience: "both",
+          answers: { services: ["gardening", "repairs"], show_figures: "yes" },
+        }),
       ),
-    ).toEqual({ look: "fresh", brandColour: "#1d4e89", audience: "both" });
+    ).toEqual({
+      look: "fresh",
+      brandColour: "#1d4e89",
+      audience: "both",
+      answers: { about_text: "", services: ["repairs"], show_figures: false },
+    });
   });
 
   it("take a colour only as # and six hex digits", () => {

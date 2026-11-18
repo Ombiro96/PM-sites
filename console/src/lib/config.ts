@@ -11,5 +11,8 @@ export const PATHS = {
   forgotPassword: "/forgot-password",
   /** Followed by the token from the emailed link, as in the dashboard. */
   resetPassword: "/reset-password",
+  /** Followed by a setup step: the first visit, before the account has a website. */
+  setup: "/setup",
+  /** Followed by one of the console's views: running the website. */
   website: "/website",
 } as const;
