@@ -19,7 +19,6 @@ export function Footer() {
         return href ? [{ href, label }] : [];
       })
     : [];
-  const report = `mailto:abuse@bomahut.com?subject=${encodeURIComponent(`Report site: ${site.address}`)}`;
 
   return (
     <footer className="ft">
@@ -50,8 +49,8 @@ export function Footer() {
             ))}
           </div>
         ) : null}
-        <div className="small">
-          {site.show_credit ? (
+        {site.show_credit ? (
+          <div className="small">
             <a
               href="https://bomahut.com"
               target="_blank"
@@ -59,9 +58,8 @@ export function Footer() {
             >
               Website by Bomahut
             </a>
-          ) : null}
-          <a href={report}>Report this site</a>
-        </div>
+          </div>
+        ) : null}
       </div>
     </footer>
   );
