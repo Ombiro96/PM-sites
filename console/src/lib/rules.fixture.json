@@ -1,23 +1,6 @@
 {
   "version": 1,
-  "looks": [
-    "fresh",
-    "classic",
-    "bold",
-    "coast",
-    "estate",
-    "plain",
-    "midnight",
-    "studio",
-    "parchment",
-    "lab",
-    "moss",
-    "dusk",
-    "gallery",
-    "catalogue",
-    "neon",
-    "collage"
-  ],
+  "looks": ["fresh", "classic", "bold", "coast", "estate", "plain"],
   "backgrounds": ["white", "tinted", "brand"],
   "page_kinds": ["home", "owners", "about", "contact"],
   "page_paths": {
