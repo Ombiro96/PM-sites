@@ -100,7 +100,7 @@ export function PagesView({
         {dirty ? (
           <div className="border-line sticky top-20 z-[5] flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-white px-4 py-3 shadow-md">
             <p className="text-sm font-medium">
-              You have changes that are not saved.
+              Save or discard these changes before leaving Edit pages.
             </p>
             <div className="flex gap-2">
               <Button

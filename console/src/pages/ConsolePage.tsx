@@ -149,6 +149,12 @@ const SAVE_FIRST: NoticeContent = {
   text: "You have changes under Edit pages that are not saved to your draft.",
 };
 
+const STAY_ON_PAGES: NoticeContent = {
+  tone: "info",
+  title: "Save or discard your changes",
+  text: "Those changes are only under Edit pages until you save them to your draft or discard them.",
+};
+
 const PUBLISHING: NoticeContent = {
   tone: "info",
   title: "Putting your website up…",
@@ -565,6 +571,13 @@ export function ConsolePage({
               key={each.key}
               href={pathOf(each.key)}
               aria-current={each.key === view.key ? "page" : undefined}
+              onClick={(event) => {
+                if (!dirty || view.key !== "pages" || each.key === "pages")
+                  return;
+                event.preventDefault();
+                event.stopPropagation();
+                tell(STAY_ON_PAGES);
+              }}
               className={`flex min-h-11 items-center rounded-lg px-3.5 ${each.key === view.key ? "bg-brand-soft text-brand font-semibold" : "hover:bg-line/40 font-medium"}`}
             >
               {each.nav}
