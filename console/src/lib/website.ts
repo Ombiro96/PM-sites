@@ -151,7 +151,55 @@ export function readSetup(username: string): StoredSetup | null {
 }
 
 export async function readWebsite(username: string): Promise<Website> {
-  return readSetup(username)?.website ?? parseWebsite(null);
+  return readSetup(username)?.website ?? parseWebsite(readTryout());
+}
+
+/**
+ * The theme, colour and company name a visitor tried on the landing page,
+ * kept on this browser so setup starts from them after they sign up.
+ */
+const TRYOUT = "website:tryout";
+
+export function saveTryout(tryout: {
+  look: Look;
+  brandColour: string;
+  name: string;
+}): void {
+  try {
+    window.localStorage.setItem(TRYOUT, JSON.stringify(tryout));
+  } catch {
+    // Setup starts from the defaults instead.
+  }
+}
+
+function readTryout(): string | null {
+  try {
+    return window.localStorage.getItem(TRYOUT);
+  } catch {
+    return null;
+  }
+}
+
+/** What was tried on the landing page, or null when nothing was. */
+export function readTried(): {
+  look: Look;
+  brandColour: string;
+  name: string;
+} | null {
+  const stored = readTryout();
+  if (stored === null) return null;
+  const { look, brandColour } = parseWebsite(stored);
+  return { look, brandColour, name: tryoutName() };
+}
+
+/** The company name tried on the landing page, or "". */
+export function tryoutName(): string {
+  try {
+    const { name } = JSON.parse(readTryout() ?? "{}") as { name?: unknown };
+    return typeof name === "string" ? name.trim() : "";
+  } catch {
+    return "";
+  }
 }
 
 /** Writes the choices and the step the manager should return to. */
@@ -166,11 +214,14 @@ export async function saveWebsite(
   );
 }
 
-/** Marks setup as started, at the theme, with the same defaults as a new site. */
+/** Marks setup as started, at the theme, from what was tried on the landing page or a new site's defaults. */
 export function startSetup(username: string): void {
   window.localStorage.setItem(
     key(username),
-    JSON.stringify({ ...parseWebsite(null), step: "look" satisfies SetupStep }),
+    JSON.stringify({
+      ...parseWebsite(readTryout()),
+      step: "look" satisfies SetupStep,
+    }),
   );
 }
 
@@ -194,6 +245,7 @@ export function saveSetupStep(username: string, step: SetupStep): void {
 export function clearWebsite(username: string): void {
   try {
     window.localStorage.removeItem(key(username));
+    window.localStorage.removeItem(TRYOUT);
   } catch {
     // Nothing was stored.
   }

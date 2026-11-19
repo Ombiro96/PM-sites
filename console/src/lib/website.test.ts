@@ -13,8 +13,10 @@ import {
   parseWebsite,
   readSetup,
   saveSetupStep,
+  saveTryout,
   saveWebsite,
   startSetup,
+  tryoutName,
 } from "./website";
 
 describe("a manager's website choices", () => {
@@ -151,5 +153,22 @@ describe("the example website", () => {
     const read = parseSiteData(JSON.parse(JSON.stringify(site)));
     expect(read?.site.look).toBe("bold");
     expect(read?.document.pages.length).toBe(site.document.pages.length);
+  });
+});
+
+describe("what a visitor tried on the landing page", () => {
+  it("is where setup starts, and is gone once setup is cleared", () => {
+    window.localStorage.clear();
+    saveTryout({ look: "bold", brandColour: "#1f4d3a", name: " Acme Homes " });
+    startSetup("tried");
+    expect(readSetup("tried")?.website).toMatchObject({
+      look: "bold",
+      brandColour: "#1f4d3a",
+    });
+    expect(tryoutName()).toBe("Acme Homes");
+    clearWebsite("tried");
+    expect(tryoutName()).toBe("");
+    startSetup("tried");
+    expect(readSetup("tried")?.website.look).toBe("fresh");
   });
 });

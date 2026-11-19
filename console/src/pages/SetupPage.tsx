@@ -31,6 +31,7 @@ import {
   saveSetupStep,
   saveWebsite,
   startSetup,
+  tryoutName,
   type SetupStep,
   type Website,
 } from "../lib/website";
@@ -344,7 +345,15 @@ function SetupWizard({
       .then(([storedWebsite, storedCompany]) => {
         if (!active) return;
         setWebsite(storedWebsite);
-        setCompany(storedCompany ?? NO_COMPANY);
+        // A new account has no name yet: start from the one tried on the landing page.
+        setCompany(
+          storedCompany?.displayName
+            ? storedCompany
+            : {
+                ...(storedCompany ?? NO_COMPANY),
+                displayName: tryoutName(),
+              },
+        );
         setLoadProblem("");
       })
       .catch((error: unknown) => {
