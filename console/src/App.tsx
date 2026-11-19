@@ -3,6 +3,7 @@ import { locationKey, navigate, subscribe } from "@/lib/router";
 import { useAuth } from "./lib/auth";
 import { PATHS } from "./lib/config";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
+import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
@@ -37,6 +38,7 @@ export function App() {
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
 
   const signedOutPaths: string[] = [
+    "/",
     PATHS.login,
     PATHS.register,
     PATHS.forgotPassword,
@@ -75,5 +77,6 @@ export function App() {
   if (state.status === "signed_in") return <SiteGate user={state.user} />;
   if (path === PATHS.register) return <RegisterPage />;
   if (path === PATHS.forgotPassword) return <ForgotPasswordPage />;
+  if (path === "/") return <LandingPage />;
   return <LoginPage />;
 }

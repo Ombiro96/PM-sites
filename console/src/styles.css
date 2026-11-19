@@ -95,3 +95,27 @@ body {
     animation-timing-function: ease;
   }
 }
+
+/* The landing page's bar: a translucent layer the page scrolls under. */
+.landing-nav {
+  background: rgb(255 255 255 / 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.06);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .landing-nav {
+    background: #fff;
+    backdrop-filter: none;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

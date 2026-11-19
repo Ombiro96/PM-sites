@@ -44,6 +44,21 @@ export function exampleSite({
   };
 }
 
+/** The example site under a name typed on the landing page, keeping the sample's phone numbers. */
+export function triedSite({
+  look,
+  brandColour,
+  name,
+}: {
+  look: Look;
+  brandColour: string;
+  name: string;
+}): SiteData {
+  const drawn = exampleSite({ look, brandColour, company: null });
+  const named = name.trim();
+  return named ? { ...drawn, facts: { ...drawn.facts, name: named } } : drawn;
+}
+
 /**
  * The manager's own pages, as they stand in the editor. Their name, numbers
  * and pictures are real. What the backend fills in at publish (houses,
