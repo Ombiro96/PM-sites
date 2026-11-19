@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { navigate } from "@/lib/router";
 import { NETWORK_PROBLEM, onNotSignedIn } from "./api";
 import { fetchUser, type User } from "./session";
 import { clearToken, readToken, storeToken } from "./token";
@@ -80,6 +81,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       signOut: () => {
         clearToken();
+        // Leaving on purpose goes home; a session that ran out still lands on sign-in, with its message.
+        navigate("/", { replace: true });
         setState({ status: "signed_out" });
       },
       retry: check,
