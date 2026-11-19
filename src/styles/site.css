@@ -1066,36 +1066,74 @@ body {
 
 /* footer */
 .ft {
+  --ft-strong: #fff;
+  --ft-rule: rgba(255, 255, 255, 0.14);
   background: #14171c;
   color: #c5c9d1;
-  padding-block: 34px;
-  font-size: 14.5px;
+  padding-block: 48px 26px;
+  font-size: 15px;
 }
-.ft .in {
+.ft-cols {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px 40px;
-  justify-content: space-between;
+  gap: 30px 40px;
 }
-.ft .in > div {
+.ft-cols > * {
+  flex: 1 1 150px;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 2px;
   min-width: 0;
-  max-width: 100%;
+}
+.ft-cols > .ft-about {
+  flex: 1.6 1 240px;
 }
 .ft b {
-  color: #fff;
+  color: var(--ft-strong);
   font-family: var(--disp);
-  font-size: 17px;
+  font-size: 19px;
+}
+.ft .ft-h {
+  color: var(--ft-strong);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.ft-about p {
+  max-width: 34ch;
+  white-space: pre-line;
+  margin-top: 6px;
 }
 .ft a {
   text-decoration: none;
+  overflow-wrap: anywhere;
+  padding-block: 5px;
 }
-.ft a:hover {
+.ft-wa {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.ft-wa svg {
+  color: #25d366;
+  flex-shrink: 0;
+}
+.ft a:hover,
+.ft a:focus-visible {
+  color: var(--ft-strong);
   text-decoration: underline;
 }
-.ft .small {
+.ft-base {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 24px;
+  margin-top: 36px;
+  padding-top: 18px;
+  border-top: 1px solid var(--ft-rule);
   font-size: 13.5px;
 }
 .mbar {
@@ -1747,12 +1785,11 @@ body {
   font-size: 24px;
 }
 .look-plain .ft {
+  --ft-strong: var(--ink);
+  --ft-rule: var(--rule);
   background: #fff;
   color: var(--soft);
   border-top: 2px solid var(--ink);
-}
-.look-plain .ft b {
-  color: var(--ink);
 }
 .look-plain .hero-plain img {
   aspect-ratio: 16/8;
@@ -1810,6 +1847,12 @@ body {
 }
 
 @media (max-width: 760px) {
+  .ft-cols > * {
+    flex-basis: 130px;
+  }
+  .ft-cols > .ft-about {
+    flex-basis: 100%;
+  }
   :root,
   :root[class] {
     --pad: 40px;
