@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { navigate } from "@/lib/router";
+import { useAuth } from "../lib/auth";
 import { PATHS } from "../lib/config";
 import type { User } from "../lib/session";
 import { findSite, type Site } from "../lib/site";
@@ -8,6 +9,7 @@ import { SetupPage } from "./SetupPage";
 
 /** Sends a signed-in manager to setup when the account has no website, and to the console when it has. */
 export function SiteGate({ user }: { user: User }) {
+  const { signOut } = useAuth();
   const [site, setSite] = useState<Site | null>();
   const [leftOut, setLeftOut] = useState<string[]>();
   const [problem, setProblem] = useState("");
@@ -54,13 +56,22 @@ export function SiteGate({ user }: { user: User }) {
       <main className="text-ink-muted flex min-h-dvh flex-col items-center justify-center gap-4 px-4 text-center">
         <p>{problem || "Loading…"}</p>
         {problem ? (
-          <button
-            type="button"
-            onClick={() => setAttempt(attempt + 1)}
-            className="text-brand font-medium hover:underline"
-          >
-            Try again
-          </button>
+          <div className="flex gap-6">
+            <button
+              type="button"
+              onClick={() => setAttempt(attempt + 1)}
+              className="text-brand font-medium hover:underline"
+            >
+              Try again
+            </button>
+            <button
+              type="button"
+              onClick={signOut}
+              className="text-brand font-medium hover:underline"
+            >
+              Sign out
+            </button>
+          </div>
         ) : null}
       </main>
     );

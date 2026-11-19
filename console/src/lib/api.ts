@@ -6,9 +6,16 @@ const TIMEOUT_MS = 20000;
 const UPLOAD_TIMEOUT_MS = 120000;
 export const NETWORK_PROBLEM =
   "Network problem. Please check your connection and try again.";
-export const NOT_SIGNED_IN = "You must be logged in to perform this action";
+const NOT_SIGNED_IN = "You must be logged in to perform this action";
 
 export class ApiError extends Error {}
+
+let whenNotSignedIn: (() => void) | null = null;
+
+/** Any call can be told the caller is not signed in; like the web app, that ends the session. */
+export function onNotSignedIn(listener: (() => void) | null): void {
+  whenNotSignedIn = listener;
+}
 
 async function request(path: string, body: unknown): Promise<unknown> {
   const token = readToken();
@@ -59,6 +66,7 @@ export async function graphql<Data>(
     errors?: { message?: string }[];
   };
   const refusal = result.errors?.[0]?.message;
+  if (refusal === NOT_SIGNED_IN) whenNotSignedIn?.();
   if (refusal) throw new ApiError(refusal);
   if (!result.data) throw new ApiError(NETWORK_PROBLEM);
   return result.data;

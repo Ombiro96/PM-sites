@@ -13,7 +13,8 @@ import { takeTrackingCookies } from "../lib/tracking";
 import { normalizeUsername } from "../lib/validation";
 
 export function LoginPage() {
-  const { accept } = useAuth();
+  const { accept, state } = useAuth();
+  const notice = state.status === "signed_out" ? (state.message ?? "") : "";
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [problem, setProblem] = useState("");
@@ -55,7 +56,7 @@ export function LoginPage() {
       }
     >
       <form onSubmit={submit} noValidate>
-        <FormError message={problem} />
+        <FormError message={problem || notice} />
         <TextField
           id="username"
           label="Username"
