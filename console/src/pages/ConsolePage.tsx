@@ -564,7 +564,7 @@ export function ConsolePage({
       <div className="mx-auto flex max-w-[100rem] flex-wrap items-start gap-6 px-4 py-6 sm:px-6">
         <nav
           aria-label="Website"
-          className="flex min-w-0 flex-[1_1_12rem] flex-col gap-1 lg:sticky lg:top-24 lg:max-w-56"
+          className="border-line flex min-w-0 flex-[1_1_12rem] flex-col gap-1 rounded-xl border bg-white p-2 shadow-sm lg:sticky lg:top-24 lg:max-w-56"
         >
           {VIEWS.map((each) => (
             <a
