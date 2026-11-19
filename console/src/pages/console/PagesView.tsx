@@ -27,7 +27,6 @@ export function PagesView({
   working,
   dirty,
   busy,
-  leftOut,
   company,
   pictures,
   onWorking,
@@ -39,8 +38,6 @@ export function PagesView({
   working: SiteDocument;
   dirty: boolean;
   busy: boolean;
-  /** Set straight after setup: what the first draft could not include. */
-  leftOut?: string[];
   company: Company | null;
   pictures: readonly Picture[];
   onWorking: (document: SiteDocument) => void;
@@ -50,7 +47,6 @@ export function PagesView({
   const [pageId, setPageId] = useState(working.pages[0]?.id ?? "");
   const [selected, setSelected] = useState("");
   const [adding, setAdding] = useState(false);
-  const [welcome, setWelcome] = useState(leftOut !== undefined);
 
   const page =
     working.pages.find((each) => each.id === pageId) ?? working.pages[0];
@@ -79,36 +75,11 @@ export function PagesView({
   const select = (sectionId: string) => {
     setSelected(sectionId);
     setAdding(false);
-    setWelcome(false);
   };
 
   return (
     <div className="grid gap-8 xl:grid-cols-[27rem_minmax(0,1fr)]">
       <div className="flex flex-col gap-4">
-        {welcome ? (
-          <div className="bg-brand rounded-xl px-5 py-4 text-white">
-            <p className="text-lg font-semibold tracking-tight">
-              Your first draft is ready. Make it yours before anyone sees it.
-            </p>
-            <p className="mt-1 text-[15px] opacity-90">
-              Click any part of the page to change its wording or pictures.
-              Nothing is public until you press Publish.
-            </p>
-            {leftOut?.map((note) => (
-              <p key={note} className="mt-1 text-[15px] opacity-90">
-                {note}
-              </p>
-            ))}
-            <button
-              type="button"
-              onClick={() => setWelcome(false)}
-              className="mt-3 min-h-11 rounded-lg border border-white px-4 font-semibold"
-            >
-              Got it
-            </button>
-          </div>
-        ) : null}
-
         {dirty ? (
           <div className="border-line sticky top-20 z-[5] flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-white px-4 py-3 shadow-md">
             <p className="text-sm font-medium">

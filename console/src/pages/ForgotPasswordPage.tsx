@@ -1,11 +1,7 @@
 import { useState, type FormEvent } from "react";
+import { toast } from "sonner";
 import { AuthLayout, TextLink } from "../components/AuthLayout";
-import {
-  FormError,
-  FormSuccess,
-  SubmitButton,
-  TextField,
-} from "../components/fields";
+import { FormError, SubmitButton, TextField } from "../components/fields";
 import { PATHS } from "../lib/config";
 import { sendPasswordReset } from "../lib/session";
 import { normalizeUsername } from "../lib/validation";
@@ -16,13 +12,11 @@ export function ForgotPasswordPage() {
   const [username, setUsername] = useState("");
   const [error, setError] = useState<string>();
   const [problem, setProblem] = useState("");
-  const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     setProblem("");
-    setSent(false);
     if (username.trim() === "") {
       setError("Please enter your username");
       return;
@@ -30,7 +24,7 @@ export function ForgotPasswordPage() {
     setBusy(true);
     try {
       const result = await sendPasswordReset(normalizeUsername(username));
-      if (result.ok) setSent(true);
+      if (result.ok) toast.success(SENT);
       else setProblem(result.message);
     } catch (failure) {
       setProblem(failure instanceof Error ? failure.message : String(failure));
@@ -50,7 +44,6 @@ export function ForgotPasswordPage() {
       }
     >
       <form onSubmit={submit} noValidate>
-        <FormSuccess message={sent ? SENT : ""} />
         <FormError message={problem} />
         <TextField
           id="username"

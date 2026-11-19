@@ -250,18 +250,6 @@ export function SubmitButton({
   );
 }
 
-export function FormSuccess({ message }: { message: string }) {
-  if (!message) return null;
-  return (
-    <p
-      role="status"
-      className="mb-4 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800"
-    >
-      {message}
-    </p>
-  );
-}
-
 export function FormError({ message }: { message: string }) {
   if (!message) return null;
   return (

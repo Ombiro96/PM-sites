@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { navigate } from "@/lib/router";
 import { useAuth } from "../lib/auth";
 import { PATHS } from "../lib/config";
@@ -12,7 +13,6 @@ import { SetupPage } from "./SetupPage";
 export function SiteGate({ user }: { user: User }) {
   const { signOut } = useAuth();
   const [site, setSite] = useState<Site | null>();
-  const [leftOut, setLeftOut] = useState<string[]>();
   const [problem, setProblem] = useState("");
   const [attempt, setAttempt] = useState(0);
   const [loaded, setLoaded] = useState(0);
@@ -85,7 +85,15 @@ export function SiteGate({ user }: { user: User }) {
       <SetupPage
         user={user}
         onCreated={(created, notes) => {
-          setLeftOut(notes);
+          const missed = notes.filter(Boolean);
+          toast.success("Your first draft is ready", {
+            id: "first-draft",
+            description: [
+              "Make it yours before anyone sees it. Click any part of a page to change it. Nothing is public until you press Publish.",
+              ...missed,
+            ].join(" "),
+            duration: Infinity,
+          });
           setSite(created);
         }}
       />
@@ -94,7 +102,6 @@ export function SiteGate({ user }: { user: User }) {
     <ConsolePage
       user={user}
       site={site}
-      leftOut={leftOut}
       onSite={setSite}
       onReload={() => setAttempt(attempt + 1)}
       // A reloaded site starts the console afresh, dropping changes made on the old one.

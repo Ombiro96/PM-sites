@@ -4,8 +4,8 @@ import { LOOKS } from "@/lib/site/data";
 import type { Look } from "@/lib/site/types";
 import logo from "../assets/bomahut.svg";
 import { Button } from "../components/fields";
-import { Notice, type NoticeContent } from "../components/Notice";
 import { useAuth } from "../lib/auth";
+import { tell, type NoticeContent } from "../lib/feedback";
 import { readCompany, type Company } from "../lib/company";
 import { PATHS } from "../lib/config";
 import { withoutNewIds } from "../lib/draft";
@@ -153,14 +153,11 @@ const liveAt = (site: Site, address: string): NoticeContent => ({
 export function ConsolePage({
   user,
   site,
-  leftOut,
   onSite,
   onReload,
 }: {
   user: User;
   site: Site;
-  /** Set straight after setup, when the first draft has just been written. */
-  leftOut?: string[];
   onSite: (site: Site) => void;
   onReload: () => void;
 }) {
@@ -175,7 +172,6 @@ export function ConsolePage({
   const [rules, setRules] = useState<Rules>();
   const [loadProblem, setLoadProblem] = useState("");
   const [working, setWorking] = useState(site.draft);
-  const [notice, setNotice] = useState<NoticeContent | null>(null);
   const [busy, setBusy] = useState(false);
   const [deployId, setDeployId] = useState("");
   // Compared by content: every answer from the backend carries the draft as a new object.
@@ -214,7 +210,7 @@ export function ConsolePage({
         .then((deploy) => {
           if (deploy?.status === "BUILDING") return;
           setDeployId("");
-          setNotice(
+          tell(
             deploy?.status === "LIVE" && deploy.url
               ? {
                   tone: "good",
@@ -241,7 +237,7 @@ export function ConsolePage({
         .then((found) => {
           if (!found || found.publishState === "PUBLISHING") return;
           onSite(found);
-          setNotice(
+          tell(
             found.publishState === "FAILED"
               ? NOT_PUT_UP
               : liveAt(found, address),
@@ -267,10 +263,7 @@ export function ConsolePage({
         text: refusal.problems[0]?.message ?? refusal.message,
         action: {
           label: "See what is left",
-          run: () => {
-            setNotice(null);
-            navigate(pathOf("go-live"));
-          },
+          run: () => navigate(pathOf("go-live")),
         },
       };
     if (refusal.code === "not_allowed")
@@ -308,12 +301,12 @@ export function ConsolePage({
     try {
       const result = await call();
       if (!result.ok) {
-        setNotice(refused(result));
+        tell(refused(result));
         return null;
       }
       onSite(result.site);
       const state = goesUp ? result.site.publishState : "LIVE";
-      setNotice(
+      tell(
         state === "FAILED"
           ? NOT_PUT_UP
           : state === "PUBLISHING"
@@ -328,7 +321,7 @@ export function ConsolePage({
         : null;
       if (found && found.publishedNumber !== site.publishedNumber) {
         onSite(found);
-        setNotice(
+        tell(
           found.publishState === "FAILED"
             ? NOT_PUT_UP
             : found.publishState === "PUBLISHING"
@@ -337,7 +330,7 @@ export function ConsolePage({
         );
         return found;
       }
-      setNotice({
+      tell({
         tone: "bad",
         title: "That did not work",
         text: error instanceof Error ? error.message : String(error),
@@ -383,7 +376,7 @@ export function ConsolePage({
   }
 
   const publishNow = () => {
-    if (dirty) return setNotice(SAVE_FIRST);
+    if (dirty) return tell(SAVE_FIRST);
     void run(
       () => publish({ siteId: site.id, expectedRevision: site.draftRevision }),
       liveAt(site, address),
@@ -392,20 +385,20 @@ export function ConsolePage({
   };
 
   const preview = async () => {
-    if (dirty) return setNotice(SAVE_FIRST);
+    if (dirty) return tell(SAVE_FIRST);
     setBusy(true);
     try {
       const started = await startPreview(site.id);
-      if (!started.ok) return setNotice(refused(started));
+      if (!started.ok) return tell(refused(started));
       setDeployId(started.deploy.id);
-      setNotice({
+      tell({
         tone: "info",
         title: "Building your preview…",
         text: "This can take up to a minute. The link will show here when it is ready.",
         working: true,
       });
     } catch (error) {
-      setNotice({
+      tell({
         tone: "bad",
         title: "This preview could not be built",
         text: error instanceof Error ? error.message : String(error),
@@ -503,9 +496,6 @@ export function ConsolePage({
         </nav>
 
         <main className="flex min-w-0 flex-[999_1_35rem] flex-col gap-4">
-          {notice ? (
-            <Notice notice={notice} onClose={() => setNotice(null)} />
-          ) : null}
           {view.key === "theme" && openedLook ? null : (
             <div>
               <h1 className="text-[26px] leading-tight font-semibold tracking-tight">
@@ -536,7 +526,6 @@ export function ConsolePage({
               working={working}
               dirty={dirty}
               busy={busy}
-              leftOut={leftOut}
               company={company}
               pictures={pictures}
               onWorking={setWorking}
