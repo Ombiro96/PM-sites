@@ -4,10 +4,11 @@ import { useAuth } from "../lib/auth";
 import { PATHS } from "../lib/config";
 import type { User } from "../lib/session";
 import { findSite, type Site } from "../lib/site";
+import { readSetup } from "../lib/website";
 import { ConsolePage } from "./ConsolePage";
 import { SetupPage } from "./SetupPage";
 
-/** Sends a signed-in manager to setup when the account has no website, and to the console when it has. */
+/** No website: the setup door, or the step already started. A website: the console. */
 export function SiteGate({ user }: { user: User }) {
   const { signOut } = useAuth();
   const [site, setSite] = useState<Site | null>();
@@ -15,8 +16,8 @@ export function SiteGate({ user }: { user: User }) {
   const [problem, setProblem] = useState("");
   const [attempt, setAttempt] = useState(0);
   const [loaded, setLoaded] = useState(0);
-  const path = window.location.pathname;
-  const settingUp = path.startsWith(`${PATHS.setup}/`);
+  const path = window.location.pathname.replace(/\/+$/, "") || "/";
+  const settingUp = path === PATHS.setup || path.startsWith(`${PATHS.setup}/`);
 
   useEffect(() => {
     let active = true;
@@ -36,13 +37,16 @@ export function SiteGate({ user }: { user: User }) {
     };
   }, [attempt]);
 
+  const resume = site === null && !settingUp ? readSetup(user.username) : null;
   const wanted =
     site === undefined
       ? path
       : site === null
         ? settingUp
           ? path
-          : `${PATHS.setup}/look`
+          : resume
+            ? `${PATHS.setup}/${resume.step}`
+            : PATHS.setup
         : settingUp
           ? `${PATHS.website}/pages`
           : path;

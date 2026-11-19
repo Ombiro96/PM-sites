@@ -6,7 +6,16 @@ import {
   companyWhatsappError,
 } from "./company";
 import { exampleSite } from "./preview";
-import { brandColourError, parseWebsite } from "./website";
+import {
+  brandColourError,
+  clearWebsite,
+  parseSetup,
+  parseWebsite,
+  readSetup,
+  saveSetupStep,
+  saveWebsite,
+  startSetup,
+} from "./website";
 
 describe("a manager's website choices", () => {
   it("start as the backend starts a new site", () => {
@@ -49,6 +58,44 @@ describe("a manager's website choices", () => {
       audience: "both",
       answers: { about_text: "", services: ["repairs"], show_figures: false },
     });
+  });
+
+  it("treat a missing record as not started, and resume a stored step", () => {
+    const fresh = parseWebsite(null);
+    expect(parseSetup(null)).toBeNull();
+    expect(parseSetup(JSON.stringify({ ...fresh, step: "details" }))).toEqual({
+      website: fresh,
+      step: "details",
+    });
+    expect(parseSetup(JSON.stringify(fresh))?.step).toBe("look");
+    expect(parseSetup(JSON.stringify({ ...fresh, step: "nope" }))?.step).toBe(
+      "look",
+    );
+    expect(parseWebsite(JSON.stringify({ ...fresh, step: "about" }))).toEqual(
+      fresh,
+    );
+  });
+
+  it("start, resume and forget in this browser", async () => {
+    localStorage.clear();
+    expect(readSetup("ada")).toBeNull();
+    startSetup("ada");
+    expect(readSetup("ada")).toEqual({
+      website: parseWebsite(null),
+      step: "look",
+    });
+    saveSetupStep("ada", "about");
+    expect(readSetup("ada")?.step).toBe("about");
+    saveSetupStep("nobody", "review");
+    expect(readSetup("nobody")).toBeNull();
+    const website = {
+      ...parseWebsite(null),
+      brandColour: "#7a1f2b",
+    };
+    await saveWebsite("ada", website, "colour");
+    expect(readSetup("ada")).toEqual({ website, step: "colour" });
+    clearWebsite("ada");
+    expect(readSetup("ada")).toBeNull();
   });
 
   it("take a colour only as # and six hex digits", () => {

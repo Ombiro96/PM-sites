@@ -47,10 +47,11 @@ export function App() {
     : "";
   let wanted = path;
   if (resetToken === "") {
+    const inSetup = path === PATHS.setup || path.startsWith(`${PATHS.setup}/`);
     if (
       state.status === "signed_in" &&
       !path.startsWith(`${PATHS.website}/`) &&
-      !path.startsWith(`${PATHS.setup}/`)
+      !inSetup
     )
       wanted = `${PATHS.website}/pages`;
     if (state.status === "signed_out" && !signedOutPaths.includes(path))

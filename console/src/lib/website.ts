@@ -38,6 +38,17 @@ export const SERVICE_CHOICES: readonly StandardService[] = [
 
 export const AUDIENCES: readonly Audience[] = ["tenants", "landlords", "both"];
 
+/** The setup steps, in order. Stored with the choices so a later visit can resume. */
+export const SETUP_STEPS = [
+  "look",
+  "colour",
+  "details",
+  "about",
+  "review",
+] as const;
+
+export type SetupStep = (typeof SETUP_STEPS)[number];
+
 /** What the backend gives a new site (`Site` in `backend/websites/models/site.py`). */
 const NEW_WEBSITE: Website = {
   look: "fresh",
@@ -106,19 +117,78 @@ export function aboutTextError(value: string): string | undefined {
   return undefined;
 }
 
-export async function readWebsite(username: string): Promise<Website> {
+export type StoredSetup = { website: Website; step: SetupStep };
+
+function stepOf(stored: string): SetupStep {
   try {
-    return parseWebsite(window.localStorage.getItem(key(username)));
+    const parsed: unknown = JSON.parse(stored);
+    if (typeof parsed === "object" && parsed !== null && "step" in parsed) {
+      const step = parsed.step;
+      if (
+        typeof step === "string" &&
+        (SETUP_STEPS as readonly string[]).includes(step)
+      )
+        return step as SetupStep;
+    }
   } catch {
-    return NEW_WEBSITE;
+    // No readable step: resume at the theme. The choices fall back on their own.
+  }
+  return "look";
+}
+
+/** Null when nothing is stored. A record counts as started, even with a missing step. */
+export function parseSetup(stored: string | null): StoredSetup | null {
+  if (stored === null) return null;
+  return { website: parseWebsite(stored), step: stepOf(stored) };
+}
+
+export function readSetup(username: string): StoredSetup | null {
+  try {
+    return parseSetup(window.localStorage.getItem(key(username)));
+  } catch {
+    return null;
   }
 }
 
+export async function readWebsite(username: string): Promise<Website> {
+  return readSetup(username)?.website ?? parseWebsite(null);
+}
+
+/** Writes the choices and the step the manager should return to. */
 export async function saveWebsite(
   username: string,
   website: Website,
+  step: SetupStep,
 ): Promise<void> {
-  window.localStorage.setItem(key(username), JSON.stringify(website));
+  window.localStorage.setItem(
+    key(username),
+    JSON.stringify({ ...website, step }),
+  );
+}
+
+/** Marks setup as started, at the theme, with the same defaults as a new site. */
+export function startSetup(username: string): void {
+  window.localStorage.setItem(
+    key(username),
+    JSON.stringify({ ...parseWebsite(null), step: "look" satisfies SetupStep }),
+  );
+}
+
+/** Records the step on an existing record. Does nothing before setup has been started. */
+export function saveSetupStep(username: string, step: SetupStep): void {
+  try {
+    const stored = window.localStorage.getItem(key(username));
+    if (stored === null) return;
+    const parsed: unknown = JSON.parse(stored);
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed))
+      return;
+    window.localStorage.setItem(
+      key(username),
+      JSON.stringify({ ...parsed, step }),
+    );
+  } catch {
+    // The choices stay as they were.
+  }
 }
 
 export function clearWebsite(username: string): void {

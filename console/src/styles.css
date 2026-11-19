@@ -22,3 +22,76 @@ body {
   color: var(--color-ink);
   font-family: var(--font-sans);
 }
+
+@keyframes setup-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes setup-onward {
+  from {
+    opacity: 0;
+    transform: translateX(1.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes setup-back {
+  from {
+    opacity: 0;
+    transform: translateX(-1.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes setup-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Critically damped: ease-out, no overshoot. About 0.35s. */
+.setup-arrive,
+.setup-onward,
+.setup-back {
+  animation-duration: 350ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: both;
+}
+
+.setup-arrive {
+  animation-name: setup-arrive;
+}
+
+.setup-onward {
+  animation-name: setup-onward;
+}
+
+.setup-back {
+  animation-name: setup-back;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .setup-arrive,
+  .setup-onward,
+  .setup-back {
+    animation-name: setup-fade;
+    animation-duration: 200ms;
+    animation-timing-function: ease;
+  }
+}
