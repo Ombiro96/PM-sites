@@ -1,8 +1,7 @@
-import type { ReactNode } from "react";
 import { TextLink } from "../../components/AuthLayout";
 import { Button } from "../../components/fields";
 import { PATHS } from "../../lib/config";
-import type { Site } from "../../lib/site";
+import type { Problem, Site } from "../../lib/site";
 
 export const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-GB", {
@@ -11,186 +10,163 @@ export const formatDate = (iso: string) =>
     year: "numeric",
   });
 
-function Check({
-  number,
-  done,
-  title,
-  children,
-  action,
-}: {
-  number: number;
-  done: boolean;
-  title: string;
-  children: ReactNode;
-  action?: ReactNode;
-}) {
-  return (
-    <li className="border-line flex items-start gap-3 border-t py-3.5">
-      <span
-        aria-hidden="true"
-        className={`mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${done ? "bg-green-700 text-white" : "bg-line/60"}`}
-      >
-        {done ? "✓" : number}
-      </span>
-      <div className="min-w-0 grow">
-        <p className="font-semibold">
-          {title}
-          <span className="sr-only">{done ? " (done)" : " (to do)"}</span>
-        </p>
-        <div className="text-ink-muted text-sm">{children}</div>
-      </div>
-      {action}
-    </li>
-  );
+const pageAt = (path: string, site: Site) => {
+  const match = /^pages\[(\d+)\]/.exec(path);
+  if (!match) return undefined;
+  return site.draft.pages[Number(match[1])];
+};
+
+/** Where the manager goes to clear one publish problem. */
+function fixFor(problem: Problem, site: Site) {
+  if (problem.path === "facts" || problem.path.startsWith("facts."))
+    return { href: `${PATHS.website}/details`, label: "Open details" };
+  const page = pageAt(problem.path, site);
+  if (page)
+    return {
+      href: `${PATHS.website}/pages/${page.id}`,
+      label: `Open ${page.title}`,
+    };
+  return { href: `${PATHS.website}/pages`, label: "Open pages" };
 }
 
-/** Everything between a draft and a live website, in the order it is done. */
+/**
+ * One sequence: the issues the backend still refuses, then the single next
+ * action. Publish, asking Bomahut, and a stale copy never compete.
+ */
 export function GoLiveView({
   site,
   dirty,
   busy,
+  stale,
   onAsk,
   onPublish,
+  onReload,
 }: {
   site: Site;
   dirty: boolean;
   busy: boolean;
+  stale: boolean;
   onAsk: () => void;
   onPublish: () => void;
+  onReload: () => void;
 }) {
-  const facts = site.publishProblems.filter((problem) =>
-    problem.path.startsWith("facts"),
-  );
-  const pages = site.publishProblems.filter(
-    (problem) => !problem.path.startsWith("facts"),
-  );
+  const problems = site.publishProblems;
   const live = site.status === "LIVE";
-  const ready = site.publishProblems.length === 0;
+  const ready = problems.length === 0;
+  const upToDate =
+    site.publishState === "LIVE" && !site.hasUnpublishedChanges && !dirty;
+  const asked = site.publishRequestedAt;
 
   return (
-    <div className="grid gap-5 lg:grid-cols-2">
-      <section className="border-line rounded-xl border bg-white p-5">
-        <h2 className="mb-3 text-lg font-semibold">
-          Before your website can go live
-        </h2>
-        <ol>
-          <Check
-            number={1}
-            done={site.publishedNumber !== null}
-            title="Make the pages yours"
-            action={
-              <TextLink href={`${PATHS.website}/pages`}>Edit pages</TextLink>
-            }
-          >
-            Your first draft is written. Read it through and change what you
-            want, for as long as you like.
-          </Check>
-          <Check
-            number={2}
-            done={facts.length === 0}
-            title="Company details confirmed as public"
-            action={
-              facts.length > 0 ? (
-                <TextLink href={`${PATHS.website}/details`}>
-                  Open details
-                </TextLink>
-              ) : null
-            }
-          >
-            {facts.length === 0 ? (
-              "Your name and phone number can be shown."
-            ) : (
-              <ul>
-                {facts.map((problem) => (
-                  <li key={problem.path + problem.code}>{problem.message}</li>
-                ))}
-              </ul>
-            )}
-          </Check>
-          <Check
-            number={3}
-            done={pages.length === 0}
-            title="No problems in your draft"
-            action={
-              pages.length > 0 ? (
-                <TextLink href={`${PATHS.website}/pages`}>Fix them</TextLink>
-              ) : null
-            }
-          >
-            {pages.length === 0 ? (
-              "Every page has what it needs."
-            ) : (
-              <ul className="list-disc pl-4">
-                {pages.map((problem) => (
-                  <li key={problem.path}>{problem.message}</li>
-                ))}
-              </ul>
-            )}
-          </Check>
-          <Check
-            number={4}
-            done={site.mayPublish}
-            title="Publishing switched on by Bomahut"
-            action={
-              !site.mayPublish && !site.publishRequestedAt ? (
-                <Button disabled={busy || !ready} onClick={onAsk}>
-                  Ask Bomahut
-                </Button>
-              ) : null
-            }
-          >
-            {site.mayPublish
-              ? "You can publish whenever you are ready."
-              : site.publishRequestedAt
-                ? `You asked on ${formatDate(site.publishRequestedAt)}. We will send you an SMS when you can publish.`
-                : ready
-                  ? "Bomahut switches on publishing for each website. Ask us to switch it on for yours."
-                  : "Bomahut switches on publishing for each website. You can ask once the steps above are done."}
-          </Check>
-        </ol>
-      </section>
-
-      <div className="flex flex-col gap-5">
-        <section className="border-line rounded-xl border bg-white p-5">
-          <h2 className="mb-2 text-lg font-semibold">Where it stands</h2>
-          <p>
-            {site.status === "OFF"
-              ? 'Your website is switched off. Visitors see "Site not found".'
-              : site.publishState === "FAILED"
-                ? "Your last publish did not reach visitors. Publish again."
-                : live && site.hasUnpublishedChanges
-                  ? "Your website is live. You have changes that visitors cannot see yet."
-                  : live
-                    ? "Your website is live and up to date."
-                    : "Your website is a draft. Only you can see it, through Preview."}
+    <div className="flex max-w-3xl flex-col gap-5">
+      {stale ? (
+        <section
+          role="alert"
+          className="rounded-xl border border-red-300 bg-red-50 p-5"
+        >
+          <h2 className="text-lg font-semibold">
+            You are not looking at the latest version
+          </h2>
+          <p className="mt-1">
+            Someone else changed this website after you opened it. Reload, then
+            fix or publish from the latest version.
           </p>
-          <p className="text-ink-muted mt-1 text-sm">
-            {site.publishedNumber !== null && site.publishedAt
-              ? `Version ${site.publishedNumber}, published ${formatDate(site.publishedAt)}.`
-              : "Not published yet."}
-          </p>
-          {dirty ? (
-            <p className="text-ink-muted mt-1 text-sm">
-              You also have changes under Edit pages that are not saved to your
-              draft.
-            </p>
-          ) : null}
           <div className="mt-4 flex">
-            <Button
-              tone="solid"
-              disabled={
-                busy ||
-                (site.publishState === "LIVE" &&
-                  !site.hasUnpublishedChanges &&
-                  !dirty)
-              }
-              onClick={onPublish}
-            >
-              {live ? "Publish my changes" : "Publish my website"}
+            <Button tone="solid" disabled={busy} onClick={onReload}>
+              Reload
             </Button>
           </div>
         </section>
-      </div>
+      ) : null}
+
+      {problems.length > 0 ? (
+        <section
+          aria-labelledby="publish-issues"
+          className="rounded-xl border border-amber-400 bg-amber-50 p-5"
+        >
+          <h2 id="publish-issues" className="text-lg font-semibold">
+            Fix these before publishing
+          </h2>
+          <p className="mt-1 text-sm">
+            Publishing stays closed until each of these is done.
+          </p>
+          <ul className="mt-2">
+            {problems.map((problem) => {
+              const fix = fixFor(problem, site);
+              return (
+                <li
+                  key={problem.path + problem.code}
+                  className="flex flex-col gap-1 border-t border-amber-300 py-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4"
+                >
+                  <p className="font-medium">{problem.message}</p>
+                  <span className="shrink-0">
+                    <TextLink href={fix.href}>{fix.label}</TextLink>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
+
+      <section className="border-line rounded-xl border bg-white p-5">
+        <h2 className="mb-2 text-lg font-semibold">Where it stands</h2>
+        <p>
+          {site.status === "OFF"
+            ? 'Your website is switched off. Visitors see "Site not found".'
+            : site.publishState === "FAILED"
+              ? "Your last publish did not reach visitors. Publish again."
+              : live && site.hasUnpublishedChanges
+                ? "Your website is live. You have changes that visitors cannot see yet."
+                : live
+                  ? "Your website is live and up to date."
+                  : "Your website is a draft. Only you can see it, through Preview."}
+        </p>
+        <p className="text-ink-muted mt-1 text-sm">
+          {site.publishedNumber !== null && site.publishedAt
+            ? `Version ${site.publishedNumber}, published ${formatDate(site.publishedAt)}.`
+            : "Not published yet."}
+        </p>
+        {dirty ? (
+          <p className="mt-3 text-sm font-medium">
+            Save the changes under Edit pages first. They are not in this draft
+            yet.
+          </p>
+        ) : null}
+
+        {stale ? null : !ready ? (
+          <p className="mt-4 font-medium">
+            {site.mayPublish
+              ? "Fix the issues above, then publish."
+              : "Fix the issues above. After that, ask Bomahut to switch on publishing."}
+          </p>
+        ) : !site.mayPublish ? (
+          asked ? (
+            <p className="mt-4">
+              {`You asked on ${formatDate(asked)}. We will send you an SMS when you can publish.`}
+            </p>
+          ) : (
+            <>
+              <p className="mt-4">
+                Nothing left to fix. Bomahut switches on publishing for each
+                website. Ask, and we will send you an SMS when you can publish
+                it yourself.
+              </p>
+              <div className="mt-4 flex">
+                <Button tone="solid" disabled={busy || dirty} onClick={onAsk}>
+                  Ask Bomahut to publish
+                </Button>
+              </div>
+            </>
+          )
+        ) : upToDate ? null : (
+          <div className="mt-4 flex">
+            <Button tone="solid" disabled={busy || dirty} onClick={onPublish}>
+              {live ? "Publish my changes" : "Publish my website"}
+            </Button>
+          </div>
+        )}
+      </section>
     </div>
   );
 }

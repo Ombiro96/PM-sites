@@ -76,7 +76,7 @@ const VIEWS = [
     key: "go-live",
     nav: "Go live",
     title: "Go live",
-    intro: "What is left to do before visitors can see your website.",
+    intro: "Fix what is listed, then publish.",
   },
   {
     key: "enquiries",
@@ -112,6 +112,26 @@ const STATUS_TONES = {
   good: "bg-green-100 text-green-900",
   waiting: "bg-amber-100 text-amber-900",
 } as const;
+
+/** The line under the Go live title. It follows the same next step as the page. */
+function lineUnderGoLive(site: Site, stale: boolean): string {
+  if (stale)
+    return "Someone else changed this website. Reload, then continue.";
+  if (site.publishProblems.length > 0)
+    return "Fix what is listed, then publish.";
+  if (!site.mayPublish)
+    return site.publishRequestedAt
+      ? "Bomahut has your request. We will text you when you can publish."
+      : "Nothing left to fix. Ask Bomahut to switch on publishing.";
+  if (site.status === "OFF") return "Your website is switched off.";
+  if (site.publishState === "FAILED")
+    return "Your last publish did not reach visitors. Publish again.";
+  if (site.status === "LIVE" && !site.hasUnpublishedChanges)
+    return "Your website is live and up to date.";
+  if (site.status === "LIVE")
+    return "Nothing left to fix. Publish your changes when you are ready.";
+  return "Nothing left to fix. Publish when you are ready.";
+}
 
 function statusOf(site: Site): [string, keyof typeof STATUS_TONES] {
   if (site.status === "OFF") return ["Switched off", "quiet"];
@@ -174,6 +194,8 @@ export function ConsolePage({
   const [working, setWorking] = useState(site.draft);
   const [busy, setBusy] = useState(false);
   const [deployId, setDeployId] = useState("");
+  // A publish or an ask found a newer draft than the one on screen.
+  const [stale, setStale] = useState(false);
   // Compared by content: every answer from the backend carries the draft as a new object.
   const dirty = useMemo(
     () => JSON.stringify(working) !== JSON.stringify(site.draft),
@@ -248,6 +270,31 @@ export function ConsolePage({
     return () => window.clearInterval(timer);
   }, [publishing, site.id, address, onSite]);
 
+  /**
+   * Publish and ask explain themselves on Go live. A toast would say something
+   * different from the card the manager is already looking at.
+   */
+  const explainRefusal = (refusal: Refusal): boolean => {
+    if (refusal.code === "stale") {
+      setStale(true);
+      navigate(pathOf("go-live"));
+      return true;
+    }
+    if (
+      refusal.code === "not_ready" ||
+      refusal.code === "not_allowed" ||
+      refusal.code === "already_asked"
+    ) {
+      setStale(false);
+      navigate(pathOf("go-live"));
+      void readSite(site.id, { quiet: true }).then((found) => {
+        if (found) onSite(found);
+      });
+      return true;
+    }
+    return false;
+  };
+
   const refused = (refusal: Refusal): NoticeContent => {
     if (refusal.code === "stale")
       return {
@@ -296,14 +343,17 @@ export function ConsolePage({
     call: () => Promise<SiteResult>,
     done: NoticeContent,
     goesUp = false,
+    explain = false,
   ): Promise<Site | null> => {
     setBusy(true);
     try {
       const result = await call();
       if (!result.ok) {
+        if (explain && explainRefusal(result)) return null;
         tell(refused(result));
         return null;
       }
+      setStale(false);
       onSite(result.site);
       const state = goesUp ? result.site.publishState : "LIVE";
       tell(
@@ -361,6 +411,7 @@ export function ConsolePage({
   };
 
   function ask() {
+    if (dirty) return tell(SAVE_FIRST);
     void run(
       () =>
         askToPublish({
@@ -372,6 +423,8 @@ export function ConsolePage({
         title: "We have your request",
         text: "Our team has been told. You will get an SMS when you can publish.",
       },
+      false,
+      true,
     );
   }
 
@@ -380,6 +433,7 @@ export function ConsolePage({
     void run(
       () => publish({ siteId: site.id, expectedRevision: site.draftRevision }),
       liveAt(site, address),
+      true,
       true,
     );
   };
@@ -432,6 +486,11 @@ export function ConsolePage({
 
   const upToDate =
     site.publishState === "LIVE" && !site.hasUnpublishedChanges && !dirty;
+  const blocked = site.publishProblems.length > 0;
+  const onGoLive = view.key === "go-live";
+  // Header Publish only fires a publish. Issues, asking Bomahut, and a stale
+  // copy are handled on Go live, so the button opens that page instead.
+  const publishHere = site.mayPublish && !blocked && !stale;
 
   return (
     <div className="min-h-dvh">
@@ -465,10 +524,25 @@ export function ConsolePage({
           </Button>
           <Button
             tone="solid"
-            disabled={busy || publishing || upToDate}
-            onClick={publishNow}
+            disabled={
+              busy ||
+              publishing ||
+              (upToDate && !stale) ||
+              (onGoLive && (!publishHere || dirty))
+            }
+            onClick={() => {
+              if (!publishHere) {
+                navigate(pathOf("go-live"));
+                return;
+              }
+              publishNow();
+            }}
           >
-            {publishing ? "Publishing…" : upToDate ? "Published" : "Publish"}
+            {publishing
+              ? "Publishing…"
+              : upToDate && !stale
+                ? "Published"
+                : "Publish"}
           </Button>
           <button
             type="button"
@@ -504,7 +578,11 @@ export function ConsolePage({
               <h1 className="text-[26px] leading-tight font-semibold tracking-tight">
                 {view.title}
               </h1>
-              <p className="text-ink-muted">{view.intro}</p>
+              <p className="text-ink-muted">
+                {view.key === "go-live"
+                  ? lineUnderGoLive(site, stale)
+                  : view.intro}
+              </p>
             </div>
           )}
 
@@ -524,6 +602,7 @@ export function ConsolePage({
             <p className="text-ink-muted">{loadProblem || "Loading…"}</p>
           ) : view.key === "pages" ? (
             <PagesView
+              openPageId={detail}
               site={site}
               rules={rules}
               working={working}
@@ -581,8 +660,10 @@ export function ConsolePage({
               site={site}
               dirty={dirty}
               busy={busy || publishing}
+              stale={stale}
               onAsk={ask}
               onPublish={publishNow}
+              onReload={onReload}
             />
           ) : view.key === "enquiries" ? (
             <EnquiriesView />
