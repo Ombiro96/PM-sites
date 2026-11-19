@@ -56,6 +56,8 @@ export function GoLiveView({
   const upToDate =
     site.publishState === "LIVE" && !site.hasUnpublishedChanges && !dirty;
   const asked = site.publishRequestedAt;
+  const goingUp = live || site.publishState === "PUBLISHING";
+  const publicUrl = goingUp ? site.url : null;
 
   return (
     <div className="flex max-w-3xl flex-col gap-5">
@@ -127,6 +129,16 @@ export function GoLiveView({
             ? `Version ${site.publishedNumber}, published ${formatDate(site.publishedAt)}.`
             : "Not published yet."}
         </p>
+        {publicUrl ? (
+          <p className="mt-3">
+            <TextLink href={publicUrl} external>
+              {new URL(publicUrl).host}
+            </TextLink>
+            <span className="text-ink-muted mt-1 block text-sm">
+              If you see &ldquo;Site not found&rdquo;, give it up to a minute.
+            </span>
+          </p>
+        ) : null}
         {dirty ? (
           <p className="mt-3 text-sm font-medium">
             Save the changes under Edit pages first. They are not in this draft
