@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { navigate } from "@/lib/router";
 import { AuthLayout, TextLink } from "../components/AuthLayout";
+import { NextWebsite } from "../components/NextWebsite";
 import { FormError, PasswordField, SubmitButton } from "../components/fields";
 import { PATHS } from "../lib/config";
 import { resetPassword, type ResetField } from "../lib/session";
@@ -41,6 +42,7 @@ export function ResetPasswordPage({ token }: { token: string }) {
   return (
     <AuthLayout
       title="Reset Password"
+      aside={<NextWebsite signingIn />}
       links={
         <>
           <TextLink href={PATHS.login}>Login</TextLink>

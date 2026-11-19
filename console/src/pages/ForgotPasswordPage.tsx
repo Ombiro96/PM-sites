@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { AuthLayout, TextLink } from "../components/AuthLayout";
+import { NextWebsite } from "../components/NextWebsite";
 import { FormError, SubmitButton, TextField } from "../components/fields";
 import { PATHS } from "../lib/config";
 import { sendPasswordReset } from "../lib/session";
@@ -36,6 +37,7 @@ export function ForgotPasswordPage() {
   return (
     <AuthLayout
       title="Forgot Password"
+      aside={<NextWebsite signingIn />}
       links={
         <>
           <TextLink href={PATHS.login}>Login</TextLink>

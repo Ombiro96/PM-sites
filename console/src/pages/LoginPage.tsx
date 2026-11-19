@@ -6,6 +6,7 @@ import {
   SubmitButton,
   TextField,
 } from "../components/fields";
+import { NextWebsite } from "../components/NextWebsite";
 import { useAuth } from "../lib/auth";
 import { PATHS } from "../lib/config";
 import { signIn } from "../lib/session";
@@ -46,6 +47,7 @@ export function LoginPage() {
   return (
     <AuthLayout
       title="Sign in"
+      aside={<NextWebsite signingIn />}
       links={
         <>
           <TextLink href={PATHS.forgotPassword}>Forgot Password</TextLink>
