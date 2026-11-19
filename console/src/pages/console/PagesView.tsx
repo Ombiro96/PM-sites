@@ -27,7 +27,7 @@ export function PagesView({
   working,
   dirty,
   busy,
-  fresh,
+  leftOut,
   company,
   pictures,
   onWorking,
@@ -39,7 +39,8 @@ export function PagesView({
   working: SiteDocument;
   dirty: boolean;
   busy: boolean;
-  fresh: boolean;
+  /** Set straight after setup: what the first draft could not include. */
+  leftOut?: string[];
   company: Company | null;
   pictures: readonly Picture[];
   onWorking: (document: SiteDocument) => void;
@@ -49,7 +50,7 @@ export function PagesView({
   const [pageId, setPageId] = useState(working.pages[0]?.id ?? "");
   const [selected, setSelected] = useState("");
   const [adding, setAdding] = useState(false);
-  const [welcome, setWelcome] = useState(fresh);
+  const [welcome, setWelcome] = useState(leftOut !== undefined);
 
   const page =
     working.pages.find((each) => each.id === pageId) ?? working.pages[0];
@@ -93,6 +94,11 @@ export function PagesView({
               Click any part of the page to change its wording or pictures.
               Nothing is public until you press Publish.
             </p>
+            {leftOut?.map((note) => (
+              <p key={note} className="mt-1 text-[15px] opacity-90">
+                {note}
+              </p>
+            ))}
             <button
               type="button"
               onClick={() => setWelcome(false)}

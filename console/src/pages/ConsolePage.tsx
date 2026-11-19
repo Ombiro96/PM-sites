@@ -18,6 +18,7 @@ import {
   readDeploy,
   readPictures,
   readRules,
+  readSite,
   saveDraft,
   setLook,
   startPreview,
@@ -114,6 +115,8 @@ const STATUS_TONES = {
 
 function statusOf(site: Site): [string, keyof typeof STATUS_TONES] {
   if (site.status === "OFF") return ["Switched off", "quiet"];
+  if (site.publishState === "PUBLISHING") return ["Publishing…", "waiting"];
+  if (site.publishState === "FAILED") return ["Publish failed", "waiting"];
   if (site.status === "DRAFT") return ["Draft · not public", "quiet"];
   return site.hasUnpublishedChanges
     ? ["Live · changes not published", "waiting"]
@@ -126,18 +129,38 @@ const SAVE_FIRST: NoticeContent = {
   text: "You have changes under Edit pages that are not saved to your draft.",
 };
 
+const PUBLISHING: NoticeContent = {
+  tone: "info",
+  title: "Putting your website up…",
+  text: "This can take up to a minute. You can carry on working, and this message will change when your website is live.",
+  working: true,
+};
+
+const NOT_PUT_UP: NoticeContent = {
+  tone: "bad",
+  title: "Your website could not be put up",
+  text: "Something went wrong on our side. Visitors see what they saw before. Try again in a few minutes.",
+};
+
+const liveAt = (site: Site, address: string): NoticeContent => ({
+  tone: "good",
+  title: "Your website was published successfully",
+  text: `Visitors now see this version at ${address}.`,
+  action: site.url ? { label: "Open your website", href: site.url } : undefined,
+});
+
 /** Where a manager runs their website once it exists: edits it, previews it, publishes it and reads what visitors sent. */
 export function ConsolePage({
   user,
   site,
-  fresh,
+  leftOut,
   onSite,
   onReload,
 }: {
   user: User;
   site: Site;
-  /** True straight after setup, when the first draft has just been written. */
-  fresh: boolean;
+  /** Set straight after setup, when the first draft has just been written. */
+  leftOut?: string[];
   onSite: (site: Site) => void;
   onReload: () => void;
 }) {
@@ -162,6 +185,7 @@ export function ConsolePage({
   );
   const address = site.url ? new URL(site.url).host : site.addressName;
   const [statusText, statusTone] = statusOf(site);
+  const publishing = site.publishState === "PUBLISHING";
 
   useEffect(() => {
     let active = true;
@@ -210,6 +234,24 @@ export function ConsolePage({
     return () => window.clearInterval(timer);
   }, [deployId]);
 
+  useEffect(() => {
+    if (!publishing) return;
+    const timer = window.setInterval(() => {
+      void readSite(site.id, { quiet: true })
+        .then((found) => {
+          if (!found || found.publishState === "PUBLISHING") return;
+          onSite(found);
+          setNotice(
+            found.publishState === "FAILED"
+              ? NOT_PUT_UP
+              : liveAt(found, address),
+          );
+        })
+        .catch(() => undefined);
+    }, DEPLOY_POLL_MS);
+    return () => window.clearInterval(timer);
+  }, [publishing, site.id, address, onSite]);
+
   const refused = (refusal: Refusal): NoticeContent => {
     if (refusal.code === "stale")
       return {
@@ -253,10 +295,14 @@ export function ConsolePage({
     return { tone: "bad", title: "That did not work", text: refusal.message };
   };
 
-  /** Runs one call about the site, takes in the site it answers with, and says how it went. */
+  /**
+   * Runs one call about the site, takes in the site it answers with, and says how it went.
+   * `goesUp` is for a call that puts a version in front of visitors, which can still be on its way or fail.
+   */
   const run = async (
     call: () => Promise<SiteResult>,
     done: NoticeContent,
+    goesUp = false,
   ): Promise<Site | null> => {
     setBusy(true);
     try {
@@ -266,9 +312,31 @@ export function ConsolePage({
         return null;
       }
       onSite(result.site);
-      setNotice(done);
+      const state = goesUp ? result.site.publishState : "LIVE";
+      setNotice(
+        state === "FAILED"
+          ? NOT_PUT_UP
+          : state === "PUBLISHING"
+            ? PUBLISHING
+            : done,
+      );
       return result.site;
     } catch (error) {
+      // A slow answer can be lost while the version still went up.
+      const found = goesUp
+        ? await readSite(site.id, { quiet: true }).catch(() => null)
+        : null;
+      if (found && found.publishedNumber !== site.publishedNumber) {
+        onSite(found);
+        setNotice(
+          found.publishState === "FAILED"
+            ? NOT_PUT_UP
+            : found.publishState === "PUBLISHING"
+              ? PUBLISHING
+              : done,
+        );
+        return found;
+      }
       setNotice({
         tone: "bad",
         title: "That did not work",
@@ -284,6 +352,7 @@ export function ConsolePage({
     const saved = await run(
       () =>
         saveDraft({
+          siteId: site.id,
           document: withoutNewIds(working),
           expectedRevision: site.draftRevision,
         }),
@@ -299,33 +368,41 @@ export function ConsolePage({
   };
 
   function ask() {
-    void run(() => askToPublish({ expectedRevision: site.draftRevision }), {
-      tone: "good",
-      title: "We have your request",
-      text: "Our team has been told. You will get an SMS when you can publish.",
-    });
+    void run(
+      () =>
+        askToPublish({
+          siteId: site.id,
+          expectedRevision: site.draftRevision,
+        }),
+      {
+        tone: "good",
+        title: "We have your request",
+        text: "Our team has been told. You will get an SMS when you can publish.",
+      },
+    );
   }
 
   const publishNow = () => {
     if (dirty) return setNotice(SAVE_FIRST);
-    void run(() => publish({ expectedRevision: site.draftRevision }), {
-      tone: "good",
-      title: "Your website is live",
-      text: `Visitors now see this version at ${address}.`,
-    });
+    void run(
+      () => publish({ siteId: site.id, expectedRevision: site.draftRevision }),
+      liveAt(site, address),
+      true,
+    );
   };
 
   const preview = async () => {
     if (dirty) return setNotice(SAVE_FIRST);
     setBusy(true);
     try {
-      const started = await startPreview();
+      const started = await startPreview(site.id);
       if (!started.ok) return setNotice(refused(started));
       setDeployId(started.deploy.id);
       setNotice({
         tone: "info",
         title: "Building your preview…",
-        text: "This takes a few seconds.",
+        text: "This can take up to a minute. The link will show here when it is ready.",
+        working: true,
       });
     } catch (error) {
       setNotice({
@@ -341,7 +418,12 @@ export function ConsolePage({
   const saveLook = (look: Look, brandColour: string) =>
     void run(
       () =>
-        setLook({ expectedRevision: site.draftRevision, look, brandColour }),
+        setLook({
+          siteId: site.id,
+          expectedRevision: site.draftRevision,
+          look,
+          brandColour,
+        }),
       {
         tone: "good",
         title:
@@ -353,7 +435,7 @@ export function ConsolePage({
     );
 
   const upToDate =
-    site.status === "LIVE" && !site.hasUnpublishedChanges && !dirty;
+    site.publishState === "LIVE" && !site.hasUnpublishedChanges && !dirty;
 
   return (
     <div className="min-h-dvh">
@@ -385,8 +467,12 @@ export function ConsolePage({
           >
             {deployId ? "Building…" : "Preview"}
           </Button>
-          <Button tone="solid" disabled={busy || upToDate} onClick={publishNow}>
-            {upToDate ? "Published" : "Publish"}
+          <Button
+            tone="solid"
+            disabled={busy || publishing || upToDate}
+            onClick={publishNow}
+          >
+            {publishing ? "Publishing…" : upToDate ? "Published" : "Publish"}
           </Button>
           <button
             type="button"
@@ -450,7 +536,7 @@ export function ConsolePage({
               working={working}
               dirty={dirty}
               busy={busy}
-              fresh={fresh}
+              leftOut={leftOut}
               company={company}
               pictures={pictures}
               onWorking={setWorking}
@@ -467,13 +553,21 @@ export function ConsolePage({
             <DetailsView
               site={site}
               company={company}
-              onSaved={(saved, result) => {
+              onSaved={(saved) => {
                 setCompany(saved);
-                void run(() => Promise.resolve(result), {
-                  tone: "good",
-                  title: "Company details saved",
-                  text: "They appear on every page of your website.",
-                });
+                // What is left before going live depends on these details.
+                void run(
+                  async () => {
+                    const found = await readSite(site.id);
+                    if (!found) throw new Error("This website was not found.");
+                    return { ok: true, site: found };
+                  },
+                  {
+                    tone: "good",
+                    title: "Company details saved",
+                    text: "They appear on every page of your website.",
+                  },
+                );
               }}
             />
           ) : view.key === "theme" || view.key === "theme-colour" ? (
@@ -493,16 +587,9 @@ export function ConsolePage({
             <GoLiveView
               site={site}
               dirty={dirty}
-              busy={busy}
+              busy={busy || publishing}
               onAsk={ask}
               onPublish={publishNow}
-              onStandin={(change) =>
-                void run(() => change, {
-                  tone: "info",
-                  title: "Publishing switch changed",
-                  text: "In production the manager gets an SMS when Bomahut switches publishing on.",
-                })
-              }
             />
           ) : view.key === "enquiries" ? (
             <EnquiriesView />
@@ -510,17 +597,21 @@ export function ConsolePage({
             <SettingsView
               site={site}
               address={address}
-              busy={busy}
+              busy={busy || publishing}
               onUndo={() =>
-                void run(undoPublish, {
-                  tone: "good",
-                  title: "Back to the previous version",
-                  text: "Visitors now see the version before your last publish.",
-                })
+                void run(
+                  () => undoPublish(site.id),
+                  {
+                    tone: "good",
+                    title: "Back to the previous version",
+                    text: "Visitors now see the version before your last publish.",
+                  },
+                  true,
+                )
               }
               onSwitch={() =>
                 void run(
-                  site.status === "OFF" ? switchOn : switchOff,
+                  () => (site.status === "OFF" ? switchOn : switchOff)(site.id),
                   site.status === "OFF"
                     ? {
                         tone: "good",
@@ -532,6 +623,7 @@ export function ConsolePage({
                         title: "Your website is switched off",
                         text: 'Visitors see "Site not found" until you switch it on again.',
                       },
+                  site.status === "OFF",
                 )
               }
             />

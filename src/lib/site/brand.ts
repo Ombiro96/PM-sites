@@ -5,18 +5,7 @@ type Rgb = [number, number, number];
 const FALLBACK_BRAND = "#1d4e89";
 const LIGHT: Rgb = [255, 255, 255];
 const DARK: Rgb = [22, 18, 10];
-/** The page colour of each look whose page is not white. */
-const PAGES: Partial<Record<Look, Rgb>> = {
-  estate: [17, 23, 21],
-  midnight: [11, 12, 14],
-  moss: [16, 38, 29],
-  dusk: [14, 19, 34],
-  neon: [12, 12, 17],
-  parchment: [250, 248, 243],
-  gallery: [233, 228, 217],
-  catalogue: [241, 241, 238],
-  collage: [255, 252, 245],
-};
+const DARK_PAGE: Rgb = [17, 23, 21];
 
 export function parseHex(value: string): Rgb | null {
   const match = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(value.trim());
@@ -66,8 +55,8 @@ export function brandVariables(
   look: Look,
 ): Record<string, string> {
   const brand = parseHex(brandColour) ?? (parseHex(FALLBACK_BRAND) as Rgb);
-  const page = PAGES[look] ?? LIGHT;
-  const dark = luminance(page) < 0.2;
+  const dark = look === "estate";
+  const page = dark ? DARK_PAGE : LIGHT;
   const deep = dark ? brand : mix(brand, [0, 0, 0], 0.72);
 
   let asText = brand;

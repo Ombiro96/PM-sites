@@ -12,7 +12,7 @@ import {
   withoutNewIds,
 } from "./draft";
 import { ruleFor, type Rules } from "./rules";
-import rulesData from "./standin/rules.json";
+import rulesData from "./rules.fixture.json";
 
 const rules = rulesData as unknown as Rules;
 const document = temboHart.document;

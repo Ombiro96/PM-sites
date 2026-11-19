@@ -14,7 +14,7 @@ const SAMPLES: Record<string, SiteData> = {
 /**
  * The site the dev server draws, chosen in the address:
  *   ?sample=tembo-hart|sunrise-court   which sample (default tembo-hart)
- *   ?look=fresh|classic|…|neon|collage   draw it in another look
+ *   ?look=fresh|classic|bold|coast|estate|plain   draw it in another look
  *   ?colour=1d4e89                      another brand colour
  *   ?listings=sample|few|empty          made-up houses instead of a backend
  * `/__sections` always draws the stress-test site.

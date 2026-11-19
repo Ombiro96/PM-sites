@@ -7,6 +7,8 @@ export type NoticeContent = {
   tone: NoticeTone;
   title: string;
   text: string;
+  /** Shows that the work is still going on. */
+  working?: boolean;
   action?: { label: string; run: () => void } | { label: string; href: string };
 };
 
@@ -47,7 +49,15 @@ export function Notice({
       className={`flex items-start justify-between gap-4 rounded-xl border px-4 py-3 ${TONES[notice.tone]}`}
     >
       <div className="flex min-w-0 flex-col gap-1">
-        <p className="font-semibold">{notice.title}</p>
+        <p className="flex items-center gap-2.5 font-semibold">
+          {notice.working ? (
+            <span
+              aria-hidden="true"
+              className="border-brand size-4 shrink-0 animate-spin rounded-full border-2 border-t-transparent"
+            />
+          ) : null}
+          {notice.title}
+        </p>
         <p className="text-[15px]">{notice.text}</p>
         {button}
       </div>

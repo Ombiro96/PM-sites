@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 import { navigate } from "@/lib/router";
 import { PATHS } from "../lib/config";
 import type { User } from "../lib/session";
-import { readSite, type Site } from "../lib/site";
+import { findSite, type Site } from "../lib/site";
 import { ConsolePage } from "./ConsolePage";
 import { SetupPage } from "./SetupPage";
 
 /** Sends a signed-in manager to setup when the account has no website, and to the console when it has. */
 export function SiteGate({ user }: { user: User }) {
   const [site, setSite] = useState<Site | null>();
-  const [fresh, setFresh] = useState(false);
+  const [leftOut, setLeftOut] = useState<string[]>();
   const [problem, setProblem] = useState("");
   const [attempt, setAttempt] = useState(0);
   const [loaded, setLoaded] = useState(0);
@@ -18,7 +18,7 @@ export function SiteGate({ user }: { user: User }) {
 
   useEffect(() => {
     let active = true;
-    readSite()
+    findSite()
       .then((found) => {
         if (!active) return;
         setSite(found);
@@ -69,8 +69,8 @@ export function SiteGate({ user }: { user: User }) {
     return (
       <SetupPage
         user={user}
-        onCreated={(created) => {
-          setFresh(true);
+        onCreated={(created, notes) => {
+          setLeftOut(notes);
           setSite(created);
         }}
       />
@@ -79,7 +79,7 @@ export function SiteGate({ user }: { user: User }) {
     <ConsolePage
       user={user}
       site={site}
-      fresh={fresh}
+      leftOut={leftOut}
       onSite={setSite}
       onReload={() => setAttempt(attempt + 1)}
       // A reloaded site starts the console afresh, dropping changes made on the old one.

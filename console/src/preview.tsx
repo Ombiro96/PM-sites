@@ -14,7 +14,6 @@ import {
   PREVIEW_READY,
   PREVIEW_SITE,
 } from "./lib/preview";
-import { STANDIN_PREVIEW, standinPreviewSite } from "./lib/standin/api";
 
 /** Inside the console the page is not a shared link, so the site's note about one is left out. */
 const EMBEDDED = window.parent !== window;
@@ -46,12 +45,8 @@ function Preview() {
       setFetcher(mockFetcher("sample", sent.api.agency));
       setSite(sent);
     };
-    // Opened in its own tab, there is no console to send a site. Until previews are built by the backend, draw the stored draft.
-    if (!EMBEDDED) {
-      if (new URLSearchParams(window.location.search).has(STANDIN_PREVIEW))
-        void standinPreviewSite().then((stored) => stored && show(stored));
-      return;
-    }
+    // Opened in its own tab, there is no console to send a site.
+    if (!EMBEDDED) return;
     const onMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return;
       if (event.data?.type !== PREVIEW_SITE) return;

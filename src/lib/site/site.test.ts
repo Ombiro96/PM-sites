@@ -112,7 +112,7 @@ describe("reading injected data", () => {
   it("fills in what is optional and refuses an unknown look", () => {
     const data = parseSiteData({
       version: 1,
-      site: { look: "no-such-look" },
+      site: { look: "neon" },
       facts: { latitude: "-1.3", longitude: "" },
       document: { pages: [] },
     });
@@ -247,12 +247,6 @@ describe("brand colours", () => {
   it("keeps the brand readable as text on the dark estate page", () => {
     expect(brandVariables("#b89a5e", "estate")["--brand-ink"]).toBe("#b89a5e");
     expect(brandVariables("#10243d", "estate")["--brand-ink"]).not.toBe(
-      "#10243d",
-    );
-    expect(brandVariables("#10243d", "midnight")["--brand-ink"]).not.toBe(
-      "#10243d",
-    );
-    expect(brandVariables("#10243d", "parchment")["--brand-ink"]).toBe(
       "#10243d",
     );
   });

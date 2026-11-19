@@ -1,7 +1,7 @@
 # PM-Sites
 
 The website a property manager gets from Bomahut. **One static app draws every
-manager's site**, in any of the sixteen looks, from data the backend writes into
+manager's site**, in any of the six looks, from data the backend writes into
 the page when the site is published.
 
 - **Stack:** Vite, React 19, Tailwind 4, TypeScript. No server, no router library.
@@ -24,13 +24,13 @@ npm run dev          # http://localhost:5173
 The dev server has no backend in front of it, so it draws a sample site. Choose
 what to draw in the address:
 
-| Address part                             | Does                                                                                                                            |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `?sample=tembo-hart` or `sunrise-court`  | Which sample (default `tembo-hart`, the full one; `sunrise-court` is the thin one)                                              |
-| `?look=fresh\|classic\|…\|neon\|collage` | Draw the sample in another look                                                                                                 |
-| `?colour=1d4e89`                         | Another brand colour                                                                                                            |
-| `?listings=sample\|few\|empty`           | Made-up houses instead of a backend                                                                                             |
-| `/__sections?look=…&only=steps,figures`  | Every section type in every layout and background, with the longest allowed text, a very long company name and missing pictures |
+| Address part                                       | Does                                                                                                                            |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `?sample=tembo-hart` or `sunrise-court`            | Which sample (default `tembo-hart`, the full one; `sunrise-court` is the thin one)                                              |
+| `?look=fresh\|classic\|bold\|coast\|estate\|plain` | Draw the sample in another look                                                                                                 |
+| `?colour=1d4e89`                                   | Another brand colour                                                                                                            |
+| `?listings=sample\|few\|empty`                     | Made-up houses instead of a backend                                                                                             |
+| `/__sections?look=…&only=steps,figures`            | Every section type in every layout and background, with the longest allowed text, a very long company name and missing pictures |
 
 Without `?listings=` the samples ask a real backend, set in `.env.local`
 (see `.env.example`):
@@ -145,13 +145,10 @@ manager's one brand colour (`src/lib/site/brand.ts`). Each look is a set of
 tokens and a few section overrides in `src/styles/site.css`; no section has
 per-look markup. Fonts are bundled with the app.
 
-There are sixteen: `fresh`, `classic`, `bold`, `coast`, `estate`, `plain`, and
-ten added later, `midnight`, `studio`, `parchment`, `lab`, `moss`, `dusk`,
-`gallery`, `catalogue`, `neon` and `collage`. The names are listed in
-`src/lib/site/data.ts`; a look whose page is not white also gives its page
-colour in `brand.ts`. The backend keeps its own list (`websites/section_rules.py`
-and the `Site` model) and refuses a look it does not know, so the ten are not
-usable on a real site until they are added there.
+There are six: `fresh`, `classic`, `bold`, `coast`, `estate` and `plain`, listed
+in `src/lib/site/data.ts`. The backend keeps its own list
+(`websites/section_rules.py` and the `Site` model) and refuses a look it does
+not know.
 
 ## Rules the code keeps
 
@@ -181,7 +178,7 @@ It talks to the backend named in `VITE_CONSOLE_API_BASE` (see `.env.example`).
 | Step         | Does                                                                                            | Kept                                              |
 | ------------ | ----------------------------------------------------------------------------------------------- | ------------------------------------------------- |
 | Sign in      | `tokenAuth`, `register`, `sendPasswordResetEmail` and `passwordReset`, exactly as the dashboard | The backend                                       |
-| Theme        | One of the sixteen looks                                                                        | This browser, until the last step                 |
+| Theme        | One of the six looks                                                                            | This browser, until the last step                 |
 | Theme colour | The brand colour                                                                                | This browser, until the last step                 |
 | Details      | Company name, phone, WhatsApp; who the site is for                                              | `saveAgencyProfile`; the audience in this browser |
 | About you    | What the first draft is written from: About text, services, whether to show figures             | This browser, until the last step                 |
@@ -202,22 +199,19 @@ It talks to the backend named in `VITE_CONSOLE_API_BASE` (see `.env.example`).
 
 Preview and Publish are in the header on every view.
 
-**The backend calls are stood in for.** The editor API planned in backend issue
-#1313 is not built, so `console/src/lib/site.ts` (the types, and one function
-per planned call) hands every call to `console/src/lib/standin/api.ts`, which
-keeps the website in this browser's storage per signed-in user. Each stand-in
-has the arguments and refusal codes of the call that replaces it. To connect
-the backend, write the real calls and change the export at the foot of
-`site.ts`; the screens do not change. What the stand-in makes up:
+**The backend calls are real.** `console/src/lib/site.ts` holds the types and
+one function per call of the editor API (`backend/websites/graphql_schema`).
+A refusal comes back as `{ ok: false, code, message, problems }`; the screens
+switch on `code`. Things worth knowing:
 
-- the first draft is the contract's sample pages under the manager's name;
-- `standin/rules.json` is a copy of the backend's `rules_as_data()`;
-- a preview opens the stored draft in a new tab, from this same app;
-- pictures are shrunk and kept in browser storage, so only a few fit;
-- enquiries are four made-up ones;
-- "Bomahut switches on publishing" is a button on Go live, in the dev server only.
-
-Company details are real: `agencyProfile` and `saveAgencyProfile` exist.
+- the draft, the answers and the section rules travel as JSON text;
+- a publish, an undo and a switch-on are followed by asking `website(id)` every
+  three seconds until `publishState` is `LIVE` or `FAILED`, as a preview is
+  followed with `websiteDeploy(id)`;
+- without the backend's `WEBSITES_*` hosting settings, preview, publish, undo and
+  switch-on are refused with `hosting_off`;
+- only Bomahut staff switch publishing on, in the Django admin (`may_publish`);
+- `rules.fixture.json` is a copy of `rules_as_data()`, used by the tests only.
 
 **The preview is the real site.** `console/preview.html` loads the site app
 from `src/` in a frame, and the console sends it site data with `postMessage`
@@ -232,5 +226,4 @@ console/index.html, preview.html   the console, and the frame that draws a site
 console/src/pages/                 sign in, create account, setup, the console and its views
 console/src/components/            form fields, the section form, the site preview
 console/src/lib/                   backend calls, sign-in state, setup choices, the draft being edited
-console/src/lib/standin/           the editor API kept in the browser, until the backend has it
 ```

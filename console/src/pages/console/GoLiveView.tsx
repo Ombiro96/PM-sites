@@ -3,7 +3,6 @@ import { TextLink } from "../../components/AuthLayout";
 import { Button } from "../../components/fields";
 import { PATHS } from "../../lib/config";
 import type { Site } from "../../lib/site";
-import { standinAllowPublishing } from "../../lib/standin/api";
 
 export const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-GB", {
@@ -52,15 +51,12 @@ export function GoLiveView({
   busy,
   onAsk,
   onPublish,
-  onStandin,
 }: {
   site: Site;
   dirty: boolean;
   busy: boolean;
   onAsk: () => void;
   onPublish: () => void;
-  /** While there is no backend: plays Bomahut staff switching publishing on or off. */
-  onStandin: (change: ReturnType<typeof standinAllowPublishing>) => void;
 }) {
   const facts = site.publishProblems.filter((problem) =>
     problem.path.startsWith("facts"),
@@ -160,11 +156,13 @@ export function GoLiveView({
           <p>
             {site.status === "OFF"
               ? 'Your website is switched off. Visitors see "Site not found".'
-              : live && site.hasUnpublishedChanges
-                ? "Your website is live. You have changes that visitors cannot see yet."
-                : live
-                  ? "Your website is live and up to date."
-                  : "Your website is a draft. Only you can see it, through Preview."}
+              : site.publishState === "FAILED"
+                ? "Your last publish did not reach visitors. Publish again."
+                : live && site.hasUnpublishedChanges
+                  ? "Your website is live. You have changes that visitors cannot see yet."
+                  : live
+                    ? "Your website is live and up to date."
+                    : "Your website is a draft. Only you can see it, through Preview."}
           </p>
           <p className="text-ink-muted mt-1 text-sm">
             {site.publishedNumber !== null && site.publishedAt
@@ -180,35 +178,18 @@ export function GoLiveView({
           <div className="mt-4 flex">
             <Button
               tone="solid"
-              disabled={busy || (live && !site.hasUnpublishedChanges && !dirty)}
+              disabled={
+                busy ||
+                (site.publishState === "LIVE" &&
+                  !site.hasUnpublishedChanges &&
+                  !dirty)
+              }
               onClick={onPublish}
             >
               {live ? "Publish my changes" : "Publish my website"}
             </Button>
           </div>
         </section>
-
-        {import.meta.env.DEV ? (
-          <section className="rounded-xl border-2 border-dashed border-[#b9bdc9] px-5 py-4">
-            <p className="text-ink-muted text-[13px] font-bold tracking-wide uppercase">
-              Development only, until the backend is connected
-            </p>
-            <p className="my-2 text-sm">
-              Bomahut staff switch publishing on in the admin site. This plays
-              that step.
-            </p>
-            <Button
-              disabled={busy}
-              onClick={() =>
-                onStandin(standinAllowPublishing(!site.mayPublish))
-              }
-            >
-              {site.mayPublish
-                ? "Switch publishing off again"
-                : "Play: Bomahut switches on publishing"}
-            </Button>
-          </section>
-        ) : null}
       </div>
     </div>
   );

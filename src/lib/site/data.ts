@@ -7,16 +7,6 @@ export const LOOKS: readonly Look[] = [
   "coast",
   "estate",
   "plain",
-  "midnight",
-  "studio",
-  "parchment",
-  "lab",
-  "moss",
-  "dusk",
-  "gallery",
-  "catalogue",
-  "neon",
-  "collage",
 ];
 
 const DATA_ELEMENT_ID = "site-data";

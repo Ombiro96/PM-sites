@@ -9,14 +9,11 @@ import {
 } from "../../components/CompanyFields";
 import { CheckField, FormError, SubmitButton } from "../../components/fields";
 import { saveCompany, type Company } from "../../lib/company";
-import {
-  confirmCompanyPublic,
-  type Site,
-  type SiteResult,
-} from "../../lib/site";
+import type { Site } from "../../lib/site";
 
-const isConfirmed = (site: Site) =>
-  !site.publishProblems.some((problem) => problem.path.startsWith("facts"));
+/** The backend keeps a confirmation for good, so it is asked for only until it is given. */
+const needsConfirming = (site: Site) =>
+  site.publishProblems.some((problem) => problem.path === "facts");
 
 export function DetailsView({
   site,
@@ -25,10 +22,10 @@ export function DetailsView({
 }: {
   site: Site;
   company: Company | null;
-  onSaved: (company: Company, result: SiteResult) => void;
+  onSaved: (company: Company) => void;
 }) {
   const [details, setDetails] = useState<Company>(company ?? NO_COMPANY);
-  const [confirmed, setConfirmed] = useState(isConfirmed(site));
+  const [confirmed, setConfirmed] = useState(false);
   const [errors, setErrors] = useState<CompanyErrors>({});
   const [problem, setProblem] = useState("");
   const [busy, setBusy] = useState(false);
@@ -50,13 +47,13 @@ export function DetailsView({
     setProblem("");
     setBusy(true);
     try {
-      const saved = await saveCompany(trimmedCompany(details));
+      const saved = await saveCompany(trimmedCompany(details), confirmed);
       if (!saved.ok) {
         setProblem(saved.message);
         return;
       }
       setDetails(saved.company);
-      onSaved(saved.company, await confirmCompanyPublic(confirmed));
+      onSaved(saved.company);
     } catch (error) {
       setProblem(error instanceof Error ? error.message : String(error));
     } finally {
@@ -77,19 +74,18 @@ export function DetailsView({
         onChange={(changes) => {
           setDetails({ ...details, ...changes });
           setErrors({});
-          // A changed name or phone number has to be confirmed again.
-          if ("displayName" in changes || "phone" in changes)
-            setConfirmed(false);
         }}
       />
-      <div className="bg-brand-soft mb-5 rounded-xl px-3.5">
-        <CheckField
-          label="These details can be shown to the public"
-          hint="Your website cannot go live until you tick this. Changing the name or phone number asks you to confirm again."
-          checked={confirmed}
-          onChange={setConfirmed}
-        />
-      </div>
+      {needsConfirming(site) ? (
+        <div className="bg-brand-soft mb-5 rounded-xl px-3.5">
+          <CheckField
+            label="These details can be shown to the public"
+            hint="Your website cannot go live until you tick this."
+            checked={confirmed}
+            onChange={setConfirmed}
+          />
+        </div>
+      ) : null}
       <div className="ml-auto w-44">
         <SubmitButton busy={busy}>Save details</SubmitButton>
       </div>

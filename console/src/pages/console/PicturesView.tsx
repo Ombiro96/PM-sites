@@ -27,7 +27,8 @@ export function PicturesView({
   const [busy, setBusy] = useState(false);
   const [round, setRound] = useState(0);
   const used = picturesUsed(document);
-  const full = pictures.length >= PICTURES_MAX;
+  const uploaded = pictures.filter((each) => each.source === "upload").length;
+  const full = uploaded >= PICTURES_MAX;
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -39,10 +40,17 @@ export function PicturesView({
       setProblem("Upload a JPEG, PNG or WebP picture of up to 10 MB.");
       return;
     }
+    if (description.trim() === "") {
+      setProblem("Say what the picture shows.");
+      return;
+    }
     setProblem("");
     setBusy(true);
     try {
-      const result = await uploadPicture({ file, description });
+      const result = await uploadPicture({
+        file,
+        description: description.trim(),
+      });
       if (!result.ok) {
         setProblem(result.message);
         return;
@@ -69,7 +77,7 @@ export function PicturesView({
         <FormError message={problem} />
         {full ? (
           <p className="text-ink-muted">
-            You have the most pictures a website can hold.
+            You have uploaded the most pictures an account can hold.
           </p>
         ) : (
           <>
@@ -107,7 +115,7 @@ export function PicturesView({
 
       <div>
         <p className="mb-3 font-semibold">
-          {pictures.length} of {PICTURES_MAX} pictures
+          {uploaded} of {PICTURES_MAX} uploads used
         </p>
         {pictures.length === 0 ? (
           <p className="text-ink-muted">

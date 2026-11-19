@@ -16,7 +16,7 @@ import { readCompany, saveCompany, type Company } from "../lib/company";
 import { PATHS } from "../lib/config";
 import { exampleSite } from "../lib/preview";
 import type { User } from "../lib/session";
-import { createSite, setLook, type Site } from "../lib/site";
+import { createSite, type Site } from "../lib/site";
 import {
   aboutTextError,
   clearWebsite,
@@ -123,7 +123,7 @@ export function SetupPage({
   onCreated,
 }: {
   user: User;
-  onCreated: (site: Site) => void;
+  onCreated: (site: Site, leftOut: string[]) => void;
 }) {
   const { signOut } = useAuth();
   const current = stepAt(window.location.pathname);
@@ -193,22 +193,13 @@ export function SetupPage({
         navigate(pathOf(STEPS[current + 1].key));
         return;
       }
-      const created = await createSite({
-        audience: website.audience,
-        answers: website.answers,
-      });
+      const created = await createSite(website);
       if (!created.ok) {
         setProblem(created.message);
         return;
       }
-      // The first draft comes in the look the backend picks; the manager's own choice is set straight after.
-      const styled = await setLook({
-        expectedRevision: created.site.draftRevision,
-        look: website.look,
-        brandColour: website.brandColour,
-      });
       clearWebsite(user.username);
-      onCreated(styled.ok ? styled.site : created.site);
+      onCreated(created.site, created.leftOut);
     } catch (error) {
       setProblem(error instanceof Error ? error.message : String(error));
     } finally {
