@@ -408,6 +408,9 @@ export function ConsolePage({
     }
   };
 
+  const addPicture = (picture: Picture) =>
+    setPictures((held) => [...held, picture]);
+
   const saveLook = (look: Look, brandColour: string) =>
     void run(
       () =>
@@ -528,6 +531,7 @@ export function ConsolePage({
               busy={busy}
               company={company}
               pictures={pictures}
+              onPictureAdded={addPicture}
               onWorking={setWorking}
               onSave={save}
               onDiscard={() => setWorking(site.draft)}
@@ -536,7 +540,7 @@ export function ConsolePage({
             <PicturesView
               pictures={pictures}
               document={working}
-              onAdded={(picture) => setPictures([...pictures, picture])}
+              onAdded={addPicture}
             />
           ) : view.key === "details" ? (
             <DetailsView

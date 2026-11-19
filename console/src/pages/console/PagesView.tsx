@@ -29,6 +29,7 @@ export function PagesView({
   busy,
   company,
   pictures,
+  onPictureAdded,
   onWorking,
   onSave,
   onDiscard,
@@ -40,6 +41,7 @@ export function PagesView({
   busy: boolean;
   company: Company | null;
   pictures: readonly Picture[];
+  onPictureAdded: (picture: Picture) => void;
   onWorking: (document: SiteDocument) => void;
   onSave: () => Promise<boolean>;
   onDiscard: () => void;
@@ -139,6 +141,7 @@ export function PagesView({
             rules={rules}
             document={working}
             pictures={pictures}
+            onPictureAdded={onPictureAdded}
             fixed={at === 0}
             canMoveUp={at > 1}
             canMoveDown={at > 0 && at < sections.length - 1}

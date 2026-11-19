@@ -1,6 +1,5 @@
 import { useState } from "react";
 import type { SiteDocument } from "@/lib/site/types";
-import { PATHS } from "../lib/config";
 import {
   itemLimits,
   newItem,
@@ -18,7 +17,6 @@ import {
   type SectionRule,
 } from "../lib/rules";
 import type { Picture } from "../lib/site";
-import { TextLink } from "./AuthLayout";
 import {
   Button,
   CheckField,
@@ -26,6 +24,7 @@ import {
   TextAreaField,
   TextField,
 } from "./fields";
+import { PictureUpload } from "./PictureUpload";
 
 type PictureValue = { asset: string; alt?: string };
 type ButtonValue = {
@@ -38,6 +37,7 @@ type Around = {
   rules: Rules;
   document: SiteDocument;
   pictures: readonly Picture[];
+  onPictureAdded: (picture: Picture) => void;
 };
 
 const OWN_WORDING = "";
@@ -76,6 +76,10 @@ function PictureInput({
 }) {
   const [choosing, setChoosing] = useState(false);
   const chosen = around.pictures.find((each) => each.id === value?.asset);
+  const choose = (picture: Picture) => {
+    onChange({ asset: picture.id, alt: value?.alt || picture.description });
+    setChoosing(false);
+  };
 
   return (
     <div className="mb-4">
@@ -102,40 +106,39 @@ function PictureInput({
         ) : null}
       </div>
       {choosing ? (
-        around.pictures.length === 0 ? (
-          <p className="text-ink-muted mt-2 text-sm">
-            You have no pictures yet.{" "}
-            <TextLink href={`${PATHS.website}/pictures`}>
-              Upload one under Pictures
-            </TextLink>
-            .
-          </p>
-        ) : (
-          <div className="mt-3 grid grid-cols-4 gap-2">
-            {around.pictures.map((each) => (
-              <button
-                key={each.id}
-                type="button"
-                aria-pressed={each.id === value?.asset}
-                title={each.description}
-                onClick={() => {
-                  onChange({
-                    asset: each.id,
-                    alt: value?.alt || each.description,
-                  });
-                  setChoosing(false);
-                }}
-                className="aria-pressed:ring-brand overflow-hidden rounded-lg aria-pressed:ring-2 aria-pressed:ring-offset-2"
-              >
-                <img
-                  src={each.url}
-                  alt={each.description}
-                  className="h-16 w-full object-cover"
-                />
-              </button>
-            ))}
+        <>
+          {around.pictures.length > 0 ? (
+            <div className="mt-3 grid grid-cols-4 gap-2">
+              {around.pictures.map((each) => (
+                <button
+                  key={each.id}
+                  type="button"
+                  aria-pressed={each.id === value?.asset}
+                  title={each.description}
+                  onClick={() => choose(each)}
+                  className="aria-pressed:ring-brand overflow-hidden rounded-lg aria-pressed:ring-2 aria-pressed:ring-offset-2"
+                >
+                  <img
+                    src={each.url}
+                    alt={each.description}
+                    className="h-16 w-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          ) : null}
+          <div className="border-line mt-3 rounded-xl border p-3.5">
+            <p className="mb-3 text-sm font-semibold">Upload a new picture</p>
+            <PictureUpload
+              id={`${id}-upload`}
+              pictures={around.pictures}
+              onAdded={(picture) => {
+                around.onPictureAdded(picture);
+                choose(picture);
+              }}
+            />
           </div>
-        )
+        </>
       ) : null}
       {value ? (
         <div className="mt-3">
@@ -562,6 +565,7 @@ export function SectionForm({
   rules,
   document,
   pictures,
+  onPictureAdded,
   fixed,
   canMoveUp,
   canMoveDown,
@@ -575,6 +579,7 @@ export function SectionForm({
   rules: Rules;
   document: SiteDocument;
   pictures: readonly Picture[];
+  onPictureAdded: (picture: Picture) => void;
   /** The opening section of a page stays where it is and cannot be hidden or removed. */
   fixed: boolean;
   canMoveUp: boolean;
@@ -584,7 +589,7 @@ export function SectionForm({
   onRemove: () => void;
   onClose: () => void;
 }) {
-  const around: Around = { rules, document, pictures };
+  const around: Around = { rules, document, pictures, onPictureAdded };
   const errors = sectionErrors(section, rules);
   const pictureCounts = rule.layout_picture_counts.find(
     ([layout]) => layout === section.layout,
