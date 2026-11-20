@@ -24,7 +24,7 @@ import {
   TextAreaField,
   TextField,
 } from "./fields";
-import { PictureUpload } from "./PictureUpload";
+import { PictureChooser } from "./PictureChooser";
 
 type PictureValue = { asset: string; alt?: string };
 type ButtonValue = {
@@ -77,7 +77,7 @@ function PictureInput({
   const [choosing, setChoosing] = useState(false);
   const chosen = around.pictures.find((each) => each.id === value?.asset);
   const choose = (picture: Picture) => {
-    onChange({ asset: picture.id, alt: value?.alt || picture.description });
+    onChange({ asset: picture.id, alt: value?.alt });
     setChoosing(false);
   };
 
@@ -96,8 +96,8 @@ function PictureInput({
             No picture
           </span>
         )}
-        <Button onClick={() => setChoosing(!choosing)}>
-          {choosing ? "Close" : chosen ? "Change" : "Choose a picture"}
+        <Button onClick={() => setChoosing(true)}>
+          {chosen ? "Change" : "Choose a picture"}
         </Button>
         {value ? (
           <Button tone="quiet" onClick={() => onChange(undefined)}>
@@ -106,39 +106,13 @@ function PictureInput({
         ) : null}
       </div>
       {choosing ? (
-        <>
-          {around.pictures.length > 0 ? (
-            <div className="mt-3 grid grid-cols-4 gap-2">
-              {around.pictures.map((each) => (
-                <button
-                  key={each.id}
-                  type="button"
-                  aria-pressed={each.id === value?.asset}
-                  title={each.description}
-                  onClick={() => choose(each)}
-                  className="aria-pressed:ring-brand overflow-hidden rounded-lg aria-pressed:ring-2 aria-pressed:ring-offset-2"
-                >
-                  <img
-                    src={each.url}
-                    alt={each.description}
-                    className="h-16 w-full object-cover"
-                  />
-                </button>
-              ))}
-            </div>
-          ) : null}
-          <div className="border-line mt-3 rounded-xl border p-3.5">
-            <p className="mb-3 text-sm font-semibold">Upload a new picture</p>
-            <PictureUpload
-              id={`${id}-upload`}
-              pictures={around.pictures}
-              onAdded={(picture) => {
-                around.onPictureAdded(picture);
-                choose(picture);
-              }}
-            />
-          </div>
-        </>
+        <PictureChooser
+          pictures={around.pictures}
+          chosenId={value?.asset}
+          onAdded={around.onPictureAdded}
+          onChoose={choose}
+          onClose={() => setChoosing(false)}
+        />
       ) : null}
       {value ? (
         <div className="mt-3">
