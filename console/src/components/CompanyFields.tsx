@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import {
   COMPANY_NAME_MAX,
   companyNameError,
@@ -53,12 +54,15 @@ export function CompanyFields({
   errors,
   consent,
   onChange,
+  afterName,
 }: {
   company: Company;
   errors: CompanyErrors;
   /** Left out when there is nothing new to consent to. */
   consent?: Consent;
   onChange: (changes: Partial<Company>) => void;
+  /** Setup puts the web address here, under the name it is taken from. */
+  afterName?: ReactNode;
 }) {
   return (
     <>
@@ -71,6 +75,7 @@ export function CompanyFields({
         error={errors.displayName}
         onChange={(event) => onChange({ displayName: event.target.value })}
       />
+      {afterName}
       <PhoneField
         id="company-phone"
         label="Phone number"

@@ -20,6 +20,10 @@ export type Website = {
   brandColour: string;
   audience: Audience;
   answers: Answers;
+  /** Empty until a name is stored. While `addressTouched` is false, the field follows the company name. */
+  addressName: string;
+  /** True once they edit the address. Clearing it does not start following the company name again. */
+  addressTouched: boolean;
 };
 
 export const ABOUT_TEXT_MIN = 40;
@@ -55,7 +59,51 @@ const NEW_WEBSITE: Website = {
   brandColour: "#1d4e89",
   audience: "tenants",
   answers: { about_text: "", services: [], show_figures: false },
+  addressName: "",
+  addressTouched: false,
 };
+
+/** Same shape the backend's address validator accepts. */
+const ADDRESS_SHAPE = /^[a-z0-9](?:[a-z0-9-]{1,38})[a-z0-9]$/;
+export const ADDRESS_SHAPE_ERROR =
+  "Use 3 to 40 lowercase letters, numbers and dashes, starting and ending with a letter or number.";
+
+export function addressError(value: string): string | undefined {
+  if (!ADDRESS_SHAPE.test(value)) return ADDRESS_SHAPE_ERROR;
+  return undefined;
+}
+
+/**
+ * The address form of a company name, before anyone checks whether it is free.
+ * Mirrors `SiteUtils.suggest_address_name` up to the point where a taken name
+ * gets a number: Django's slugify, then dashes for whatever is left.
+ */
+export function addressFromName(name: string): string {
+  const ascii = [...name.normalize("NFKD")]
+    .filter((char) => char.charCodeAt(0) < 128)
+    .join("");
+  const slugged = ascii
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[-\s]+/g, "-")
+    .replace(/^[-_]+|[-_]+$/g, "");
+  let base = slugged
+    .replace(/[^a-z0-9]+/g, "-")
+    .slice(0, 40)
+    .replace(/^-+|-+$/g, "");
+  // Names starting "preview-" are kept for draft previews.
+  if (`${base}-`.startsWith("preview-"))
+    base = base.includes("-") ? base.replace("-", "") : `${base}site`;
+  if (base.length < 3) base = "website";
+  return base;
+}
+
+/** What the address box shows: their edit, or the company name's address until they edit. */
+export function chosenAddress(website: Website, companyName: string): string {
+  if (website.addressTouched) return website.addressName;
+  const trimmed = companyName.trim();
+  return trimmed ? addressFromName(trimmed) : "";
+}
 
 export const BRAND_COLOURS: readonly { name: string; value: string }[] = [
   { name: "Blue", value: "#1d4e89" },
@@ -85,7 +133,7 @@ export function parseWebsite(stored: string | null): Website {
   } catch {
     // Unreadable: start from the defaults.
   }
-  const { look, brandColour, audience } = found;
+  const { look, brandColour, audience, addressName, addressTouched } = found;
   const answers: Partial<Answers> =
     typeof found.answers === "object" && found.answers !== null
       ? found.answers
@@ -107,6 +155,8 @@ export function parseWebsite(stored: string | null): Website {
         : [],
       show_figures: answers.show_figures === true,
     },
+    addressName: typeof addressName === "string" ? addressName : "",
+    addressTouched: addressTouched === true,
   };
 }
 

@@ -23,9 +23,10 @@ import { readCompany, saveCompany, type Company } from "../lib/company";
 import { PATHS } from "../lib/config";
 import { exampleSite } from "../lib/preview";
 import type { User } from "../lib/session";
-import { createSite, type Site } from "../lib/site";
+import { confirmAddress, createSite, type Site } from "../lib/site";
 import {
   aboutTextError,
+  chosenAddress,
   clearWebsite,
   readSetup,
   readWebsite,
@@ -341,6 +342,11 @@ function SetupWizard({
   const [problem, setProblem] = useState("");
   const [busy, setBusy] = useState(false);
   const [aboutError, setAboutError] = useState<string>();
+  const [addressRefusal, setAddressRefusal] = useState<{
+    name: string;
+    problem: string;
+    suggestion: string | null;
+  } | null>(null);
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
@@ -376,6 +382,12 @@ function SetupWizard({
   }, [user.username, step.key]);
 
   const named = company.displayName.trim() !== "";
+  const address = website ? chosenAddress(website, company.displayName) : "";
+  const takeAddress = (addressName: string) => {
+    if (!website) return;
+    setAddressRefusal(null);
+    setWebsite({ ...website, addressName, addressTouched: true });
+  };
   const site = useMemo(
     () =>
       website
@@ -402,6 +414,13 @@ function SetupWizard({
         }
         setCompany(saved.company);
         setConsent({ given: true, saved: true });
+        const name = chosenAddress(website, saved.company.displayName);
+        const checked = await confirmAddress(name);
+        if (!checked.ok) {
+          setAddressRefusal({ ...checked, name });
+          return;
+        }
+        setAddressRefusal(null);
       }
       if (step.key === "about") {
         const found = aboutTextError(website.answers.about_text);
@@ -415,8 +434,23 @@ function SetupWizard({
         navigate(pathOf(next));
         return;
       }
-      const created = await createSite(website);
+      const name = chosenAddress(website, company.displayName);
+      const checked = await confirmAddress(name);
+      if (!checked.ok) {
+        setAddressRefusal({ ...checked, name });
+        return;
+      }
+      setAddressRefusal(null);
+      const created = await createSite({ ...website, addressName: name });
       if (!created.ok) {
+        if (created.code === "address_name") {
+          setAddressRefusal({
+            name,
+            problem: created.message,
+            suggestion: created.suggestion,
+          });
+          return;
+        }
         setProblem(created.message);
         return;
       }
@@ -491,6 +525,11 @@ function SetupWizard({
                     },
                   }}
                   audience={website.audience}
+                  address={address}
+                  addressTouched={website.addressTouched}
+                  addressRefusal={
+                    addressRefusal?.name === address ? addressRefusal : null
+                  }
                   onCompany={(changes) => {
                     setCompany({ ...company, ...changes });
                     setErrors({});
@@ -500,6 +539,7 @@ function SetupWizard({
                   onAudience={(audience) =>
                     setWebsite({ ...website, audience })
                   }
+                  onAddress={takeAddress}
                 />
               ) : null}
               {step.key === "about" ? (
@@ -520,6 +560,18 @@ function SetupWizard({
                 <ReviewStep
                   website={website}
                   company={company}
+                  address={address}
+                  addressProblem={
+                    addressRefusal?.name === address
+                      ? addressRefusal.problem
+                      : undefined
+                  }
+                  addressSuggestion={
+                    addressRefusal?.name === address
+                      ? addressRefusal.suggestion
+                      : null
+                  }
+                  onUseAddress={takeAddress}
                   pathOf={pathOf}
                 />
               ) : null}

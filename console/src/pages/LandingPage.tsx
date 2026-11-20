@@ -99,7 +99,7 @@ const QUESTIONS: { q: string; a: string }[] = [
   },
   {
     q: "Do I need my own web address?",
-    a: "No. We give your website an address based on your company name.",
+    a: "No. You pick one when you set up your website, starting from your company name. It isn't changed later.",
   },
   {
     q: "Will it work on phones?",

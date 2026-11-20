@@ -1,7 +1,7 @@
 import type { Look, SiteDocument } from "@/lib/site/types";
 import { graphql } from "./api";
 import type { Rules } from "./rules";
-import type { Answers, Audience } from "./website";
+import { addressError, type Answers, type Audience } from "./website";
 
 /**
  * A manager's website as the backend's editor API gives it
@@ -53,7 +53,17 @@ export type SiteResult = { ok: true; site: Site } | Refusal;
 
 /** `leftOut` says, in sentences, what the first draft could not include and why. */
 export type CreateResult =
-  { ok: true; site: Site; leftOut: string[] } | Refusal;
+  | { ok: true; site: Site; leftOut: string[] }
+  | (Refusal & { suggestion: string | null });
+
+export type AddressCheck = {
+  available: boolean;
+  problem: string | null;
+  suggestion: string;
+};
+
+export type AddressVerdict =
+  { ok: true } | { ok: false; problem: string; suggestion: string | null };
 
 export type Picture = {
   id: string;
@@ -119,6 +129,7 @@ const ARGUMENTS = {
   answers: "JSONString",
   look: "String",
   brandColour: "String",
+  addressName: "String",
   file: "Upload!",
   description: "String!",
 } as const;
@@ -212,26 +223,68 @@ export async function readRules(): Promise<Rules> {
   return JSON.parse(data.websiteRules) as Rules;
 }
 
-/** The address is left for the backend to choose from the company name. */
+/** Whether this address can be taken. Quiet, so checking while someone types does not flash the page. */
+export async function checkAddress(name: string): Promise<AddressCheck> {
+  const data = await graphql<{ websiteAddressCheck: AddressCheck }>(
+    `
+      query ($name: String!) {
+        websiteAddressCheck(name: $name) {
+          available
+          problem
+          suggestion
+        }
+      }
+    `,
+    { name },
+    { quiet: true },
+  );
+  return data.websiteAddressCheck;
+}
+
+/** The shape, then the backend. A taken name comes back with another name that is free. */
+export async function confirmAddress(name: string): Promise<AddressVerdict> {
+  const problem = addressError(name);
+  if (problem) return { ok: false, problem, suggestion: null };
+  const check = await checkAddress(name);
+  if (check.available) return { ok: true };
+  return {
+    ok: false,
+    problem: check.problem ?? "This address name is taken.",
+    suggestion: check.suggestion,
+  };
+}
+
+/** Creates the site at `addressName`. A taken name is refused, never swapped for another. */
 export async function createSite({
   audience,
   answers,
   look,
   brandColour,
+  addressName,
 }: {
   audience: Audience;
   answers: Answers;
   look: Look;
   brandColour: string;
+  addressName: string;
 }): Promise<CreateResult> {
-  const answer = await mutate<{ website: SentSite | null; leftOut: string[] }>(
+  const answer = await mutate<{
+    website: SentSite | null;
+    leftOut: string[];
+    suggestion: string | null;
+  }>(
     "websiteCreate",
-    { audience, answers: JSON.stringify({ ...answers, look }), brandColour },
-    `leftOut website { ${SITE_FIELDS} }`,
+    {
+      audience,
+      answers: JSON.stringify({ ...answers, look }),
+      brandColour,
+      addressName,
+    },
+    `leftOut suggestion website { ${SITE_FIELDS} }`,
   );
   return answer.success && answer.website
     ? { ok: true, site: received(answer.website), leftOut: answer.leftOut }
-    : refusal(answer);
+    : { ...refusal(answer), suggestion: answer.suggestion ?? null };
 }
 
 export const saveDraft = ({

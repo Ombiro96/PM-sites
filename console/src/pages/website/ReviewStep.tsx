@@ -1,5 +1,7 @@
 import { TextLink } from "../../components/AuthLayout";
+import { UseAddress } from "../../components/AddressField";
 import type { Company } from "../../lib/company";
+import { WEBSITES_ROOT_DOMAIN } from "../../lib/config";
 import { AUDIENCE_DETAILS, LOOK_DETAILS } from "../../lib/looks";
 import type { Website } from "../../lib/website";
 
@@ -10,10 +12,18 @@ type ChangedAt = "look" | "colour" | "details" | "about";
 export function ReviewStep({
   website,
   company,
+  address,
+  addressProblem,
+  addressSuggestion,
+  onUseAddress,
   pathOf,
 }: {
   website: Website;
   company: Company;
+  address: string;
+  addressProblem?: string;
+  addressSuggestion?: string | null;
+  onUseAddress: (address: string) => void;
   pathOf: (step: ChangedAt) => string;
 }) {
   const { answers } = website;
@@ -21,6 +31,11 @@ export function ReviewStep({
     { label: "Theme", value: LOOK_DETAILS[website.look].name, step: "look" },
     { label: "Theme colour", value: website.brandColour, step: "colour" },
     { label: "Company name", value: company.displayName, step: "details" },
+    {
+      label: "Web address",
+      value: address ? `${address}.${WEBSITES_ROOT_DOMAIN}` : "",
+      step: "details",
+    },
     { label: "Phone number", value: company.phone, step: "details" },
     {
       label: "WhatsApp number",
@@ -54,6 +69,21 @@ export function ReviewStep({
           </div>
         ))}
       </dl>
+      {addressProblem ? (
+        <p
+          key={addressProblem}
+          role="alert"
+          className="address-status text-bad mt-3 text-sm"
+        >
+          {addressProblem}
+          {addressSuggestion && addressSuggestion !== address ? (
+            <>
+              {" "}
+              <UseAddress suggestion={addressSuggestion} onUse={onUseAddress} />
+            </>
+          ) : null}
+        </p>
+      ) : null}
       <div className="bg-brand-soft mt-5 space-y-2 rounded-xl px-4 py-3">
         <p className="font-semibold">What happens next</p>
         <ol className="list-decimal space-y-1 pl-5">
@@ -66,9 +96,6 @@ export function ReviewStep({
             You publish when you are happy. Nothing is public before that.
           </li>
         </ol>
-        <p className="text-sm">
-          We choose your website's address from your company name.
-        </p>
       </div>
     </>
   );

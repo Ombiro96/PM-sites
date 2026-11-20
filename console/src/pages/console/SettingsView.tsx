@@ -40,10 +40,7 @@ export function SettingsView({
     <div className="flex max-w-2xl flex-col gap-5">
       <Card title="Website address">
         <p className="text-ink font-semibold">{address}</p>
-        <p>
-          We chose this from your company name. It cannot be changed here for
-          now; ask Bomahut if it is wrong.
-        </p>
+        <p>You chose this when you set up your website. It can't be changed.</p>
       </Card>
       <Card
         title="Go back to previous version"

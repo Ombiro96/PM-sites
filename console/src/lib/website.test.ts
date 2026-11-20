@@ -7,7 +7,9 @@ import {
 } from "./company";
 import { exampleSite } from "./preview";
 import {
+  addressFromName,
   brandColourError,
+  chosenAddress,
   clearWebsite,
   parseSetup,
   parseWebsite,
@@ -26,6 +28,8 @@ describe("a manager's website choices", () => {
       brandColour: "#1d4e89",
       audience: "tenants",
       answers: { about_text: "", services: [], show_figures: false },
+      addressName: "",
+      addressTouched: false,
     };
     expect(parseWebsite(null)).toEqual(fresh);
     expect(parseWebsite("not json")).toEqual(fresh);
@@ -39,10 +43,12 @@ describe("a manager's website choices", () => {
       show_figures: true,
     };
     const stored = {
-      look: "estate",
+      look: "estate" as const,
       brandColour: "#7a1f2b",
-      audience: "both",
+      audience: "both" as const,
       answers,
+      addressName: "",
+      addressTouched: false,
     };
     expect(parseWebsite(JSON.stringify(stored))).toEqual(stored);
     expect(
@@ -59,7 +65,43 @@ describe("a manager's website choices", () => {
       brandColour: "#1d4e89",
       audience: "both",
       answers: { about_text: "", services: ["repairs"], show_figures: false },
+      addressName: "",
+      addressTouched: false,
     });
+  });
+
+  it("keeps a chosen address and treats a missing one as not yet chosen", () => {
+    expect(addressFromName("Mwangaza Homes")).toBe("mwangaza-homes");
+    expect(addressFromName("")).toBe("website");
+    expect(addressFromName("ab")).toBe("website");
+    expect(addressFromName("Preview Realty")).toBe("previewrealty");
+    const fresh = parseWebsite(null);
+    const chosen = parseWebsite(
+      JSON.stringify({
+        ...fresh,
+        addressName: "acme-homes",
+        addressTouched: true,
+      }),
+    );
+    expect(chosen.addressName).toBe("acme-homes");
+    expect(chosen.addressTouched).toBe(true);
+    expect(parseWebsite(JSON.stringify({ look: "fresh" }))).toMatchObject({
+      addressName: "",
+      addressTouched: false,
+    });
+    expect(chosenAddress(fresh, "Mwangaza Homes")).toBe("mwangaza-homes");
+    expect(
+      chosenAddress(
+        { ...fresh, addressName: "acme", addressTouched: true },
+        "Mwangaza Homes",
+      ),
+    ).toBe("acme");
+    expect(
+      chosenAddress(
+        { ...fresh, addressName: "", addressTouched: true },
+        "Mwangaza Homes",
+      ),
+    ).toBe("");
   });
 
   it("treat a missing record as not started, and resume a stored step", () => {

@@ -1,3 +1,7 @@
+import {
+  AddressField,
+  type AddressRefusal,
+} from "../../components/AddressField";
 import { ChoiceCard } from "../../components/ChoiceCard";
 import {
   CompanyFields,
@@ -13,15 +17,23 @@ export function DetailsStep({
   errors,
   consent,
   audience,
+  address,
+  addressTouched,
+  addressRefusal,
   onCompany,
   onAudience,
+  onAddress,
 }: {
   company: Company;
   errors: CompanyErrors;
   consent: Consent;
   audience: Audience;
+  address: string;
+  addressTouched: boolean;
+  addressRefusal: AddressRefusal | null;
   onCompany: (changes: Partial<Company>) => void;
   onAudience: (audience: Audience) => void;
+  onAddress: (address: string) => void;
 }) {
   return (
     <>
@@ -30,6 +42,14 @@ export function DetailsStep({
         errors={errors}
         consent={consent}
         onChange={onCompany}
+        afterName={
+          <AddressField
+            value={address}
+            touched={addressTouched}
+            refusal={addressRefusal}
+            onChange={onAddress}
+          />
+        }
       />
       <fieldset className="mt-6">
         <legend className="mb-2.5 text-sm font-medium">

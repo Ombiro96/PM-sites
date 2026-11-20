@@ -5,6 +5,14 @@ export const API_BASE = trimmed(
   import.meta.env.VITE_CONSOLE_API_BASE ?? "http://127.0.0.1:8000",
 );
 
+/**
+ * The host after a website's own name. The API never returns this on its own
+ * (a site's `url` only exists once the site does), so the console keeps the
+ * same value as the backend's `WEBSITES_ROOT_DOMAIN`.
+ */
+export const WEBSITES_ROOT_DOMAIN =
+  import.meta.env.VITE_WEBSITES_ROOT_DOMAIN || "poc.bomahut.com";
+
 export const PATHS = {
   login: "/login",
   register: "/register",
