@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { navigate } from "@/lib/router";
+import { Button } from "../components/fields";
 import { useAuth } from "../lib/auth";
 import { PATHS } from "../lib/config";
 import type { User } from "../lib/session";
@@ -60,21 +61,11 @@ export function SiteGate({ user }: { user: User }) {
       <main className="text-ink-muted flex min-h-dvh flex-col items-center justify-center gap-4 px-4 text-center">
         <p>{problem || "Loading…"}</p>
         {problem ? (
-          <div className="flex gap-6">
-            <button
-              type="button"
-              onClick={() => setAttempt(attempt + 1)}
-              className="text-brand font-medium hover:underline"
-            >
+          <div className="flex gap-3">
+            <Button tone="solid" onClick={() => setAttempt(attempt + 1)}>
               Try again
-            </button>
-            <button
-              type="button"
-              onClick={signOut}
-              className="text-brand font-medium hover:underline"
-            >
-              Sign out
-            </button>
+            </Button>
+            <Button onClick={signOut}>Sign out</Button>
           </div>
         ) : null}
       </main>

@@ -1,5 +1,6 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { locationKey, navigate, subscribe } from "@/lib/router";
+import { Button } from "./components/fields";
 import { useAuth } from "./lib/auth";
 import { PATHS } from "./lib/config";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
@@ -20,13 +21,9 @@ function Notice({
     <main className="flex min-h-dvh flex-col items-center justify-center gap-4 px-4 text-center">
       <p className="text-ink-muted">{children}</p>
       {onRetry ? (
-        <button
-          type="button"
-          onClick={onRetry}
-          className="text-brand font-medium hover:underline"
-        >
+        <Button tone="solid" onClick={onRetry}>
           Try again
-        </button>
+        </Button>
       ) : null}
     </main>
   );

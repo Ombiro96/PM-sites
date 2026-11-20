@@ -6,6 +6,7 @@ const TIMEOUT_MS = 20000;
 const UPLOAD_TIMEOUT_MS = 120000;
 export const NETWORK_PROBLEM =
   "Network problem. Please check your connection and try again.";
+const OUR_PROBLEM = "Something went wrong on our side. Please try again.";
 const NOT_SIGNED_IN = "You must be logged in to perform this action";
 
 export class ApiError extends Error {}
@@ -67,6 +68,11 @@ export async function graphql<Data>(
   };
   const refusal = result.errors?.[0]?.message;
   if (refusal === NOT_SIGNED_IN) whenNotSignedIn?.();
+  // No `data` at all means the backend rejected the document itself, in words not meant for people.
+  if (refusal && !("data" in result)) {
+    console.error(refusal);
+    throw new ApiError(OUR_PROBLEM);
+  }
   if (refusal) throw new ApiError(refusal);
   if (!result.data) throw new ApiError(NETWORK_PROBLEM);
   return result.data;
