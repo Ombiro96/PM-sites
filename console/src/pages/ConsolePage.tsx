@@ -115,8 +115,7 @@ const STATUS_TONES = {
 
 /** The line under the Go live title. It follows the same next step as the page. */
 function lineUnderGoLive(site: Site, stale: boolean): string {
-  if (stale)
-    return "Someone else changed this website. Reload, then continue.";
+  if (stale) return "Someone else changed this website. Reload, then continue.";
   if (site.publishProblems.length > 0)
     return "Fix what is listed, then publish.";
   if (!site.mayPublish)
@@ -493,9 +492,7 @@ export function ConsolePage({
   const upToDate =
     site.publishState === "LIVE" && !site.hasUnpublishedChanges && !dirty;
   const blocked = site.publishProblems.length > 0;
-  const onGoLive = view.key === "go-live";
-  // Header Publish only fires a publish. Issues, asking Bomahut, and a stale
-  // copy are handled on Go live, so the button opens that page instead.
+  // Header Publish only fires a publish. Issues, asking Bomahut, and a stale copy are handled on Go live.
   const publishHere = site.mayPublish && !blocked && !stale;
 
   return (
@@ -530,19 +527,8 @@ export function ConsolePage({
           </Button>
           <Button
             tone="solid"
-            disabled={
-              busy ||
-              publishing ||
-              (upToDate && !stale) ||
-              (onGoLive && (!publishHere || dirty))
-            }
-            onClick={() => {
-              if (!publishHere) {
-                navigate(pathOf("go-live"));
-                return;
-              }
-              publishNow();
-            }}
+            disabled={busy || publishing || upToDate || !publishHere || dirty}
+            onClick={publishNow}
           >
             {publishing
               ? "Publishing…"
