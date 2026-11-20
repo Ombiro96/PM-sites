@@ -2,6 +2,7 @@ import { ChoiceCard } from "../../components/ChoiceCard";
 import {
   CompanyFields,
   type CompanyErrors,
+  type Consent,
 } from "../../components/CompanyFields";
 import type { Company } from "../../lib/company";
 import { AUDIENCE_DETAILS } from "../../lib/looks";
@@ -10,19 +11,26 @@ import { AUDIENCES, type Audience } from "../../lib/website";
 export function DetailsStep({
   company,
   errors,
+  consent,
   audience,
   onCompany,
   onAudience,
 }: {
   company: Company;
   errors: CompanyErrors;
+  consent: Consent;
   audience: Audience;
   onCompany: (changes: Partial<Company>) => void;
   onAudience: (audience: Audience) => void;
 }) {
   return (
     <>
-      <CompanyFields company={company} errors={errors} onChange={onCompany} />
+      <CompanyFields
+        company={company}
+        errors={errors}
+        consent={consent}
+        onChange={onCompany}
+      />
       <fieldset className="mt-6">
         <legend className="mb-2.5 text-sm font-medium">
           Who should the website attract?

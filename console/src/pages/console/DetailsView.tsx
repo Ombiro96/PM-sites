@@ -2,16 +2,18 @@ import { useState, type FormEvent } from "react";
 import {
   CompanyFields,
   companyErrors,
+  CONSENT_NEEDED,
   hasErrors,
   NO_COMPANY,
+  sameCompany,
   trimmedCompany,
   type CompanyErrors,
 } from "../../components/CompanyFields";
-import { CheckField, FormError, SubmitButton } from "../../components/fields";
+import { FormError, SubmitButton } from "../../components/fields";
 import { saveCompany, type Company } from "../../lib/company";
 import type { Site } from "../../lib/site";
 
-/** The backend keeps a confirmation for good, so it is asked for only until it is given. */
+/** The backend keeps a consent for good. The console asks again whenever the details change. */
 const needsConfirming = (site: Site) =>
   site.publishProblems.some((problem) => problem.path === "facts");
 
@@ -27,6 +29,7 @@ export function DetailsView({
   const [details, setDetails] = useState<Company>(company ?? NO_COMPANY);
   const [confirmed, setConfirmed] = useState(false);
   const [errors, setErrors] = useState<CompanyErrors>({});
+  const [consentError, setConsentError] = useState<string>();
   const [problem, setProblem] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -39,11 +42,15 @@ export function DetailsView({
       </p>
     );
 
+  const changed = !sameCompany(details, company ?? NO_COMPANY);
+  const asks = changed || needsConfirming(site);
+
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     const found = companyErrors(details);
     setErrors(found);
-    if (hasErrors(found)) return;
+    setConsentError(asks && !confirmed ? CONSENT_NEEDED : undefined);
+    if (hasErrors(found) || (asks && !confirmed)) return;
     setProblem("");
     setBusy(true);
     try {
@@ -53,6 +60,7 @@ export function DetailsView({
         return;
       }
       setDetails(saved.company);
+      setConfirmed(false);
       onSaved(saved.company);
     } catch (error) {
       setProblem(error instanceof Error ? error.message : String(error));
@@ -71,21 +79,24 @@ export function DetailsView({
       <CompanyFields
         company={details}
         errors={errors}
+        consent={
+          asks
+            ? {
+                given: confirmed,
+                again: changed && !needsConfirming(site),
+                error: consentError,
+                onChange: (given) => {
+                  setConfirmed(given);
+                  setConsentError(undefined);
+                },
+              }
+            : undefined
+        }
         onChange={(changes) => {
           setDetails({ ...details, ...changes });
           setErrors({});
         }}
       />
-      {needsConfirming(site) ? (
-        <div className="bg-brand-soft mb-5 rounded-xl px-3.5">
-          <CheckField
-            label="These details can be shown to the public"
-            hint="Your website cannot go live until you tick this."
-            checked={confirmed}
-            onChange={setConfirmed}
-          />
-        </div>
-      ) : null}
       <div className="ml-auto w-44">
         <SubmitButton busy={busy}>Save details</SubmitButton>
       </div>

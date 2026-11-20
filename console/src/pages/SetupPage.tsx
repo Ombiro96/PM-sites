@@ -10,6 +10,7 @@ import logo from "../assets/bomahut.svg";
 import { Chevron } from "../components/Chevron";
 import {
   companyErrors,
+  CONSENT_NEEDED,
   hasErrors,
   NO_COMPANY,
   trimmedCompany,
@@ -333,6 +334,9 @@ function SetupWizard({
   const [website, setWebsite] = useState<Website | null>(null);
   const [company, setCompany] = useState<Company>(NO_COMPANY);
   const [errors, setErrors] = useState<CompanyErrors>({});
+  // The consent to the details being public. It is asked for again once saved details are changed.
+  const [consent, setConsent] = useState({ given: false, saved: false });
+  const [consentError, setConsentError] = useState<string>();
   const [loadProblem, setLoadProblem] = useState("");
   const [problem, setProblem] = useState("");
   const [busy, setBusy] = useState(false);
@@ -389,13 +393,15 @@ function SetupWizard({
       if (step.key === "details") {
         const found = companyErrors(company);
         setErrors(found);
-        if (hasErrors(found)) return;
-        const saved = await saveCompany(trimmedCompany(company));
+        setConsentError(consent.given ? undefined : CONSENT_NEEDED);
+        if (hasErrors(found) || !consent.given) return;
+        const saved = await saveCompany(trimmedCompany(company), true);
         if (!saved.ok) {
           setProblem(saved.message);
           return;
         }
         setCompany(saved.company);
+        setConsent({ given: true, saved: true });
       }
       if (step.key === "about") {
         const found = aboutTextError(website.answers.about_text);
@@ -476,10 +482,20 @@ function SetupWizard({
                 <DetailsStep
                   company={company}
                   errors={errors}
+                  consent={{
+                    given: consent.given,
+                    error: consentError,
+                    onChange: (given) => {
+                      setConsent({ given, saved: false });
+                      setConsentError(undefined);
+                    },
+                  }}
                   audience={website.audience}
                   onCompany={(changes) => {
                     setCompany({ ...company, ...changes });
                     setErrors({});
+                    if (consent.saved)
+                      setConsent({ given: false, saved: false });
                   }}
                   onAudience={(audience) =>
                     setWebsite({ ...website, audience })
