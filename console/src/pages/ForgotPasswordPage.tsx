@@ -7,7 +7,15 @@ import { PATHS } from "../lib/config";
 import { sendPasswordReset } from "../lib/session";
 import { normalizeUsername } from "../lib/validation";
 
-const SENT = "A password reset link has been sent to your email. Thank you";
+const SENT =
+  "If a username exists, we will send a reset password link to it.";
+
+/** These say whether the username is real. The same sentence covers both. */
+const hidesAccount = (message: string) =>
+  message.startsWith("We couldn't find an account") ||
+  message.startsWith(
+    "Could not complete password reset because your account has been deactivated",
+  );
 
 export function ForgotPasswordPage() {
   const [username, setUsername] = useState("");
@@ -25,7 +33,7 @@ export function ForgotPasswordPage() {
     setBusy(true);
     try {
       const result = await sendPasswordReset(normalizeUsername(username));
-      if (result.ok) toast.success(SENT);
+      if (result.ok || hidesAccount(result.message)) toast.success(SENT);
       else setProblem(result.message);
     } catch (failure) {
       setProblem(failure instanceof Error ? failure.message : String(failure));
