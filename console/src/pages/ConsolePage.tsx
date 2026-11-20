@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { navigate } from "@/lib/router";
-import { LOOKS } from "@/lib/site/data";
 import type { Look } from "@/lib/site/types";
 import logo from "../assets/bomahut.svg";
 import { Button } from "../components/fields";
@@ -37,7 +36,6 @@ import { LookView } from "./console/LookView";
 import { PagesView } from "./console/PagesView";
 import { PicturesView } from "./console/PicturesView";
 import { SettingsView } from "./console/SettingsView";
-import { LookStep } from "./website/LookStep";
 
 const VIEWS = [
   {
@@ -96,7 +94,7 @@ type ViewKey = (typeof VIEWS)[number]["key"];
 
 const pathOf = (view: ViewKey) => `${PATHS.website}/${view}`;
 
-/** The view a path names, and what follows it: the theme opened on the Theme view. */
+/** The view a path names, and what follows it: the page opened on Edit pages. */
 function viewAt(pathname: string) {
   const [key, detail = ""] = pathname
     .slice(PATHS.website.length + 1)
@@ -202,10 +200,6 @@ export function ConsolePage({
 }) {
   const { signOut } = useAuth();
   const { view, detail } = viewAt(window.location.pathname);
-  const openedLook = LOOKS.find((look) => look === detail) ?? null;
-  // Each theme in the grid is a whole website being drawn, so once shown the grid stays loaded and is only hidden.
-  const [themesShown, setThemesShown] = useState(false);
-  if (view.key === "theme" && !themesShown) setThemesShown(true);
   const [company, setCompany] = useState<Company | null>(null);
   const [pictures, setPictures] = useState<Picture[]>([]);
   const [rules, setRules] = useState<Rules>();
@@ -602,30 +596,16 @@ export function ConsolePage({
         </nav>
 
         <main className="flex min-w-0 flex-[999_1_35rem] flex-col gap-4">
-          {view.key === "theme" && openedLook ? null : (
-            <div>
-              <h1 className="text-[26px] leading-tight font-semibold tracking-tight">
-                {view.title}
-              </h1>
-              <p className="text-ink-muted">
-                {view.key === "go-live"
-                  ? lineUnderGoLive(site, stale)
-                  : view.intro}
-              </p>
-            </div>
-          )}
-
-          {themesShown ? (
-            <div hidden={view.key !== "theme" || openedLook !== null}>
-              <LookStep
-                look={site.look}
-                brandColour={site.brandColour}
-                company={company}
-                opens
-                onChoose={(look) => navigate(`${pathOf("theme")}/${look}`)}
-              />
-            </div>
-          ) : null}
+          <div>
+            <h1 className="text-[26px] leading-tight font-semibold tracking-tight">
+              {view.title}
+            </h1>
+            <p className="text-ink-muted">
+              {view.key === "go-live"
+                ? lineUnderGoLive(site, stale)
+                : view.intro}
+            </p>
+          </div>
 
           {!rules ? (
             <p className="text-ink-muted">{loadProblem || "Loading…"}</p>
@@ -675,8 +655,6 @@ export function ConsolePage({
             <LookView
               key={view.key}
               part={view.key}
-              opened={view.key === "theme" ? openedLook : null}
-              onClose={() => navigate(pathOf("theme"))}
               site={site}
               working={working}
               company={company}

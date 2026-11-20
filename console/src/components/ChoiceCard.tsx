@@ -2,8 +2,7 @@ import type { ReactNode } from "react";
 
 /**
  * One option of a single-choice group, drawn as a card. `children` sit above
- * its name. With `opens`, the card is a button that leads somewhere, and can
- * be pressed again while chosen.
+ * its name.
  */
 export function ChoiceCard({
   group,
@@ -12,7 +11,6 @@ export function ChoiceCard({
   onChoose,
   name,
   summary,
-  opens = false,
   children,
 }: {
   group: string;
@@ -21,7 +19,6 @@ export function ChoiceCard({
   onChoose: () => void;
   name: string;
   summary: string;
-  opens?: boolean;
   children?: ReactNode;
 }) {
   const words = (
@@ -40,17 +37,6 @@ export function ChoiceCard({
       </span>
     </>
   );
-  if (opens)
-    return (
-      <button
-        type="button"
-        aria-pressed={chosen}
-        onClick={onChoose}
-        className={`border-line focus-visible:outline-brand block w-full cursor-pointer overflow-hidden rounded-xl border bg-white text-left transition-shadow hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 ${chosen ? "border-brand ring-brand-soft ring-4" : ""}`}
-      >
-        {words}
-      </button>
-    );
   return (
     <label className="border-line has-checked:border-brand has-checked:ring-brand-soft has-focus-visible:outline-brand block cursor-pointer overflow-hidden rounded-xl border bg-white transition-shadow hover:shadow-md has-checked:ring-4 has-focus-visible:outline-2 has-focus-visible:outline-offset-2">
       <input
