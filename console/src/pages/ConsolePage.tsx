@@ -94,14 +94,15 @@ type ViewKey = (typeof VIEWS)[number]["key"];
 
 const pathOf = (view: ViewKey) => `${PATHS.website}/${view}`;
 
-/** The view a path names, and what follows it: the page opened on Edit pages. */
+/** The view a path names, and what follows it: the page and the section opened on Edit pages. */
 function viewAt(pathname: string) {
-  const [key, detail = ""] = pathname
+  const [key, detail = "", more = ""] = pathname
     .slice(PATHS.website.length + 1)
     .split("/");
   return {
     view: VIEWS.find((each) => each.key === key) ?? VIEWS[0],
     detail,
+    more,
   };
 }
 
@@ -199,7 +200,7 @@ export function ConsolePage({
   onReload: () => void;
 }) {
   const { signOut } = useAuth();
-  const { view, detail } = viewAt(window.location.pathname);
+  const { view, detail, more } = viewAt(window.location.pathname);
   const [company, setCompany] = useState<Company | null>(null);
   const [pictures, setPictures] = useState<Picture[]>([]);
   const [rules, setRules] = useState<Rules>();
@@ -612,6 +613,7 @@ export function ConsolePage({
           ) : view.key === "pages" ? (
             <PagesView
               openPageId={detail}
+              openSectionId={more}
               site={site}
               rules={rules}
               working={working}
@@ -665,6 +667,7 @@ export function ConsolePage({
           ) : view.key === "go-live" ? (
             <GoLiveView
               site={site}
+              rules={rules}
               dirty={dirty}
               busy={busy || publishing}
               stale={stale}

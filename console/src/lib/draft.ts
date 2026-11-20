@@ -288,3 +288,29 @@ export function documentProblems(
   );
   return problems;
 }
+
+/**
+ * Where one of the backend's publish problems is: in words, and as the page
+ * and section to open. Null when its path is not inside a page.
+ */
+export function problemPlace(
+  path: string,
+  document: SiteDocument,
+  rules: Rules,
+): { pageId: string; sectionId: string; where: string } | null {
+  const match = /^pages\[(\d+)\](?:\.sections\[(\d+)\](?:\.(.+))?)?/.exec(path);
+  const page = match ? document.pages[Number(match[1])] : undefined;
+  if (!match || !page) return null;
+  const section =
+    match[2] === undefined ? undefined : sectionsOf(page)[Number(match[2])];
+  if (!section) return { pageId: page.id, sectionId: "", where: page.title };
+  const rule = ruleFor(rules, section.type);
+  const parts = [page.title, rule?.name ?? section.type];
+  const rest = match[3] ?? "";
+  const item = /^items\[(\d+)\](?:\.(\w+))?/.exec(rest);
+  const field = item ? item[2] : /^fields\.(\w+)/.exec(rest)?.[1];
+  if (item)
+    parts.push(`${rule?.items?.label ?? "Entry"} ${Number(item[1]) + 1}`);
+  if (field) parts.push(fieldLabel(section.type, field));
+  return { pageId: page.id, sectionId: section.id, where: parts.join(", ") };
+}

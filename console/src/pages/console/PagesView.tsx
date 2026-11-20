@@ -23,6 +23,7 @@ const text = (value: unknown) => (typeof value === "string" ? value : "");
 /** The pages as visitors will see them, beside the list of their sections and the form for the one being changed. */
 export function PagesView({
   openPageId = "",
+  openSectionId = "",
   site,
   rules,
   working,
@@ -37,6 +38,8 @@ export function PagesView({
 }: {
   /** A page to show first, from `/website/pages/<id>`. */
   openPageId?: string;
+  /** A section of that page to open for changing, from `/website/pages/<id>/<section id>`. */
+  openSectionId?: string;
   site: Site;
   rules: Rules;
   working: SiteDocument;
@@ -53,17 +56,17 @@ export function PagesView({
   const [pageId, setPageId] = useState(
     known(openPageId) ? openPageId : (working.pages[0]?.id ?? ""),
   );
-  const [selected, setSelected] = useState("");
+  const [selected, setSelected] = useState(openSectionId);
   const [adding, setAdding] = useState(false);
 
   useEffect(() => {
     if (!known(openPageId)) return;
     setPageId(openPageId);
-    setSelected("");
+    setSelected(openSectionId);
     setAdding(false);
     // Edits replace `working` and must not throw away the section being edited.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [openPageId]);
+  }, [openPageId, openSectionId]);
 
   const page =
     working.pages.find((each) => each.id === pageId) ?? working.pages[0];

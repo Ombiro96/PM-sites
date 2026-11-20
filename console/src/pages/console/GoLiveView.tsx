@@ -1,6 +1,8 @@
 import { TextLink } from "../../components/AuthLayout";
 import { Button } from "../../components/fields";
 import { PATHS } from "../../lib/config";
+import { problemPlace } from "../../lib/draft";
+import type { Rules } from "../../lib/rules";
 import type { Problem, Site } from "../../lib/site";
 
 export const formatDate = (iso: string) =>
@@ -10,23 +12,22 @@ export const formatDate = (iso: string) =>
     year: "numeric",
   });
 
-const pageAt = (path: string, site: Site) => {
-  const match = /^pages\[(\d+)\]/.exec(path);
-  if (!match) return undefined;
-  return site.draft.pages[Number(match[1])];
-};
-
-/** Where the manager goes to clear one publish problem. */
-function fixFor(problem: Problem, site: Site) {
+/** Where one publish problem is, and where the manager goes to clear it. */
+function fixFor(problem: Problem, site: Site, rules: Rules) {
   if (problem.path === "facts" || problem.path.startsWith("facts."))
-    return { href: `${PATHS.website}/details`, label: "Open details" };
-  const page = pageAt(problem.path, site);
-  if (page)
     return {
-      href: `${PATHS.website}/pages/${page.id}`,
-      label: `Open ${page.title}`,
+      where: "Company details",
+      href: `${PATHS.website}/details`,
+      label: "Open details",
     };
-  return { href: `${PATHS.website}/pages`, label: "Open pages" };
+  const place = problemPlace(problem.path, site.draft, rules);
+  if (place)
+    return {
+      where: place.where,
+      href: `${PATHS.website}/pages/${place.pageId}${place.sectionId ? `/${place.sectionId}` : ""}`,
+      label: "Open it",
+    };
+  return { where: "", href: `${PATHS.website}/pages`, label: "Open pages" };
 }
 
 /**
@@ -35,6 +36,7 @@ function fixFor(problem: Problem, site: Site) {
  */
 export function GoLiveView({
   site,
+  rules,
   dirty,
   busy,
   stale,
@@ -43,6 +45,7 @@ export function GoLiveView({
   onReload,
 }: {
   site: Site;
+  rules: Rules;
   dirty: boolean;
   busy: boolean;
   stale: boolean;
@@ -94,13 +97,18 @@ export function GoLiveView({
           </p>
           <ul className="mt-2">
             {problems.map((problem) => {
-              const fix = fixFor(problem, site);
+              const fix = fixFor(problem, site, rules);
               return (
                 <li
                   key={problem.path + problem.code}
                   className="flex flex-col gap-1 border-t border-amber-300 py-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4"
                 >
-                  <p className="font-medium">{problem.message}</p>
+                  <p>
+                    {fix.where ? (
+                      <span className="block font-semibold">{fix.where}</span>
+                    ) : null}
+                    {problem.message}
+                  </p>
                   <span className="shrink-0">
                     <TextLink href={fix.href}>{fix.label}</TextLink>
                   </span>

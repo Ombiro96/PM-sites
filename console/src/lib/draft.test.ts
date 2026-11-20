@@ -7,6 +7,7 @@ import {
   moveSection,
   newSection,
   picturesUsed,
+  problemPlace,
   sectionErrors,
   sectionsOf,
   withoutNewIds,
@@ -65,5 +66,37 @@ describe("a draft being edited", () => {
 
   it("knows which pages use a picture", () => {
     expect(picturesUsed(document).get("as_skyline")).toEqual(["Home"]);
+  });
+});
+
+describe("where a publish problem is", () => {
+  it("names the page, the section, the entry and the field", () => {
+    const team = newSection(ruleFor(rules, "team")!);
+    const withTeam = addSection(document, home.id, {
+      ...team,
+      id: "sec_team",
+      items: [{ id: "it_1", name: "Amina" }, { id: "it_2" }],
+    });
+    const at = withTeam.pages[0].sections.length - 1;
+    expect(
+      problemPlace(`pages[0].sections[${at}].items[1].name`, withTeam, rules),
+    ).toEqual({
+      pageId: home.id,
+      sectionId: "sec_team",
+      where: `${home.title}, Team, Person 2, Name`,
+    });
+  });
+
+  it("names a field of the section itself", () => {
+    expect(
+      problemPlace("pages[0].sections[0].fields.heading", document, rules)
+        ?.where,
+    ).toBe(
+      `${home.title}, ${ruleFor(rules, home.sections[0].type)?.name}, Heading`,
+    );
+  });
+
+  it("is null outside the pages", () => {
+    expect(problemPlace("facts.phone", document, rules)).toBeNull();
   });
 });
