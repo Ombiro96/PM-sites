@@ -40,8 +40,8 @@ const REGISTER = `
 `;
 
 const SEND_PASSWORD_RESET = `
-  mutation SendPasswordReset($username: String!) {
-    sendPasswordResetEmail(username: $username) {
+  mutation SendPasswordReset($username: String!, $frontendDomain: String) {
+    sendPasswordResetEmail(username: $username, frontendDomain: $frontendDomain) {
       success
       errors
     }
@@ -119,7 +119,10 @@ export async function sendPasswordReset(
       success: boolean | null;
       errors: string | null;
     } | null;
-  }>(SEND_PASSWORD_RESET, { username });
+  }>(SEND_PASSWORD_RESET, {
+    username,
+    frontendDomain: window.location.origin,
+  });
   if (data.sendPasswordResetEmail?.success) return { ok: true };
   return {
     ok: false,
