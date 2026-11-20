@@ -142,6 +142,20 @@ function statusOf(site: Site): [string, keyof typeof STATUS_TONES] {
     : ["Live", "good"];
 }
 
+/** What sits beside Go live in the sidebar: how many things are left to fix, or a dot for where the website stands. */
+function goLiveMark(
+  site: Site,
+  upToDate: boolean,
+): { count: number; says: string } | null {
+  if (site.status === "OFF") return null;
+  const count = site.publishProblems.length;
+  if (count > 0)
+    return { count, says: `${count} left to fix before going live` };
+  return upToDate
+    ? { count: 0, says: "Live and up to date" }
+    : { count: 0, says: "Not published yet" };
+}
+
 const SAVE_FIRST: NoticeContent = {
   tone: "info",
   title: "Save your changes first",
@@ -492,6 +506,7 @@ export function ConsolePage({
   const upToDate =
     site.publishState === "LIVE" && !site.hasUnpublishedChanges && !dirty;
   const blocked = site.publishProblems.length > 0;
+  const mark = goLiveMark(site, upToDate);
   // Header Publish only fires a publish. Issues, asking Bomahut, and a stale copy are handled on Go live.
   const publishHere = site.mayPublish && !blocked && !stale;
 
@@ -564,9 +579,24 @@ export function ConsolePage({
                 event.stopPropagation();
                 tell(STAY_ON_PAGES);
               }}
-              className={`flex min-h-11 items-center rounded-lg px-3.5 ${each.key === view.key ? "bg-brand-soft text-brand font-semibold" : "hover:bg-line/40 font-medium"}`}
+              className={`flex min-h-11 items-center justify-between gap-2 rounded-lg px-3.5 ${each.key === view.key ? "bg-brand-soft text-brand font-semibold" : "hover:bg-line/40 font-medium"}`}
             >
               {each.nav}
+              {each.key === "go-live" && mark ? (
+                <span
+                  title={mark.says}
+                  className={
+                    mark.count > 0
+                      ? "rounded-full bg-amber-100 px-2 py-0.5 text-[13px] font-semibold text-amber-900"
+                      : `size-2.5 rounded-full ${upToDate ? "bg-green-600" : "bg-amber-500"}`
+                  }
+                >
+                  {mark.count > 0 ? mark.count : null}
+                  <span className="sr-only">
+                    {mark.count > 0 ? " left to fix" : mark.says}
+                  </span>
+                </span>
+              ) : null}
             </a>
           ))}
         </nav>
