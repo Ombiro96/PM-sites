@@ -145,6 +145,11 @@ manager's one brand colour (`src/lib/site/brand.ts`). Each look is a set of
 tokens and a few section overrides in `src/styles/site.css`; no section has
 per-look markup. Fonts are bundled with the app.
 
+There are six: `fresh`, `classic`, `bold`, `coast`, `estate` and `plain`, listed
+in `src/lib/site/data.ts`. The backend keeps its own list
+(`websites/section_rules.py` and the `Site` model) and refuses a look it does
+not know.
+
 ## Rules the code keeps
 
 - Manager text is never rendered as HTML.
@@ -157,8 +162,8 @@ per-look markup. Fonts are bundled with the app.
 ## The console
 
 `console/` is a second, separate app in this repo: where a manager signs in or
-creates an account and sets up their website. It has its own build
-(`vite.console.config.ts`), so a site build never carries it.
+creates an account, sets up their website and then runs it. It has its own
+build (`vite.console.config.ts`), so a site build never carries it.
 
 ```bash
 npm run dev:console      # http://localhost:5174
@@ -168,28 +173,57 @@ npm run build:console    # dist-console/
 
 It talks to the backend named in `VITE_CONSOLE_API_BASE` (see `.env.example`).
 
-| Step    | Does                                                                                            | Kept                                              |
-| ------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| Sign in | `tokenAuth`, `register`, `sendPasswordResetEmail` and `passwordReset`, exactly as the dashboard | The backend                                       |
-| Look    | One of the six looks                                                                            | This browser, until the backend has calls for it  |
-| Colour  | The brand colour                                                                                | This browser, until the backend has calls for it  |
-| Details | Company name, phone, WhatsApp; who the site is for                                              | `saveAgencyProfile`; the audience in this browser |
-| Review  | Everything chosen, each line changeable                                                         |                                                   |
+**Setup** (`/setup/<step>`) is gone through once, by an account with no website:
 
-The backend's `websites` app has no calls for a site's look, colour, audience,
-draft, preview or publish yet. `console/src/lib/website.ts` keeps those choices
-in the browser; its `readWebsite` and `saveWebsite` are the two functions to
-point at the backend when it has them.
+| Step         | Does                                                                                            | Kept                                              |
+| ------------ | ----------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| Sign in      | `tokenAuth`, `register`, `sendPasswordResetEmail` and `passwordReset`, exactly as the dashboard | The backend                                       |
+| Theme        | One of the six looks                                                                            | This browser, until the last step                 |
+| Theme colour | The brand colour                                                                                | This browser, until the last step                 |
+| Details      | Company name, phone, WhatsApp; who the site is for                                              | `saveAgencyProfile`; the audience in this browser |
+| About you    | What the first draft is written from: About text, services, whether to show figures             | This browser, until the last step                 |
+| Review       | Everything chosen, each line changeable. "Write my first draft" creates the website             | `createSite`, then `setLook`                      |
+
+**The console** (`/website/<view>`) is what an account with a website sees:
+
+| View            | Does                                                                                           |
+| --------------- | ---------------------------------------------------------------------------------------------- |
+| Edit pages      | The page drawn live beside its list of sections. Clicking a section, in either, opens its form |
+| Pictures        | Upload, and see which pages use each picture                                                   |
+| Company details | The same fields as setup, and the tick that they may be public                                 |
+| Theme           | The look, as in setup, drawn on the manager's own pages                                        |
+| Theme colour    | The brand colour, as in setup, drawn on the manager's own pages                                |
+| Go live         | What still blocks publishing, asking Bomahut to switch publishing on, and Publish              |
+| Enquiries       | Messages and management requests from the site                                                 |
+| Settings        | The address, undoing the last publish, switching the site off and on                           |
+
+Preview and Publish are in the header on every view.
+
+**The backend calls are real.** `console/src/lib/site.ts` holds the types and
+one function per call of the editor API (`backend/websites/graphql_schema`).
+A refusal comes back as `{ ok: false, code, message, problems }`; the screens
+switch on `code`. Things worth knowing:
+
+- the draft, the answers and the section rules travel as JSON text;
+- a publish, an undo and a switch-on are followed by asking `website(id)` every
+  three seconds until `publishState` is `LIVE` or `FAILED`, as a preview is
+  followed with `websiteDeploy(id)`;
+- without the backend's `WEBSITES_*` hosting settings, preview, publish, undo and
+  switch-on are refused with `hosting_off`;
+- only Bomahut staff switch publishing on, in the Django admin (`may_publish`);
+- `rules.fixture.json` is a copy of `rules_as_data()`, used by the tests only.
 
 **The preview is the real site.** `console/preview.html` loads the site app
 from `src/` in a frame, and the console sends it site data with `postMessage`
-(`console/src/components/SitePreview.tsx`). Until a manager has a draft of
-their own it draws the full sample from `src/dev/`, in their look and colour
-and under their company's name, with made-up houses.
+(`console/src/components/SitePreview.tsx`). In setup it draws the full sample
+from `src/dev/` in the manager's look and colour. In the console it draws the
+manager's own draft as they type, and a click on a section is reported back
+to the console. Houses are made up and figures are examples there, because
+only a real preview or publish fills them in.
 
 ```
 console/index.html, preview.html   the console, and the frame that draws a site
-console/src/pages/                 sign in, create account, the setup steps
-console/src/components/            form fields, choice cards, the site preview
-console/src/lib/                   backend calls, sign-in state, website choices
+console/src/pages/                 sign in, create account, setup, the console and its views
+console/src/components/            form fields, the section form, the site preview
+console/src/lib/                   backend calls, sign-in state, setup choices, the draft being edited
 ```

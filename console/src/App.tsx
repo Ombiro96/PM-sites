@@ -1,12 +1,14 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { locationKey, navigate, subscribe } from "@/lib/router";
+import { Button } from "./components/fields";
 import { useAuth } from "./lib/auth";
 import { PATHS } from "./lib/config";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
+import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
-import { WebsitePage } from "./pages/WebsitePage";
+import { SiteGate } from "./pages/SiteGate";
 
 function Notice({
   children,
@@ -19,13 +21,9 @@ function Notice({
     <main className="flex min-h-dvh flex-col items-center justify-center gap-4 px-4 text-center">
       <p className="text-ink-muted">{children}</p>
       {onRetry ? (
-        <button
-          type="button"
-          onClick={onRetry}
-          className="text-brand font-medium hover:underline"
-        >
+        <Button tone="solid" onClick={onRetry}>
           Try again
-        </button>
+        </Button>
       ) : null}
     </main>
   );
@@ -37,6 +35,7 @@ export function App() {
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
 
   const signedOutPaths: string[] = [
+    "/",
     PATHS.login,
     PATHS.register,
     PATHS.forgotPassword,
@@ -47,8 +46,13 @@ export function App() {
     : "";
   let wanted = path;
   if (resetToken === "") {
-    if (state.status === "signed_in" && !path.startsWith(`${PATHS.website}/`))
-      wanted = `${PATHS.website}/look`;
+    const inSetup = path === PATHS.setup || path.startsWith(`${PATHS.setup}/`);
+    if (
+      state.status === "signed_in" &&
+      !path.startsWith(`${PATHS.website}/`) &&
+      !inSetup
+    )
+      wanted = `${PATHS.website}/pages`;
     if (state.status === "signed_out" && !signedOutPaths.includes(path))
       wanted = PATHS.login;
   }
@@ -67,8 +71,9 @@ export function App() {
       </Notice>
     );
   if (wanted !== path) return null;
-  if (state.status === "signed_in") return <WebsitePage user={state.user} />;
+  if (state.status === "signed_in") return <SiteGate user={state.user} />;
   if (path === PATHS.register) return <RegisterPage />;
   if (path === PATHS.forgotPassword) return <ForgotPasswordPage />;
+  if (path === "/") return <LandingPage />;
   return <LoginPage />;
 }

@@ -23,8 +23,8 @@ const READ = `
 `;
 
 const SAVE = `
-  mutation SaveAgencyProfile($displayName: String, $phone: String, $whatsappNumber: String) {
-    saveAgencyProfile(displayName: $displayName, phone: $phone, whatsappNumber: $whatsappNumber) {
+  mutation SaveAgencyProfile($displayName: String, $phone: String, $whatsappNumber: String, $confirmPublic: Boolean) {
+    saveAgencyProfile(displayName: $displayName, phone: $phone, whatsappNumber: $whatsappNumber, confirmPublic: $confirmPublic) {
       success
       message
       agencyProfile {
@@ -40,14 +40,18 @@ export async function readCompany(): Promise<Company | null> {
   return data.agencyProfile;
 }
 
-export async function saveCompany(company: Company): Promise<Saved> {
+/** `confirmPublic` records that the name and phone number may be shown publicly. The backend never takes it back. */
+export async function saveCompany(
+  company: Company,
+  confirmPublic = false,
+): Promise<Saved> {
   const data = await graphql<{
     saveAgencyProfile: {
       success: boolean | null;
       message: string | null;
       agencyProfile: Company | null;
     } | null;
-  }>(SAVE, company);
+  }>(SAVE, { ...company, confirmPublic });
   const result = data.saveAgencyProfile;
   if (result?.success && result.agencyProfile)
     return { ok: true, company: result.agencyProfile };

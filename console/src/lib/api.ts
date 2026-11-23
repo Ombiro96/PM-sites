@@ -3,24 +3,34 @@ import { whileLoading } from "./loading";
 import { readToken } from "./token";
 
 const TIMEOUT_MS = 20000;
+const UPLOAD_TIMEOUT_MS = 120000;
 export const NETWORK_PROBLEM =
   "Network problem. Please check your connection and try again.";
-export const NOT_SIGNED_IN = "You must be logged in to perform this action";
+const OUR_PROBLEM = "Something went wrong on our side. Please try again.";
+const NOT_SIGNED_IN = "You must be logged in to perform this action";
 
 export class ApiError extends Error {}
 
+let whenNotSignedIn: (() => void) | null = null;
+
+/** Any call can be told the caller is not signed in; like the web app, that ends the session. */
+export function onNotSignedIn(listener: (() => void) | null): void {
+  whenNotSignedIn = listener;
+}
+
 async function request(path: string, body: unknown): Promise<unknown> {
   const token = readToken();
+  const upload = body instanceof FormData;
   let response: Response;
   try {
     response = await fetch(`${API_BASE}${path}`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        ...(upload ? {} : { "Content-Type": "application/json" }),
         ...(token ? { Authorization: `JWT ${token}` } : {}),
       },
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(TIMEOUT_MS),
+      body: upload ? body : JSON.stringify(body),
+      signal: AbortSignal.timeout(upload ? UPLOAD_TIMEOUT_MS : TIMEOUT_MS),
     });
   } catch {
     throw new ApiError(NETWORK_PROBLEM);
@@ -35,16 +45,34 @@ function send(path: string, body: unknown, quiet = false): Promise<unknown> {
   return quiet ? request(path, body) : whileLoading(() => request(path, body));
 }
 
-/** Runs one GraphQL document and returns its `data`. A refusal from the server is thrown. */
+/**
+ * Runs one GraphQL document and returns its `data`. A refusal from the server is thrown.
+ * A `file` is sent as the document's `$file` variable.
+ */
 export async function graphql<Data>(
   query: string,
   variables: Record<string, unknown> = {},
+  { file, quiet = false }: { file?: File; quiet?: boolean } = {},
 ): Promise<Data> {
-  const result = (await send("/graphql", { query, variables })) as {
+  let body: unknown = { query, variables };
+  if (file) {
+    const form = new FormData();
+    form.append("operations", JSON.stringify(body));
+    form.append("map", JSON.stringify({ "0": ["variables.file"] }));
+    form.append("0", file);
+    body = form;
+  }
+  const result = (await send("/graphql", body, quiet)) as {
     data?: Data | null;
     errors?: { message?: string }[];
   };
   const refusal = result.errors?.[0]?.message;
+  if (refusal === NOT_SIGNED_IN) whenNotSignedIn?.();
+  // No `data` at all means the backend rejected the document itself, in words not meant for people.
+  if (refusal && !("data" in result)) {
+    console.error(refusal);
+    throw new ApiError(OUR_PROBLEM);
+  }
   if (refusal) throw new ApiError(refusal);
   if (!result.data) throw new ApiError(NETWORK_PROBLEM);
   return result.data;

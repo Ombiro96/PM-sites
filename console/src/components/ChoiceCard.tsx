@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 
-/** One option of a single-choice group, drawn as a card. `children` sit above its name. */
+/**
+ * One option of a single-choice group, drawn as a card. `children` sit above
+ * its name.
+ */
 export function ChoiceCard({
   group,
   value,
@@ -18,16 +21,8 @@ export function ChoiceCard({
   summary: string;
   children?: ReactNode;
 }) {
-  return (
-    <label className="border-line has-checked:border-brand has-checked:ring-brand-soft has-focus-visible:outline-brand block cursor-pointer overflow-hidden rounded-xl border bg-white transition-shadow hover:shadow-md has-checked:ring-4 has-focus-visible:outline-2 has-focus-visible:outline-offset-2">
-      <input
-        type="radio"
-        name={group}
-        value={value}
-        checked={chosen}
-        onChange={onChoose}
-        className="sr-only"
-      />
+  const words = (
+    <>
       {children}
       <span className="block px-3.5 py-3">
         <span className="flex items-center justify-between gap-2 font-semibold">
@@ -40,6 +35,19 @@ export function ChoiceCard({
         </span>
         <span className="text-ink-muted mt-0.5 block text-sm">{summary}</span>
       </span>
+    </>
+  );
+  return (
+    <label className="border-line has-checked:border-brand has-checked:ring-brand-soft has-focus-visible:outline-brand block cursor-pointer overflow-hidden rounded-xl border bg-white transition-shadow hover:shadow-md has-checked:ring-4 has-focus-visible:outline-2 has-focus-visible:outline-offset-2">
+      <input
+        type="radio"
+        name={group}
+        value={value}
+        checked={chosen}
+        onChange={onChoose}
+        className="sr-only"
+      />
+      {words}
     </label>
   );
 }

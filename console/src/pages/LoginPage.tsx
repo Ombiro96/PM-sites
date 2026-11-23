@@ -6,6 +6,7 @@ import {
   SubmitButton,
   TextField,
 } from "../components/fields";
+import { NextWebsite } from "../components/NextWebsite";
 import { useAuth } from "../lib/auth";
 import { PATHS } from "../lib/config";
 import { signIn } from "../lib/session";
@@ -13,7 +14,8 @@ import { takeTrackingCookies } from "../lib/tracking";
 import { normalizeUsername } from "../lib/validation";
 
 export function LoginPage() {
-  const { accept } = useAuth();
+  const { accept, state } = useAuth();
+  const notice = state.status === "signed_out" ? (state.message ?? "") : "";
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [problem, setProblem] = useState("");
@@ -45,6 +47,7 @@ export function LoginPage() {
   return (
     <AuthLayout
       title="Sign in"
+      aside={<NextWebsite signingIn />}
       links={
         <>
           <TextLink href={PATHS.forgotPassword}>Forgot Password</TextLink>
@@ -55,7 +58,7 @@ export function LoginPage() {
       }
     >
       <form onSubmit={submit} noValidate>
-        <FormError message={problem} />
+        <FormError message={problem || notice} />
         <TextField
           id="username"
           label="Username"

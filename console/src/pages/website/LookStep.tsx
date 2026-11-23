@@ -31,7 +31,7 @@ export function LookStep({
 
   return (
     <fieldset>
-      <legend className="sr-only">Look</legend>
+      <legend className="sr-only">Theme</legend>
       <div className="grid grid-cols-2 gap-3.5">
         {sites.map(({ look: each, site }) => (
           <ChoiceCard
@@ -46,7 +46,7 @@ export function LookStep({
             <span className="border-line block border-b">
               <SitePreview
                 site={site}
-                title={`${LOOK_DETAILS[each].name} look`}
+                title={`${LOOK_DETAILS[each].name} theme`}
                 {...THUMBNAIL}
               />
             </span>

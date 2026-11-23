@@ -7,14 +7,15 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { NETWORK_PROBLEM } from "./api";
+import { navigate } from "@/lib/router";
+import { NETWORK_PROBLEM, onNotSignedIn } from "./api";
 import { fetchUser, type User } from "./session";
 import { clearToken, readToken, storeToken } from "./token";
 
 export type AuthState =
   | { status: "checking" }
   | { status: "unreachable" }
-  | { status: "signed_out" }
+  | { status: "signed_out"; message?: string }
   | { status: "signed_in"; user: User };
 
 type Auth = {
@@ -26,10 +27,17 @@ type Auth = {
 
 const AuthContext = createContext<Auth | null>(null);
 
+const SESSION_ENDED = "You were signed out. Sign in again to carry on.";
+const NOT_A_MANAGER =
+  "This account cannot manage a website. Sign in with your property manager account.";
+
 async function currentState(): Promise<AuthState> {
   if (!readToken()) return { status: "signed_out" };
   try {
-    return { status: "signed_in", user: await fetchUser() };
+    const user = await fetchUser();
+    if (user.teamMember) return { status: "signed_in", user };
+    clearToken();
+    return { status: "signed_out", message: NOT_A_MANAGER };
   } catch (error) {
     if (error instanceof Error && error.message === NETWORK_PROBLEM)
       return { status: "unreachable" };
@@ -56,6 +64,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  useEffect(() => {
+    onNotSignedIn(() => {
+      clearToken();
+      setState({ status: "signed_out", message: SESSION_ENDED });
+    });
+    return () => onNotSignedIn(null);
+  }, []);
+
   const auth = useMemo<Auth>(
     () => ({
       state,
@@ -65,6 +81,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       signOut: () => {
         clearToken();
+        // Leaving on purpose goes home; a session that ran out still lands on sign-in, with its message.
+        navigate("/", { replace: true });
         setState({ status: "signed_out" });
       },
       retry: check,

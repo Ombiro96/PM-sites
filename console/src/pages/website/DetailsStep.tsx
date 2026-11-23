@@ -1,53 +1,54 @@
+import {
+  AddressField,
+  type AddressRefusal,
+} from "../../components/AddressField";
 import { ChoiceCard } from "../../components/ChoiceCard";
-import { PhoneField, TextField } from "../../components/fields";
-import { COMPANY_NAME_MAX, type Company } from "../../lib/company";
+import {
+  CompanyFields,
+  type CompanyErrors,
+  type Consent,
+} from "../../components/CompanyFields";
+import type { Company } from "../../lib/company";
 import { AUDIENCE_DETAILS } from "../../lib/looks";
-import { phoneForInput, phoneFromInput } from "../../lib/validation";
 import { AUDIENCES, type Audience } from "../../lib/website";
-
-export type CompanyErrors = Partial<Record<keyof Company, string>>;
 
 export function DetailsStep({
   company,
   errors,
+  consent,
   audience,
+  address,
+  addressTouched,
+  addressRefusal,
   onCompany,
   onAudience,
+  onAddress,
 }: {
   company: Company;
   errors: CompanyErrors;
+  consent: Consent;
   audience: Audience;
+  address: string;
+  addressTouched: boolean;
+  addressRefusal: AddressRefusal | null;
   onCompany: (changes: Partial<Company>) => void;
   onAudience: (audience: Audience) => void;
+  onAddress: (address: string) => void;
 }) {
   return (
     <>
-      <TextField
-        id="company-name"
-        label="Company name"
-        autoComplete="organization"
-        maxLength={COMPANY_NAME_MAX}
-        value={company.displayName}
-        error={errors.displayName}
-        onChange={(event) => onCompany({ displayName: event.target.value })}
-      />
-      <PhoneField
-        id="company-phone"
-        label="Phone number"
-        value={phoneForInput(company.phone)}
-        error={errors.phone}
-        onChange={(value, dialCode) =>
-          onCompany({ phone: phoneFromInput(value, dialCode) })
-        }
-      />
-      <PhoneField
-        id="company-whatsapp"
-        label="WhatsApp number (optional)"
-        hint="Optional. Visitors get a WhatsApp button when you give one."
-        value={phoneForInput(company.whatsappNumber)}
-        error={errors.whatsappNumber}
-        onChange={(value, dialCode) =>
-          onCompany({ whatsappNumber: phoneFromInput(value, dialCode) })
+      <CompanyFields
+        company={company}
+        errors={errors}
+        consent={consent}
+        onChange={onCompany}
+        afterName={
+          <AddressField
+            value={address}
+            touched={addressTouched}
+            refusal={addressRefusal}
+            onChange={onAddress}
+          />
         }
       />
       <fieldset className="mt-6">

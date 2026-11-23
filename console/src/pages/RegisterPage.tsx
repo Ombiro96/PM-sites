@@ -7,6 +7,7 @@ import {
   SubmitButton,
   TextField,
 } from "../components/fields";
+import { NextWebsite } from "../components/NextWebsite";
 import { useAuth } from "../lib/auth";
 import { API_BASE, PATHS } from "../lib/config";
 import { signUp, usernameAvailable } from "../lib/session";
@@ -100,6 +101,7 @@ export function RegisterPage() {
   return (
     <AuthLayout
       title="Create Account"
+      aside={<NextWebsite />}
       links={
         <>
           <TextLink href={PATHS.forgotPassword}>Forgot Password</TextLink>

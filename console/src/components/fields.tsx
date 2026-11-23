@@ -1,4 +1,9 @@
-import { useState, type InputHTMLAttributes, type ReactNode } from "react";
+import {
+  useState,
+  type InputHTMLAttributes,
+  type ReactNode,
+  type TextareaHTMLAttributes,
+} from "react";
 import PhoneInputModule from "react-phone-input-2";
 import { PHONE_COUNTRY } from "../lib/validation";
 
@@ -61,6 +66,103 @@ export function TextField({ id, label, error, hint, ...input }: InputProps) {
     <FieldShell id={id} label={label} error={error} hint={hint}>
       <input id={id} className={INPUT} {...describedBy(id, error)} {...input} />
     </FieldShell>
+  );
+}
+
+export function TextAreaField({
+  id,
+  label,
+  error,
+  hint,
+  ...input
+}: Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "id"> & {
+  id: string;
+  label: string;
+  error?: string;
+  hint?: string;
+}) {
+  return (
+    <FieldShell id={id} label={label} error={error} hint={hint}>
+      <textarea
+        id={id}
+        rows={4}
+        className={INPUT}
+        {...describedBy(id, error)}
+        {...input}
+      />
+    </FieldShell>
+  );
+}
+
+export function SelectField({
+  id,
+  label,
+  error,
+  hint,
+  value,
+  options,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  error?: string;
+  hint?: string;
+  value: string;
+  options: readonly { value: string; label: string }[];
+  onChange: (value: string) => void;
+}) {
+  return (
+    <FieldShell id={id} label={label} error={error} hint={hint}>
+      <select
+        id={id}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className={`${INPUT} min-h-[46px]`}
+        {...describedBy(id, error)}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </FieldShell>
+  );
+}
+
+/** A tick box with its label beside it and, when given, a line of explanation under the label. */
+export function CheckField({
+  label,
+  hint,
+  error,
+  checked,
+  onChange,
+}: {
+  label: string;
+  hint?: string;
+  error?: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <label className="flex min-h-11 cursor-pointer items-start gap-2.5 py-2">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(event) => onChange(event.target.checked)}
+        className="accent-brand mt-0.5 size-5 shrink-0"
+      />
+      <span>
+        <span className="font-medium">{label}</span>
+        {error ? (
+          <span role="alert" className="text-bad block text-sm">
+            {error}
+          </span>
+        ) : hint ? (
+          <span className="text-ink-muted block text-sm">{hint}</span>
+        ) : null}
+      </span>
+    </label>
   );
 }
 
@@ -148,18 +250,6 @@ export function SubmitButton({
   );
 }
 
-export function FormSuccess({ message }: { message: string }) {
-  if (!message) return null;
-  return (
-    <p
-      role="status"
-      className="mb-4 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800"
-    >
-      {message}
-    </p>
-  );
-}
-
 export function FormError({ message }: { message: string }) {
   if (!message) return null;
   return (
@@ -169,5 +259,36 @@ export function FormError({ message }: { message: string }) {
     >
       {message}
     </p>
+  );
+}
+
+const BUTTON_TONES = {
+  solid: "bg-brand hover:bg-brand-deep text-white",
+  outline: "border-brand text-brand hover:bg-brand-soft border bg-white",
+  danger: "border-bad text-bad border bg-white hover:bg-red-50",
+  quiet: "text-ink-muted hover:text-ink",
+} as const;
+
+/** A button that is not a form's submit. */
+export function Button({
+  tone = "outline",
+  disabled,
+  onClick,
+  children,
+}: {
+  tone?: keyof typeof BUTTON_TONES;
+  disabled?: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className={`flex min-h-11 items-center justify-center gap-1.5 rounded-lg px-4 font-semibold transition-transform active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100 ${BUTTON_TONES[tone]}`}
+    >
+      {children}
+    </button>
   );
 }
