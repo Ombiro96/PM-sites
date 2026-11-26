@@ -44,8 +44,6 @@ export function backgroundOf(section: Section): Background {
     : allowed[0];
 }
 
-/** Looks that put a page title's picture behind the title. */
-const PHOTO_TITLE_LOOKS: Look[] = ["classic", "coast", "estate"];
 /** Looks whose header sits on top of a photo banner instead of above it. */
 const OVERLAY_HEADER_LOOKS: Look[] = ["coast", "estate"];
 
@@ -63,10 +61,7 @@ export function opensWithPhoto(
     );
   }
   if (section.type === "page_title") {
-    return (
-      PHOTO_TITLE_LOOKS.includes(site.site.look) &&
-      resolvePicture(section.fields?.picture, site.pictures) !== null
-    );
+    return resolvePicture(section.fields?.picture, site.pictures) !== null;
   }
   return false;
 }
