@@ -3,6 +3,7 @@ import type { SiteData } from "@/lib/site/types";
 import {
   PREVIEW_DRAWN,
   PREVIEW_PAGE,
+  PREVIEW_GO,
   PREVIEW_PICK,
   PREVIEW_READY,
   PREVIEW_SITE,
@@ -94,6 +95,7 @@ export function SitePreview({
   path,
   selected,
   onPick,
+  onGo,
 }: {
   site: SiteData;
   width: number;
@@ -103,6 +105,8 @@ export function SitePreview({
   path?: string;
   selected?: string;
   onPick?: (sectionId: string) => void;
+  /** While picking: a link in the menu or the footer was clicked, with the path it leads to. */
+  onGo?: (path: string) => void;
 }) {
   const box = useRef<HTMLDivElement>(null);
   const frame = useRef<HTMLIFrameElement>(null);
@@ -112,8 +116,10 @@ export function SitePreview({
   const [drawn, setDrawn] = useState(false);
   const picking = onPick !== undefined;
   const pick = useRef(onPick);
+  const go = useRef(onGo);
   useEffect(() => {
     pick.current = onPick;
+    go.current = onGo;
   });
 
   useEffect(() => {
@@ -150,6 +156,11 @@ export function SitePreview({
         typeof event.data.section === "string"
       )
         pick.current?.(event.data.section);
+      if (
+        event.data?.type === PREVIEW_GO &&
+        typeof event.data.path === "string"
+      )
+        go.current?.(event.data.path);
     };
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);

@@ -13,13 +13,22 @@ import {
   CONSENT_NEEDED,
   hasErrors,
   NO_COMPANY,
+  NO_LOGO_CHANGE,
+  samePublicDetails,
   trimmedCompany,
   type CompanyErrors,
+  type LogoChange,
 } from "../components/CompanyFields";
 import { FormError, SubmitButton } from "../components/fields";
 import { PreviewPanel } from "../components/PreviewPanel";
 import { useAuth } from "../lib/auth";
-import { readCompany, saveCompany, type Company } from "../lib/company";
+import {
+  readAreaGroups,
+  readCompany,
+  saveCompany,
+  type AreaGroup,
+  type Company,
+} from "../lib/company";
 import { PATHS } from "../lib/config";
 import { exampleSite } from "../lib/preview";
 import type { User } from "../lib/session";
@@ -335,6 +344,9 @@ function SetupWizard({
   const [website, setWebsite] = useState<Website | null>(null);
   const [company, setCompany] = useState<Company>(NO_COMPANY);
   const [errors, setErrors] = useState<CompanyErrors>({});
+  const [logo, setLogo] = useState<LogoChange>(NO_LOGO_CHANGE);
+  const [areaGroups, setAreaGroups] = useState<AreaGroup[] | null>(null);
+  const [areasProblem, setAreasProblem] = useState<string>();
   // The consent to the details being public. It is asked for again once saved details are changed.
   const [consent, setConsent] = useState({ given: false, saved: false });
   const [consentError, setConsentError] = useState<string>();
@@ -348,6 +360,21 @@ function SetupWizard({
     suggestion: string | null;
   } | null>(null);
   const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    readAreaGroups()
+      .then((found) => active && setAreaGroups(found))
+      .catch((error: unknown) => {
+        if (active)
+          setAreasProblem(
+            error instanceof Error ? error.message : String(error),
+          );
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -407,12 +434,17 @@ function SetupWizard({
         setErrors(found);
         setConsentError(consent.given ? undefined : CONSENT_NEEDED);
         if (hasErrors(found) || !consent.given) return;
-        const saved = await saveCompany(trimmedCompany(company), true);
+        const saved = await saveCompany(
+          trimmedCompany(company),
+          true,
+          logo.file ?? (logo.removed ? "remove" : undefined),
+        );
         if (!saved.ok) {
           setProblem(saved.message);
           return;
         }
         setCompany(saved.company);
+        setLogo(NO_LOGO_CHANGE);
         setConsent({ given: true, saved: true });
         const name = chosenAddress(website, saved.company.displayName);
         const checked = await confirmAddress(name);
@@ -441,7 +473,11 @@ function SetupWizard({
         return;
       }
       setAddressRefusal(null);
-      const created = await createSite({ ...website, addressName: name });
+      const created = await createSite({
+        ...website,
+        addressName: name,
+        areas: company.areasServed,
+      });
       if (!created.ok) {
         if (created.code === "address_name") {
           setAddressRefusal({
@@ -530,10 +566,14 @@ function SetupWizard({
                   addressRefusal={
                     addressRefusal?.name === address ? addressRefusal : null
                   }
+                  logo={{ ...logo, onChange: setLogo }}
+                  areas={{ groups: areaGroups, problem: areasProblem }}
                   onCompany={(changes) => {
-                    setCompany({ ...company, ...changes });
+                    const changed = { ...company, ...changes };
+                    setCompany(changed);
                     setErrors({});
-                    if (consent.saved)
+                    // Consent covers the name and numbers; the logo and the areas need none.
+                    if (consent.saved && !samePublicDetails(company, changed))
                       setConsent({ given: false, saved: false });
                   }}
                   onAudience={(audience) =>

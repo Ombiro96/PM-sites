@@ -98,11 +98,11 @@ When the head placeholder left no title, the app sets the tab title itself.
 
 ## Pages and paths
 
-| Path                                     | Drawn from                                                     |
-| ---------------------------------------- | -------------------------------------------------------------- |
-| `/`, `/for-owners`, `/about`, `/contact` | The document. A page the document lacks shows "page not found" |
-| `/houses`                                | Listings search: filters, count, pages of results              |
-| `/houses/<short code or id>`             | One house type                                                 |
+| Path                                                            | Drawn from                                                     |
+| --------------------------------------------------------------- | -------------------------------------------------------------- |
+| `/`, `/for-owners`, `/services`, `/areas`, `/about`, `/contact` | The document. A page the document lacks shows "page not found" |
+| `/houses`                                                       | Listings search: filters, count, pages of results              |
+| `/houses/<short code or id>`                                    | One house type                                                 |
 
 Paths are real paths. `src/lib/router.ts` takes over same-site link clicks,
 uses the history API, scrolls to the top, and scrolls to a section when a

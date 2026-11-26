@@ -27,6 +27,7 @@ export function Footer() {
       })
     : [];
   const hasContact = Boolean(facts.phone || facts.whatsapp || facts.email);
+  const logo = safeUrl(facts.logo);
 
   return (
     <footer className="ft">
@@ -34,6 +35,7 @@ export function Footer() {
         <div className="ft-cols">
           <div className="ft-about">
             <b>{facts.name}</b>
+            {logo ? <img className="ft-logo" src={logo} alt="" /> : null}
             {facts.office_address ? <p>{facts.office_address}</p> : null}
             {facts.opening_hours ? <p>{facts.opening_hours}</p> : null}
           </div>

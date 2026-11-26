@@ -1,5 +1,7 @@
-import type { Page, Section, SiteDocument } from "@/lib/site/types";
+import { DEFAULT_NAV_LABELS } from "@/lib/site/pages";
+import type { Page, PageKind, Section, SiteDocument } from "@/lib/site/types";
 import { fieldLabel } from "./labels";
+import type { Audience } from "./website";
 import {
   ruleFor,
   type FieldRule,
@@ -110,9 +112,14 @@ export function addable(rules: Rules, page: Page): SectionRule[] {
   );
 }
 
-export function newItem(items: ItemsRule): Item {
+/** A new entry. In a list of standard choices the `at`th starts on the `at`th choice, so a new section does not repeat one. */
+export function newItem(items: ItemsRule, at = 0): Item {
   return items.standard_key
-    ? { id: newId(), [items.standard_key]: items.standard_options[0] }
+    ? {
+        id: newId(),
+        [items.standard_key]:
+          items.standard_options[at % items.standard_options.length],
+      }
     : { id: newId() };
 }
 
@@ -132,10 +139,105 @@ export function newSection(rule: SectionRule): EditSection {
   if (rule.layouts.length > 0) section.layout = rule.layouts[0];
   if (rule.backgrounds.length > 0) section.background = rule.backgrounds[0];
   if (rule.items)
-    section.items = Array.from({ length: rule.items.min_count }, () =>
-      newItem(rule.items as ItemsRule),
+    section.items = Array.from({ length: rule.items.min_count }, (_, at) =>
+      newItem(rule.items as ItemsRule, at),
     );
   return section;
+}
+
+/** Pages that stay once a site has them. The backend refuses to publish without Home and Contact; About is kept by choice. */
+const KEPT_PAGES: readonly PageKind[] = ["home", "about", "contact"];
+
+/** The pages this site can still be given. A site for tenants only cannot have a For owners page. */
+export function addablePages(
+  rules: Rules,
+  document: SiteDocument,
+  audience: Audience,
+): PageKind[] {
+  return rules.page_kinds.filter(
+    (kind) =>
+      !document.pages.some((page) => page.kind === kind) &&
+      !(kind === "owners" && audience === "tenants"),
+  );
+}
+
+/** The sections a page needs besides its opening one to go live, as the backend's publish check has them, or to be of any use. */
+const REQUIRED_SECTIONS: Partial<Record<PageKind, string[]>> = {
+  owners: ["management_request"],
+  services: ["services"],
+  areas: ["areas"],
+  about: ["about"],
+  contact: ["contact"],
+};
+
+/** Sections that need no writing, used to give a page the content it must have to go live. */
+const STARTER_SECTIONS: Partial<Record<PageKind, string[]>> = {
+  owners: ["services", "figures"],
+  about: ["buildings"],
+};
+
+/** A page of this kind, started with every section it needs to go live. */
+export function newPage(rules: Rules, kind: PageKind): Page {
+  const title = DEFAULT_NAV_LABELS[kind];
+  const opening = rules.page.opening_section[kind];
+  const notContent = rules.page.not_counted_as_content[kind];
+  const counts = (type: string) => !notContent?.includes(type);
+  const required = REQUIRED_SECTIONS[kind] ?? [];
+  // Only some pages must have a least amount of content; the rest need none beyond what is required.
+  const wanted = notContent ? rules.page.min_content_sections : 0;
+  const starters = (STARTER_SECTIONS[kind] ?? []).slice(
+    0,
+    Math.max(0, wanted - required.filter(counts).length),
+  );
+  const types = [
+    opening,
+    ...required.filter(counts),
+    ...starters,
+    ...required.filter((type) => !counts(type)),
+  ];
+  const sections = types.flatMap((type) => {
+    const rule = ruleFor(rules, type);
+    if (!rule || !rule.pages.includes(kind)) return [];
+    const section = newSection(rule);
+    if (type === opening && "heading" in section.fields)
+      section.fields.heading = title;
+    return [section];
+  });
+  return {
+    id: newId(),
+    kind,
+    title,
+    nav_label: title,
+    search_description: "",
+    sections: sections as unknown as Section[],
+  };
+}
+
+/** Adds a page, keeping the pages in the order the rules list them. */
+export function addPage(
+  document: SiteDocument,
+  rules: Rules,
+  page: Page,
+): SiteDocument {
+  const place = (kind: PageKind) => rules.page_kinds.indexOf(kind);
+  return {
+    ...document,
+    pages: [...document.pages, page].sort(
+      (first, second) => place(first.kind) - place(second.kind),
+    ),
+  };
+}
+
+export const canRemovePage = (page: Page) => !KEPT_PAGES.includes(page.kind);
+
+export function removePage(
+  document: SiteDocument,
+  pageId: string,
+): SiteDocument {
+  return {
+    ...document,
+    pages: document.pages.filter((page) => page.id !== pageId),
+  };
 }
 
 /** The document as it is sent: ids the editor made up are left out, for the backend to give real ones. */
@@ -149,7 +251,7 @@ export function withoutNewIds(document: SiteDocument): SiteDocument {
   return {
     ...document,
     pages: document.pages.map((page) => ({
-      ...page,
+      ...clean(page),
       sections: sectionsOf(page).map((section) => ({
         ...clean(section),
         ...(section.items ? { items: section.items.map(clean) } : {}),

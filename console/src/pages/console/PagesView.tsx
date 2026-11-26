@@ -1,19 +1,25 @@
 import { useEffect, useMemo, useState } from "react";
-import { PAGE_PATHS } from "@/lib/site/pages";
-import type { SiteDocument } from "@/lib/site/types";
+import { DEFAULT_NAV_LABELS, HOUSES_PATH, PAGE_PATHS } from "@/lib/site/pages";
+import type { PageKind, SiteDocument } from "@/lib/site/types";
 import { Button } from "../../components/fields";
 import { PreviewPanel } from "../../components/PreviewPanel";
 import { SectionForm } from "../../components/SectionForm";
 import type { Company } from "../../lib/company";
 import {
   addable,
+  addablePages,
+  addPage,
   addSection,
+  canRemovePage,
   moveSection,
+  newPage,
   newSection,
+  removePage,
   removeSection,
   replaceSection,
   sectionsOf,
 } from "../../lib/draft";
+import { tell } from "../../lib/feedback";
 import { draftSite } from "../../lib/preview";
 import { ruleFor, type Rules } from "../../lib/rules";
 import type { Picture, Site } from "../../lib/site";
@@ -58,6 +64,9 @@ export function PagesView({
   );
   const [selected, setSelected] = useState(openSectionId);
   const [adding, setAdding] = useState(false);
+  const [addingPage, setAddingPage] = useState(false);
+  // A page added here gets its real id from the backend on save; its kind finds it again.
+  const [addedKind, setAddedKind] = useState<PageKind | null>(null);
 
   useEffect(() => {
     if (!known(openPageId)) return;
@@ -69,7 +78,10 @@ export function PagesView({
   }, [openPageId, openSectionId]);
 
   const page =
-    working.pages.find((each) => each.id === pageId) ?? working.pages[0];
+    working.pages.find((each) => each.id === pageId) ??
+    working.pages.find((each) => each.kind === addedKind) ??
+    working.pages[0];
+  const pageChoices = addablePages(rules, working, site.audience);
   const sections = page ? sectionsOf(page) : [];
   const at = sections.findIndex((each) => each.id === selected);
   const section = at >= 0 ? sections[at] : undefined;
@@ -95,6 +107,27 @@ export function PagesView({
   const select = (sectionId: string) => {
     setSelected(sectionId);
     setAdding(false);
+  };
+
+  const openPage = (id: string) => {
+    setPageId(id);
+    setAddedKind(null);
+    setSelected("");
+    setAdding(false);
+    setAddingPage(false);
+  };
+
+  /** A menu or footer link clicked in the preview opens that page here, as its tab would. */
+  const followPreviewLink = (clicked: string) => {
+    const path = clicked.replace(/\/+$/, "") || "/";
+    const target = working.pages.find((each) => PAGE_PATHS[each.kind] === path);
+    if (target) openPage(target.id);
+    else if (path === HOUSES_PATH || path.startsWith(`${HOUSES_PATH}/`))
+      tell({
+        tone: "info",
+        title: "Houses to let is not edited here",
+        text: "That page is drawn from your adverts in the Bomahut dashboard.",
+      });
   };
 
   return (
@@ -140,17 +173,61 @@ export function PagesView({
               type="button"
               role="tab"
               aria-selected={each.id === page.id}
-              onClick={() => {
-                setPageId(each.id);
-                setSelected("");
-                setAdding(false);
-              }}
+              onClick={() => openPage(each.id)}
               className={`min-h-11 rounded-lg px-4 text-[15px] font-semibold ${each.id === page.id ? "bg-brand text-white" : "text-ink-muted"}`}
             >
               {each.title}
             </button>
           ))}
+          {pageChoices.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => {
+                setAddingPage(true);
+                setSelected("");
+                setAdding(false);
+              }}
+              className="text-brand min-h-11 rounded-lg px-4 text-[15px] font-semibold"
+            >
+              + Add page
+            </button>
+          ) : null}
         </div>
+
+        {addingPage ? (
+          <div className="border-line rounded-xl border bg-white p-4">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <h2 className="font-semibold">Add a page</h2>
+              <Button tone="quiet" onClick={() => setAddingPage(false)}>
+                Close
+              </Button>
+            </div>
+            <ul className="divide-line divide-y">
+              {pageChoices.map((kind) => (
+                <li key={kind}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const added = newPage(rules, kind);
+                      onWorking(addPage(working, rules, added));
+                      setPageId(added.id);
+                      setAddedKind(kind);
+                      setAddingPage(false);
+                    }}
+                    className="hover:bg-surface w-full px-1 py-2.5 text-left"
+                  >
+                    <span className="block font-semibold">
+                      {DEFAULT_NAV_LABELS[kind]}
+                    </span>
+                    <span className="text-ink-muted block text-sm">
+                      {PAGE_PATHS[kind]}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
 
         {section && rule ? (
           <SectionForm
@@ -239,16 +316,29 @@ export function PagesView({
                 + Add a section to this page
               </button>
             ) : null}
+            {canRemovePage(page) ? (
+              <Button
+                tone="quiet"
+                onClick={() => {
+                  onWorking(removePage(working, page.id));
+                  setPageId(working.pages[0]?.id ?? "");
+                  setAddedKind(null);
+                }}
+              >
+                Remove the {page.title} page
+              </Button>
+            ) : null}
           </>
         )}
       </div>
 
       <PreviewPanel
         site={preview}
-        caption="Click any part of the page to change it. The houses and figures shown are examples."
+        caption="Click any part of the page to change it, or a link in its menu to open that page. The houses and figures shown are examples."
         path={PAGE_PATHS[page.kind]}
         selected={selected}
         onPick={select}
+        onGo={followPreviewLink}
       />
     </div>
   );

@@ -10,6 +10,7 @@ import type { SiteData } from "@/lib/site/types";
 import "./preview.css";
 import {
   PREVIEW_DRAWN,
+  PREVIEW_GO,
   PREVIEW_PICK,
   PREVIEW_READY,
   PREVIEW_SITE,
@@ -32,7 +33,8 @@ function applyLook(site: SiteData): void {
 /**
  * Draws whichever site the console sends, with the same code that draws a
  * published one. While the console is editing, a click on a section tells the
- * console which one instead of following a link.
+ * console which one instead of following a link, and a click on a link in the
+ * menu or the footer tells it which page was asked for.
  */
 function Preview() {
   const [site, setSite] = useState<SiteData | null>(null);
@@ -107,11 +109,20 @@ function Preview() {
       let element = event.target as Element | null;
       while (element && !sectionIds.includes(element.id))
         element = element.parentElement;
-      if (element)
+      if (element) {
         window.parent.postMessage(
           { type: PREVIEW_PICK, section: element.id },
           window.location.origin,
         );
+        return;
+      }
+      const link = (event.target as Element | null)?.closest?.("a[href]");
+      if (!(link instanceof HTMLAnchorElement)) return;
+      if (link.origin !== window.location.origin) return;
+      window.parent.postMessage(
+        { type: PREVIEW_GO, path: link.pathname },
+        window.location.origin,
+      );
     };
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);

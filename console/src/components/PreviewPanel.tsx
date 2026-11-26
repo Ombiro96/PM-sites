@@ -17,12 +17,14 @@ export function PreviewPanel({
   path,
   selected,
   onPick,
+  onGo,
 }: {
   site: SiteData;
   caption: string;
   path?: string;
   selected?: string;
   onPick?: (sectionId: string) => void;
+  onGo?: (path: string) => void;
 }) {
   const [device, setDevice] = useState<Device>("desktop");
 
@@ -56,6 +58,7 @@ export function PreviewPanel({
           path={path}
           selected={selected}
           onPick={onPick}
+          onGo={onGo}
         />
       </div>
     </section>

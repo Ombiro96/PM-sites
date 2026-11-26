@@ -7,8 +7,9 @@ import {
   CompanyFields,
   type CompanyErrors,
   type Consent,
+  type LogoChoice,
 } from "../../components/CompanyFields";
-import type { Company } from "../../lib/company";
+import type { AreaGroup, Company } from "../../lib/company";
 import { AUDIENCE_DETAILS } from "../../lib/looks";
 import { AUDIENCES, type Audience } from "../../lib/website";
 
@@ -16,6 +17,8 @@ export function DetailsStep({
   company,
   errors,
   consent,
+  logo,
+  areas,
   audience,
   address,
   addressTouched,
@@ -27,6 +30,8 @@ export function DetailsStep({
   company: Company;
   errors: CompanyErrors;
   consent: Consent;
+  logo: LogoChoice;
+  areas: { groups: AreaGroup[] | null; problem?: string };
   audience: Audience;
   address: string;
   addressTouched: boolean;
@@ -41,6 +46,8 @@ export function DetailsStep({
         company={company}
         errors={errors}
         consent={consent}
+        logo={logo}
+        areas={areas}
         onChange={onCompany}
         afterName={
           <AddressField

@@ -167,6 +167,12 @@ const STAY_ON_PAGES: NoticeContent = {
   text: "Those changes are only under Edit pages until you save them to your draft or discard them.",
 };
 
+const STAY_ON_DETAILS: NoticeContent = {
+  tone: "info",
+  title: "Save or discard your changes",
+  text: "Your changes under Company details are not saved yet. Save or discard them first.",
+};
+
 const PUBLISHING: NoticeContent = {
   tone: "info",
   title: "Putting your website up…",
@@ -210,6 +216,7 @@ export function ConsolePage({
   const [deployId, setDeployId] = useState("");
   // A publish or an ask found a newer draft than the one on screen.
   const [stale, setStale] = useState(false);
+  const [detailsDirty, setDetailsDirty] = useState(false);
   // Compared by content: every answer from the backend carries the draft as a new object.
   const dirty = useMemo(
     () => JSON.stringify(working) !== JSON.stringify(site.draft),
@@ -479,6 +486,9 @@ export function ConsolePage({
   const addPicture = (picture: Picture) =>
     setPictures((held) => [...held, picture]);
 
+  const removePicture = (picture: Picture) =>
+    setPictures((held) => held.filter((each) => each.id !== picture.id));
+
   const saveLook = (look: Look, brandColour: string) =>
     void run(
       () =>
@@ -568,11 +578,17 @@ export function ConsolePage({
               href={pathOf(each.key)}
               aria-current={each.key === view.key ? "page" : undefined}
               onClick={(event) => {
-                if (!dirty || view.key !== "pages" || each.key === "pages")
-                  return;
+                if (each.key === view.key) return;
+                const unsaved =
+                  dirty && view.key === "pages"
+                    ? STAY_ON_PAGES
+                    : detailsDirty && view.key === "details"
+                      ? STAY_ON_DETAILS
+                      : null;
+                if (!unsaved) return;
                 event.preventDefault();
                 event.stopPropagation();
-                tell(STAY_ON_PAGES);
+                tell(unsaved);
               }}
               className={`flex min-h-11 items-center justify-between gap-2 rounded-lg px-3.5 ${each.key === view.key ? "bg-brand-soft text-brand font-semibold" : "hover:bg-line/40 font-medium"}`}
             >
@@ -631,11 +647,13 @@ export function ConsolePage({
               pictures={pictures}
               document={working}
               onAdded={addPicture}
+              onRemoved={removePicture}
             />
           ) : view.key === "details" ? (
             <DetailsView
               site={site}
               company={company}
+              onDirty={setDetailsDirty}
               onSaved={(saved) => {
                 setCompany(saved);
                 // What is left before going live depends on these details.

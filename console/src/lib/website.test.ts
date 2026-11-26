@@ -183,9 +183,12 @@ describe("the example website", () => {
         displayName: "ABC Properties",
         phone: "0712 345 678",
         whatsappNumber: "",
+        logoUrl: "https://example.com/logo.jpg",
+        areasServed: [],
       },
     });
     expect(site.facts.name).toBe("ABC Properties");
+    expect(site.facts.logo).toBe("https://example.com/logo.jpg");
     expect(site.facts.phone).toBe("0712 345 678");
     expect(site.facts.whatsapp).toBe("");
   });

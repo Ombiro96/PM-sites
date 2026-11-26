@@ -7,6 +7,7 @@ import {
 } from "./actions";
 import { brandVariables } from "./brand";
 import { parseSiteData, readInjectedData } from "./data";
+import { faviconHref } from "./favicon";
 import { resolvePicture } from "./pictures";
 import type { SiteData } from "./types";
 
@@ -122,6 +123,18 @@ describe("reading injected data", () => {
     expect(data?.facts.areas_served).toEqual([]);
     expect(data?.pictures).toEqual({});
     expect(data?.document.header.contact_action).toBe("auto");
+  });
+});
+
+describe("the tab icon", () => {
+  it("is the logo when there is one, and otherwise the initials on the brand colour", () => {
+    const site = parseSiteData(RAW) as SiteData;
+    const mark = decodeURIComponent(faviconHref(site));
+    expect(mark.startsWith("data:image/svg+xml,<svg")).toBe(true);
+    expect(mark).toContain(">TH</text>");
+    expect(mark).toContain('fill="#1d4e89"');
+    const logo = "https://files.example/logo.jpg";
+    expect(faviconHref({ ...site, facts: { ...site.facts, logo } })).toBe(logo);
   });
 });
 

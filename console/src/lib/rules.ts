@@ -50,8 +50,14 @@ export type SectionRule = {
 
 export type Rules = {
   max_sections_per_page: number;
+  page_kinds: PageKind[];
   action_kinds: Record<string, string[]>;
-  page: { opening_section: Record<PageKind, string> };
+  page: {
+    opening_section: Record<PageKind, string>;
+    /** For the pages that must have a least amount of content: the sections that do not count towards it. */
+    not_counted_as_content: Partial<Record<PageKind, string[]>>;
+    min_content_sections: number;
+  };
   button: {
     label_min: number;
     label_max: number;

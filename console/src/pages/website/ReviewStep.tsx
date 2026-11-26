@@ -47,6 +47,11 @@ export function ReviewStep({
       value: AUDIENCE_DETAILS[website.audience].name,
       step: "details",
     },
+    {
+      label: "Areas you cover",
+      value: company.areasServed.join(", "),
+      step: "details",
+    },
     { label: "About you", value: answers.about_text.trim(), step: "about" },
   ];
 
