@@ -139,8 +139,8 @@ export function newSection(rule: SectionRule): EditSection {
   return section;
 }
 
-/** The pages a site cannot be published without, as the backend's publish check has them. */
-const REQUIRED_PAGES: readonly PageKind[] = ["home", "contact"];
+/** Pages that stay once a site has them. The backend refuses to publish without Home and Contact; About is kept by choice. */
+const KEPT_PAGES: readonly PageKind[] = ["home", "about", "contact"];
 
 /** The pages the rules know that this document does not have yet. */
 export function addablePages(rules: Rules, document: SiteDocument): PageKind[] {
@@ -187,8 +187,7 @@ export function addPage(
   };
 }
 
-export const canRemovePage = (page: Page) =>
-  !REQUIRED_PAGES.includes(page.kind);
+export const canRemovePage = (page: Page) => !KEPT_PAGES.includes(page.kind);
 
 export function removePage(
   document: SiteDocument,

@@ -79,6 +79,8 @@ describe("a draft being edited", () => {
     expect("id" in sent).toBe(false);
     expect(canRemovePage(page)).toBe(true);
     expect(canRemovePage(home)).toBe(false);
+    const about = document.pages.find((each) => each.kind === "about");
+    expect(about && canRemovePage(about)).toBe(false);
   });
 
   it("says what a new section still needs before publishing", () => {
