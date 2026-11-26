@@ -2,9 +2,13 @@ import { describe, expect, it } from "vitest";
 import { temboHart } from "@/dev/tembo-hart";
 import {
   addable,
+  addablePages,
+  addPage,
   addSection,
+  canRemovePage,
   documentProblems,
   moveSection,
+  newPage,
   newSection,
   picturesUsed,
   problemPlace,
@@ -53,6 +57,28 @@ describe("a draft being edited", () => {
     expect(sent && "id" in sent).toBe(false);
     expect(sent?.items?.every((item) => !("id" in item))).toBe(true);
     expect(ids(0, withoutNewIds(document))).toEqual(ids(0));
+  });
+
+  it("offers the pages the site lacks and adds one ready to publish", () => {
+    expect(addablePages(rules, document)).toEqual(["services", "areas"]);
+    const page = newPage(rules, "services");
+    expect(page.sections.map((section) => section.type)).toEqual([
+      "page_title",
+      "services",
+    ]);
+    const added = addPage(document, rules, page);
+    expect(added.pages.map((each) => each.kind)).toEqual([
+      "home",
+      "owners",
+      "services",
+      "about",
+      "contact",
+    ]);
+    expect(documentProblems(added, rules)).toEqual([]);
+    const sent = withoutNewIds(added).pages[2];
+    expect("id" in sent).toBe(false);
+    expect(canRemovePage(page)).toBe(true);
+    expect(canRemovePage(home)).toBe(false);
   });
 
   it("says what a new section still needs before publishing", () => {

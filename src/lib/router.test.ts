@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 import { inSiteTarget, matchRoute } from "./router";
 
 describe("matchRoute", () => {
-  it("matches the four stored pages by their fixed paths", () => {
+  it("matches the stored pages by their fixed paths", () => {
     expect(matchRoute("/")).toEqual({ name: "page", kind: "home" });
     expect(matchRoute("/for-owners")).toEqual({ name: "page", kind: "owners" });
+    expect(matchRoute("/services")).toEqual({ name: "page", kind: "services" });
+    expect(matchRoute("/areas")).toEqual({ name: "page", kind: "areas" });
     expect(matchRoute("/about")).toEqual({ name: "page", kind: "about" });
     expect(matchRoute("/contact")).toEqual({ name: "page", kind: "contact" });
   });

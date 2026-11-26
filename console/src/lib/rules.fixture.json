@@ -2,10 +2,12 @@
   "version": 1,
   "looks": ["fresh", "classic", "bold", "coast", "estate", "plain"],
   "backgrounds": ["white", "tinted", "brand"],
-  "page_kinds": ["home", "owners", "about", "contact"],
+  "page_kinds": ["home", "owners", "services", "areas", "about", "contact"],
   "page_paths": {
     "home": "/",
     "owners": "/for-owners",
+    "services": "/services",
+    "areas": "/areas",
     "about": "/about",
     "contact": "/contact"
   },
@@ -26,6 +28,8 @@
     "opening_section": {
       "home": "top_banner",
       "owners": "page_title",
+      "services": "page_title",
+      "areas": "page_title",
       "about": "page_title",
       "contact": "page_title"
     },
@@ -59,7 +63,7 @@
       "type": "page_title",
       "name": "Page title",
       "description": "The title at the top of every page except home.",
-      "pages": ["owners", "about", "contact"],
+      "pages": ["owners", "services", "areas", "about", "contact"],
       "source": "free",
       "fields": [
         {
@@ -196,7 +200,7 @@
       "type": "houses",
       "name": "Houses to let",
       "description": "Vacancies from Bomahut. Updates by itself.",
-      "pages": ["home", "owners", "about", "contact"],
+      "pages": ["home", "owners", "services", "areas", "about", "contact"],
       "source": "live",
       "fields": [
         {
@@ -283,7 +287,7 @@
       "type": "services",
       "name": "Services",
       "description": "What the manager does for owners.",
-      "pages": ["home", "owners"],
+      "pages": ["home", "owners", "services"],
       "source": "manager",
       "fields": [
         {
@@ -621,7 +625,7 @@
       "type": "areas",
       "name": "Areas we cover",
       "description": "The areas served, from the company facts.",
-      "pages": ["home"],
+      "pages": ["home", "areas"],
       "source": "live",
       "fields": [
         {
@@ -898,7 +902,7 @@
       "type": "call_to_action",
       "name": "Call-to-action band",
       "description": "One line and a button, on the brand colour.",
-      "pages": ["home", "owners", "about", "contact"],
+      "pages": ["home", "owners", "services", "areas", "about", "contact"],
       "source": "free",
       "fields": [
         {

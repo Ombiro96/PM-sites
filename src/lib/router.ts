@@ -10,6 +10,8 @@ export type Route =
 const STORED: Record<string, PageKind> = {
   "": "home",
   "for-owners": "owners",
+  services: "services",
+  areas: "areas",
   about: "about",
   contact: "contact",
 };

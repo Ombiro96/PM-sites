@@ -5,7 +5,8 @@
  */
 
 export type Look = "fresh" | "classic" | "bold" | "coast" | "estate" | "plain";
-export type PageKind = "home" | "owners" | "about" | "contact";
+export type PageKind =
+  "home" | "owners" | "services" | "areas" | "about" | "contact";
 export type Background = "white" | "tinted" | "brand";
 
 export type Action =

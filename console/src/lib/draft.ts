@@ -1,4 +1,5 @@
-import type { Page, Section, SiteDocument } from "@/lib/site/types";
+import { DEFAULT_NAV_LABELS } from "@/lib/site/pages";
+import type { Page, PageKind, Section, SiteDocument } from "@/lib/site/types";
 import { fieldLabel } from "./labels";
 import {
   ruleFor,
@@ -138,6 +139,67 @@ export function newSection(rule: SectionRule): EditSection {
   return section;
 }
 
+/** The pages a site cannot be published without, as the backend's publish check has them. */
+const REQUIRED_PAGES: readonly PageKind[] = ["home", "contact"];
+
+/** The pages the rules know that this document does not have yet. */
+export function addablePages(rules: Rules, document: SiteDocument): PageKind[] {
+  return rules.page_kinds.filter(
+    (kind) => !document.pages.some((page) => page.kind === kind),
+  );
+}
+
+/** A page of this kind: its opening section and, where one is named after the page, that section. */
+export function newPage(rules: Rules, kind: PageKind): Page {
+  const title = DEFAULT_NAV_LABELS[kind];
+  const sections: EditSection[] = [];
+  const opening = ruleFor(rules, rules.page.opening_section[kind]);
+  if (opening) {
+    const section = newSection(opening);
+    if ("heading" in section.fields) section.fields.heading = title;
+    sections.push(section);
+  }
+  const own = ruleFor(rules, kind);
+  if (own && own !== opening && own.pages.includes(kind))
+    sections.push(newSection(own));
+  return {
+    id: newId(),
+    kind,
+    title,
+    nav_label: title,
+    search_description: "",
+    sections: sections as unknown as Section[],
+  };
+}
+
+/** Adds a page, keeping the pages in the order the rules list them. */
+export function addPage(
+  document: SiteDocument,
+  rules: Rules,
+  page: Page,
+): SiteDocument {
+  const place = (kind: PageKind) => rules.page_kinds.indexOf(kind);
+  return {
+    ...document,
+    pages: [...document.pages, page].sort(
+      (first, second) => place(first.kind) - place(second.kind),
+    ),
+  };
+}
+
+export const canRemovePage = (page: Page) =>
+  !REQUIRED_PAGES.includes(page.kind);
+
+export function removePage(
+  document: SiteDocument,
+  pageId: string,
+): SiteDocument {
+  return {
+    ...document,
+    pages: document.pages.filter((page) => page.id !== pageId),
+  };
+}
+
 /** The document as it is sent: ids the editor made up are left out, for the backend to give real ones. */
 export function withoutNewIds(document: SiteDocument): SiteDocument {
   const clean = <Holder extends { id?: string }>(holder: Holder): Holder => {
@@ -149,7 +211,7 @@ export function withoutNewIds(document: SiteDocument): SiteDocument {
   return {
     ...document,
     pages: document.pages.map((page) => ({
-      ...page,
+      ...clean(page),
       sections: sectionsOf(page).map((section) => ({
         ...clean(section),
         ...(section.items ? { items: section.items.map(clean) } : {}),

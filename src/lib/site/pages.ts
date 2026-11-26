@@ -3,6 +3,8 @@ import type { Look, Page, PageKind, SiteDocument } from "./types";
 export const PAGE_PATHS: Record<PageKind, string> = {
   home: "/",
   owners: "/for-owners",
+  services: "/services",
+  areas: "/areas",
   about: "/about",
   contact: "/contact",
 };
@@ -10,9 +12,11 @@ export const PAGE_PATHS: Record<PageKind, string> = {
 export const HOUSES_PATH = "/houses";
 export const TENANT_LOGIN_URL = "https://app.bomahut.com/t/login";
 
-const DEFAULT_NAV_LABELS: Record<PageKind, string> = {
+export const DEFAULT_NAV_LABELS: Record<PageKind, string> = {
   home: "Home",
   owners: "For owners",
+  services: "Services",
+  areas: "Areas we cover",
   about: "About",
   contact: "Contact",
 };
@@ -67,7 +71,7 @@ export function navLabel(page: Page): string {
   return page.nav_label || DEFAULT_NAV_LABELS[page.kind] || page.title;
 }
 
-/** The menu, in its fixed order: Home, Houses to let, For owners, About, Contact. */
+/** The menu, in its fixed order: Home, Houses to let, For owners, Services, Areas we cover, About, Contact. */
 export function navItems(document: SiteDocument, look: Look): NavItem[] {
   const stored = (kind: PageKind): NavItem[] => {
     const page = findPage(document, kind);
@@ -78,6 +82,8 @@ export function navItems(document: SiteDocument, look: Look): NavItem[] {
     ...stored("home"),
     { href: HOUSES_PATH, label: houseWords(look).nav },
     ...stored("owners"),
+    ...stored("services"),
+    ...stored("areas"),
     ...stored("about"),
     ...stored("contact"),
   ];

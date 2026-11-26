@@ -1,15 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
-import { PAGE_PATHS } from "@/lib/site/pages";
-import type { SiteDocument } from "@/lib/site/types";
+import { DEFAULT_NAV_LABELS, PAGE_PATHS } from "@/lib/site/pages";
+import type { PageKind, SiteDocument } from "@/lib/site/types";
 import { Button } from "../../components/fields";
 import { PreviewPanel } from "../../components/PreviewPanel";
 import { SectionForm } from "../../components/SectionForm";
 import type { Company } from "../../lib/company";
 import {
   addable,
+  addablePages,
+  addPage,
   addSection,
+  canRemovePage,
   moveSection,
+  newPage,
   newSection,
+  removePage,
   removeSection,
   replaceSection,
   sectionsOf,
@@ -58,6 +63,9 @@ export function PagesView({
   );
   const [selected, setSelected] = useState(openSectionId);
   const [adding, setAdding] = useState(false);
+  const [addingPage, setAddingPage] = useState(false);
+  // A page added here gets its real id from the backend on save; its kind finds it again.
+  const [addedKind, setAddedKind] = useState<PageKind | null>(null);
 
   useEffect(() => {
     if (!known(openPageId)) return;
@@ -69,7 +77,10 @@ export function PagesView({
   }, [openPageId, openSectionId]);
 
   const page =
-    working.pages.find((each) => each.id === pageId) ?? working.pages[0];
+    working.pages.find((each) => each.id === pageId) ??
+    working.pages.find((each) => each.kind === addedKind) ??
+    working.pages[0];
+  const pageChoices = addablePages(rules, working);
   const sections = page ? sectionsOf(page) : [];
   const at = sections.findIndex((each) => each.id === selected);
   const section = at >= 0 ? sections[at] : undefined;
@@ -142,15 +153,65 @@ export function PagesView({
               aria-selected={each.id === page.id}
               onClick={() => {
                 setPageId(each.id);
+                setAddedKind(null);
                 setSelected("");
                 setAdding(false);
+                setAddingPage(false);
               }}
               className={`min-h-11 rounded-lg px-4 text-[15px] font-semibold ${each.id === page.id ? "bg-brand text-white" : "text-ink-muted"}`}
             >
               {each.title}
             </button>
           ))}
+          {pageChoices.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => {
+                setAddingPage(true);
+                setSelected("");
+                setAdding(false);
+              }}
+              className="text-brand min-h-11 rounded-lg px-4 text-[15px] font-semibold"
+            >
+              + Add page
+            </button>
+          ) : null}
         </div>
+
+        {addingPage ? (
+          <div className="border-line rounded-xl border bg-white p-4">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <h2 className="font-semibold">Add a page</h2>
+              <Button tone="quiet" onClick={() => setAddingPage(false)}>
+                Close
+              </Button>
+            </div>
+            <ul className="divide-line divide-y">
+              {pageChoices.map((kind) => (
+                <li key={kind}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const added = newPage(rules, kind);
+                      onWorking(addPage(working, rules, added));
+                      setPageId(added.id);
+                      setAddedKind(kind);
+                      setAddingPage(false);
+                    }}
+                    className="hover:bg-surface w-full px-1 py-2.5 text-left"
+                  >
+                    <span className="block font-semibold">
+                      {DEFAULT_NAV_LABELS[kind]}
+                    </span>
+                    <span className="text-ink-muted block text-sm">
+                      {PAGE_PATHS[kind]}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
 
         {section && rule ? (
           <SectionForm
@@ -238,6 +299,18 @@ export function PagesView({
               >
                 + Add a section to this page
               </button>
+            ) : null}
+            {canRemovePage(page) ? (
+              <Button
+                tone="quiet"
+                onClick={() => {
+                  onWorking(removePage(working, page.id));
+                  setPageId(working.pages[0]?.id ?? "");
+                  setAddedKind(null);
+                }}
+              >
+                Remove the {page.title} page
+              </Button>
             ) : null}
           </>
         )}

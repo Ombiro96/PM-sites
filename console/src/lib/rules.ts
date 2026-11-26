@@ -50,6 +50,7 @@ export type SectionRule = {
 
 export type Rules = {
   max_sections_per_page: number;
+  page_kinds: PageKind[];
   action_kinds: Record<string, string[]>;
   page: { opening_section: Record<PageKind, string> };
   button: {
