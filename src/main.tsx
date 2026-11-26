@@ -4,6 +4,7 @@ import { App } from "./App";
 import { startRouter } from "./lib/router";
 import { brandVariables } from "./lib/site/brand";
 import { readInjectedData } from "./lib/site/data";
+import { setFavicon } from "./lib/site/favicon";
 import type { SiteData } from "./lib/site/types";
 import "./styles/site.css";
 
@@ -41,6 +42,7 @@ loadSite().then((site) => {
   // The backend writes each page's own title; without it (or in dev) the app sets one.
   const keepTitle = document.title.trim() !== "";
   applyLook(site);
+  setFavicon(site);
   startRouter();
   createRoot(container).render(
     <StrictMode>
