@@ -6,13 +6,15 @@ export type Company = {
   displayName: string;
   phone: string;
   whatsappNumber: string;
+  /** Where the saved logo is. Null without one. */
+  logoUrl: string | null;
 };
 
 export const COMPANY_NAME_MAX = 100;
 
 type Saved = { ok: true; company: Company } | { ok: false; message: string };
 
-const FIELDS = "displayName phone whatsappNumber";
+const FIELDS = "displayName phone whatsappNumber logoUrl";
 
 const READ = `
   query {
@@ -23,8 +25,8 @@ const READ = `
 `;
 
 const SAVE = `
-  mutation SaveAgencyProfile($displayName: String, $phone: String, $whatsappNumber: String, $confirmPublic: Boolean) {
-    saveAgencyProfile(displayName: $displayName, phone: $phone, whatsappNumber: $whatsappNumber, confirmPublic: $confirmPublic) {
+  mutation SaveAgencyProfile($displayName: String, $phone: String, $whatsappNumber: String, $confirmPublic: Boolean, $file: Upload, $removeLogo: Boolean) {
+    saveAgencyProfile(displayName: $displayName, phone: $phone, whatsappNumber: $whatsappNumber, confirmPublic: $confirmPublic, logo: $file, removeLogo: $removeLogo) {
       success
       message
       agencyProfile {
@@ -40,10 +42,14 @@ export async function readCompany(): Promise<Company | null> {
   return data.agencyProfile;
 }
 
-/** `confirmPublic` records that the name and phone number may be shown publicly. The backend never takes it back. */
+/**
+ * `confirmPublic` records that the name and phone number may be shown publicly. The backend never takes it back.
+ * A `logo` file replaces the saved one and "remove" clears it; without either the saved logo stays.
+ */
 export async function saveCompany(
-  company: Company,
+  { displayName, phone, whatsappNumber }: Company,
   confirmPublic = false,
+  logo?: File | "remove",
 ): Promise<Saved> {
   const data = await graphql<{
     saveAgencyProfile: {
@@ -51,7 +57,18 @@ export async function saveCompany(
       message: string | null;
       agencyProfile: Company | null;
     } | null;
-  }>(SAVE, { ...company, confirmPublic });
+  }>(
+    SAVE,
+    {
+      displayName,
+      phone,
+      whatsappNumber,
+      confirmPublic,
+      file: null,
+      removeLogo: logo === "remove",
+    },
+    { file: logo === "remove" ? undefined : logo },
+  );
   const result = data.saveAgencyProfile;
   if (result?.success && result.agencyProfile)
     return { ok: true, company: result.agencyProfile };

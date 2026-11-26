@@ -36,6 +36,7 @@ export function exampleSite({
       ? {
           ...temboHart.facts,
           name: company.displayName,
+          logo: company.logoUrl ?? "",
           phone: company.phone,
           whatsapp: company.whatsappNumber,
         }
@@ -94,7 +95,7 @@ export function draftSite({
     },
     facts: {
       name: company?.displayName || "Your company",
-      logo: "",
+      logo: company?.logoUrl ?? "",
       phone: company?.phone ?? "",
       whatsapp: company?.whatsappNumber ?? "",
       email: "",

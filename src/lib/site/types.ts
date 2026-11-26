@@ -187,7 +187,7 @@ export type SocialNetwork =
 /** The public company facts, written into the page when the site is published. */
 export type CompanyFacts = {
   name: string;
-  /** Empty when the manager has no logo: the name is shown as a wordmark. */
+  /** Empty when the manager has no logo: the name's initials are shown in its place. */
   logo: string;
   phone: string;
   whatsapp: string;

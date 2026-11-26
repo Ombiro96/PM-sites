@@ -1,7 +1,7 @@
 import { useSite } from "@/lib/site/context";
 import { initials, safeUrl } from "@/lib/utils";
 
-/** The manager's logo, shown whole; without one, the name as a wordmark. */
+/** The manager's logo beside the name; without a logo, the name's initials stand in for it. */
 export function Logo() {
   const { facts } = useSite();
   const logo = safeUrl(facts.logo);
@@ -12,7 +12,7 @@ export function Logo() {
       ) : (
         <i aria-hidden="true">{initials(facts.name)}</i>
       )}
-      {logo ? null : <span>{facts.name}</span>}
+      <span>{facts.name}</span>
     </a>
   );
 }

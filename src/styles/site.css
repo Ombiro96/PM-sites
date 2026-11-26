@@ -1102,6 +1102,17 @@ body {
   text-transform: uppercase;
   margin-bottom: 6px;
 }
+.ft-logo {
+  display: block;
+  height: 72px;
+  width: auto;
+  max-width: min(360px, 100%);
+  object-fit: contain;
+  margin-top: 12px;
+  padding: 4px;
+  background: #fff;
+  border-radius: 6px;
+}
 .ft-about p {
   max-width: 34ch;
   white-space: pre-line;

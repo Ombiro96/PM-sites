@@ -1,10 +1,12 @@
 import { useRef, useState } from "react";
+import { ConfirmDialog } from "./ConfirmDialog";
 import { PicturePreview } from "./PicturePreview";
 import { nameFromFile } from "../lib/pictures";
 import {
   PICTURE_BYTES_MAX,
   PICTURE_TYPES,
   PICTURES_MAX,
+  deletePicture,
   uploadPicture,
   type Picture,
 } from "../lib/site";
@@ -19,6 +21,7 @@ export function PictureLibrary({
   chosenId,
   onChoose,
   onAdded,
+  onRemoved,
 }: {
   pictures: readonly Picture[];
   /** The pages each picture is on, said under it when given. */
@@ -26,6 +29,8 @@ export function PictureLibrary({
   chosenId?: string;
   onChoose?: (picture: Picture) => void;
   onAdded: (picture: Picture) => void;
+  /** Given where uploaded pictures can be deleted. */
+  onRemoved?: (picture: Picture) => void;
 }) {
   const input = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState<{ at: number; of: number } | null>(
@@ -34,6 +39,7 @@ export function PictureLibrary({
   const [problems, setProblems] = useState<string[]>([]);
   const [dragging, setDragging] = useState(false);
   const [viewing, setViewing] = useState<Picture | null>(null);
+  const [removing, setRemoving] = useState<Picture | null>(null);
   const uploaded = pictures.filter((each) => each.source === "upload").length;
   const full = uploaded >= PICTURES_MAX;
 
@@ -42,9 +48,11 @@ export function PictureLibrary({
     const found: string[] = [];
     const taken: File[] = [];
     for (const file of files) {
-      if (!PICTURE_TYPES.includes(file.type) || file.size > PICTURE_BYTES_MAX)
+      if (!PICTURE_TYPES.includes(file.type))
+        found.push(`${file.name}: this is not a JPEG, PNG or WebP picture.`);
+      else if (file.size > PICTURE_BYTES_MAX)
         found.push(
-          `${file.name}: upload a JPEG, PNG or WebP picture of up to 10 MB.`,
+          `${file.name}: this picture is larger than 10 MB. Choose a smaller one.`,
         );
       else if (uploaded + taken.length >= PICTURES_MAX)
         found.push(
@@ -195,6 +203,17 @@ export function PictureLibrary({
                     View
                   </button>
                 ) : null}
+                {onRemoved && each.source === "upload" ? (
+                  <button
+                    type="button"
+                    aria-label={`Delete ${each.description || "this picture"}`}
+                    title="Delete this picture"
+                    onClick={() => setRemoving(each)}
+                    className="border-line text-ink hover:border-bad hover:text-bad absolute -top-2.5 -right-2.5 flex h-7 w-7 items-center justify-center rounded-full border bg-white text-lg leading-none font-semibold shadow-sm"
+                  >
+                    ×
+                  </button>
+                ) : null}
               </li>
             );
           })}
@@ -202,6 +221,35 @@ export function PictureLibrary({
       )}
       {viewing ? (
         <PicturePreview picture={viewing} onClose={() => setViewing(null)} />
+      ) : null}
+      {removing && onRemoved ? (
+        <ConfirmDialog
+          title={
+            used?.has(removing.id)
+              ? "This picture is in use"
+              : "Delete this picture?"
+          }
+          text={
+            used?.has(removing.id)
+              ? `It is used on ${used.get(removing.id)?.join(", ")}. Take it off the page first, then delete it.`
+              : `${removing.description || "This picture"} will be deleted for good. This cannot be undone.`
+          }
+          confirmLabel="Delete"
+          busyLabel="Deleting…"
+          canConfirm={!used?.has(removing.id)}
+          onClose={() => setRemoving(null)}
+          onConfirm={async () => {
+            try {
+              const result = await deletePicture(removing.id);
+              if (!result.ok) return result.message;
+            } catch (error) {
+              return error instanceof Error ? error.message : String(error);
+            }
+            onRemoved(removing);
+            setRemoving(null);
+            return null;
+          }}
+        />
       ) : null}
     </div>
   );

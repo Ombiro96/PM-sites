@@ -6,6 +6,9 @@ const TIMEOUT_MS = 20000;
 const UPLOAD_TIMEOUT_MS = 120000;
 export const NETWORK_PROBLEM =
   "Network problem. Please check your connection and try again.";
+export const UPLOAD_PROBLEM =
+  "This could not be uploaded. The file may be too large, or your connection dropped. Try a smaller picture, or try again.";
+const TOO_LARGE = "This file is too large to upload. Choose a smaller one.";
 const OUR_PROBLEM = "Something went wrong on our side. Please try again.";
 const NOT_SIGNED_IN = "You must be logged in to perform this action";
 
@@ -33,8 +36,10 @@ async function request(path: string, body: unknown): Promise<unknown> {
       signal: AbortSignal.timeout(upload ? UPLOAD_TIMEOUT_MS : TIMEOUT_MS),
     });
   } catch {
-    throw new ApiError(NETWORK_PROBLEM);
+    // A server in front of the backend that refuses an upload answers in a way the browser hides, so it lands here too.
+    throw new ApiError(upload ? UPLOAD_PROBLEM : NETWORK_PROBLEM);
   }
+  if (response.status === 413) throw new ApiError(TOO_LARGE);
   const parsed: unknown = await response.json().catch(() => null);
   if (parsed === null) throw new ApiError(NETWORK_PROBLEM);
   return parsed;

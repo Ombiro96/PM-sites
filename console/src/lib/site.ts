@@ -132,6 +132,7 @@ const ARGUMENTS = {
   addressName: "String",
   file: "Upload!",
   description: "String!",
+  id: "ID!",
 } as const;
 
 type Variables = Partial<Record<keyof typeof ARGUMENTS, unknown>>;
@@ -369,6 +370,14 @@ export async function uploadPicture({
   return answer.success && answer.picture
     ? { ok: true, picture: answer.picture }
     : refusal(answer);
+}
+
+/** Deletes one of the account's uploaded pictures. Refused while a page or the live website shows it. */
+export async function deletePicture(
+  id: string,
+): Promise<{ ok: true } | Refusal> {
+  const answer = await mutate<object>("websiteDeletePicture", { id }, "");
+  return answer.success ? { ok: true } : refusal(answer);
 }
 
 export async function readLeads(variables: {
