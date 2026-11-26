@@ -1,138 +1,100 @@
-"use client";
-
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import type { Brand } from "@/lib/brand/types";
-import { cn, telHref } from "@/lib/utils";
-import { Container, ButtonLink } from "@/components/ui/primitives";
+import { useState } from "react";
+import { ActionLink } from "@/components/ui";
+import { headerContactButton } from "@/lib/site/actions";
+import { useActionContext, useSite } from "@/lib/site/context";
+import { navItems, TENANT_LOGIN_URL } from "@/lib/site/pages";
+import { cx } from "@/lib/utils";
 import { Logo } from "./Logo";
 
-export function Header({ brand }: { brand: Brand }) {
-  const pathname = usePathname();
-  const [open, setOpen] = useState(false);
+export function Header({
+  pathname,
+  over,
+}: {
+  pathname: string;
+  over: boolean;
+}) {
+  const site = useSite();
+  const context = useActionContext();
+  // Remembers which address the menu was opened on, so it closes by itself after a link is followed.
+  const [openOn, setOpenOn] = useState<string | null>(null);
+  const open = openOn === pathname;
 
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
+  const nav = navItems(site.document, site.site.look);
+  const contact = headerContactButton(context);
+  const isCurrent = (href: string) =>
+    href === "/"
+      ? pathname === "/"
+      : pathname === href || pathname.startsWith(`${href}/`);
+
+  const links = nav.map((item) => (
+    <a
+      key={item.href}
+      href={item.href}
+      aria-current={isCurrent(item.href) ? "page" : undefined}
+    >
+      {item.label}
+    </a>
+  ));
+  const tenantLogin = site.document.header.show_tenant_login ? (
+    <a
+      className="tl"
+      href={TENANT_LOGIN_URL}
+      target="_blank"
+      rel="noreferrer noopener"
+    >
+      Tenant login
+    </a>
+  ) : null;
+  const contactButton = (
+    <ActionLink
+      button={contact}
+      className={cx("sm", contact?.kind === "whatsapp" && "wa")}
+    />
+  );
 
   return (
-    <header className="sticky top-0 z-50 border-b border-line bg-surface/95 backdrop-blur">
-      <div className="hidden bg-brand-deep text-brand-contrast lg:block">
-        <Container className="flex h-10 items-center justify-between text-xs">
-          <p className="text-white/70">{brand.contact.officeHours}</p>
-          <div className="flex items-center gap-6">
-            <a
-              href={telHref(brand.contact.phone)}
-              className="font-semibold hover:text-accent"
-            >
-              {brand.contact.phoneDisplay}
-            </a>
-            <a
-              href={`mailto:${brand.contact.email}`}
-              className="text-white/70 hover:text-accent"
-            >
-              {brand.contact.email}
-            </a>
-          </div>
-        </Container>
-      </div>
-
-      <Container className="flex h-18 items-center justify-between gap-6">
-        <Logo brand={brand} />
-
-        <nav aria-label="Main" className="hidden items-center gap-8 lg:flex">
-          {brand.nav.map((item) => {
-            const active =
-              item.href === "/"
-                ? pathname === "/"
-                : pathname.startsWith(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "text-sm font-medium transition-colors",
-                  active ? "text-brand" : "text-ink-muted hover:text-brand",
-                )}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
+    <header className={cx("hd", over && "over", open && "open")}>
+      <div className="in">
+        <Logo />
+        <nav className="nav" aria-label="Site">
+          {links}
         </nav>
-
-        <div className="hidden items-center gap-3 lg:flex">
-          <ButtonLink href="/tenant-portal" variant="secondary" size="sm">
-            Tenant login
-          </ButtonLink>
-          <ButtonLink href="/contact" size="sm">
-            Enquire
-          </ButtonLink>
+        <div className="hd-actions">
+          {tenantLogin}
+          {contactButton}
         </div>
-
         <button
           type="button"
-          onClick={() => setOpen((value) => !value)}
+          className="menu-btn"
+          aria-label={open ? "Close menu" : "Menu"}
           aria-expanded={open}
-          aria-controls="mobile-nav"
-          aria-label={open ? "Close menu" : "Open menu"}
-          className="grid h-11 w-11 place-items-center rounded-brand border border-line lg:hidden"
+          aria-controls="site-menu"
+          onClick={() => setOpenOn(open ? null : pathname)}
         >
           <svg
+            width="22"
+            height="22"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth={1.8}
+            strokeWidth="2"
             strokeLinecap="round"
-            className="h-5 w-5"
             aria-hidden="true"
           >
-            {open ? (
-              <path d="M6 6l12 12M18 6L6 18" />
-            ) : (
-              <path d="M4 7h16M4 12h16M4 17h16" />
-            )}
+            <path
+              d={open ? "M6 6l12 12M18 6L6 18" : "M4 7h16M4 12h16M4 17h16"}
+            />
           </svg>
         </button>
-      </Container>
-
+      </div>
       {open ? (
-        <div
-          id="mobile-nav"
-          className="border-t border-line bg-surface lg:hidden"
-        >
-          <Container className="flex flex-col gap-1 py-4">
-            {brand.nav.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className="rounded-brand px-3 py-3 text-base font-medium text-ink hover:bg-surface-muted"
-              >
-                {item.label}
-              </Link>
-            ))}
-            <div className="mt-3 grid gap-2">
-              <ButtonLink href="/tenant-portal" variant="secondary" size="md">
-                Tenant login
-              </ButtonLink>
-              <ButtonLink href="/contact" size="md">
-                Send an enquiry
-              </ButtonLink>
-              <a
-                href={telHref(brand.contact.phone)}
-                className="py-2 text-center text-sm font-semibold text-brand"
-              >
-                Call {brand.contact.phoneDisplay}
-              </a>
-            </div>
-          </Container>
-        </div>
+        <nav className="menu" id="site-menu" aria-label="Site menu">
+          {links}
+          <div className="row">
+            {tenantLogin}
+            {contactButton}
+          </div>
+        </nav>
       ) : null}
     </header>
   );

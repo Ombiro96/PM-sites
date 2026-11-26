@@ -1,0 +1,137 @@
+@import "@fontsource/figtree/latin-400.css";
+@import "@fontsource/figtree/latin-500.css";
+@import "@fontsource/figtree/latin-600.css";
+@import "@fontsource/figtree/latin-700.css";
+@import "react-phone-input-2/lib/style.css";
+@import "tailwindcss" source("./");
+
+@theme {
+  --font-sans: "Figtree", system-ui, sans-serif;
+  --color-brand: #000082;
+  --color-brand-deep: #000050;
+  --color-brand-soft: #e4e4ff;
+  --color-ink: #1b1e23;
+  --color-ink-muted: #5a606b;
+  --color-line: #d5d8e0;
+  --color-surface: #f6f7fc;
+  --color-bad: #b42318;
+}
+
+body {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+@keyframes setup-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes setup-onward {
+  from {
+    opacity: 0;
+    transform: translateX(1.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes setup-back {
+  from {
+    opacity: 0;
+    transform: translateX(-1.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes setup-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Critically damped: ease-out, no overshoot. About 0.35s. */
+.setup-arrive,
+.setup-onward,
+.setup-back {
+  animation-duration: 350ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: both;
+}
+
+.setup-arrive {
+  animation-name: setup-arrive;
+}
+
+.setup-onward {
+  animation-name: setup-onward;
+}
+
+.setup-back {
+  animation-name: setup-back;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .setup-arrive,
+  .setup-onward,
+  .setup-back {
+    animation-name: setup-fade;
+    animation-duration: 200ms;
+    animation-timing-function: ease;
+  }
+}
+
+/* The landing page's bar: a translucent layer the page scrolls under. */
+.landing-nav {
+  background: rgb(255 255 255 / 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.06);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .landing-nav {
+    background: #fff;
+    backdrop-filter: none;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* A check result arriving under the address field. Opacity only. */
+.address-status {
+  opacity: 1;
+  transition: opacity 150ms cubic-bezier(0.23, 1, 0.32, 1);
+
+  @starting-style {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .address-status {
+    transition: none;
+  }
+}

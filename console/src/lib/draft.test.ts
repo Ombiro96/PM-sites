@@ -1,0 +1,160 @@
+import { describe, expect, it } from "vitest";
+import { temboHart } from "@/dev/tembo-hart";
+import {
+  addable,
+  addablePages,
+  addPage,
+  addSection,
+  canRemovePage,
+  documentProblems,
+  moveSection,
+  newPage,
+  newSection,
+  picturesUsed,
+  problemPlace,
+  sectionErrors,
+  sectionsOf,
+  withoutNewIds,
+} from "./draft";
+import { ruleFor, type Rules } from "./rules";
+import rulesData from "./rules.fixture.json";
+
+const rules = rulesData as unknown as Rules;
+const document = temboHart.document;
+const home = document.pages[0];
+const ids = (pageAt: number, from = document) =>
+  from.pages[pageAt].sections.map((section) => section.id);
+
+describe("a draft being edited", () => {
+  it("passes the contract's sample without problems", () => {
+    expect(documentProblems(document, rules)).toEqual([]);
+  });
+
+  it("keeps the opening section first when sections move", () => {
+    const [opening, second, third] = ids(0);
+    expect(ids(0, moveSection(document, home.id, opening, 1))).toEqual(ids(0));
+    expect(ids(0, moveSection(document, home.id, second, -1))).toEqual(ids(0));
+    expect(
+      ids(0, moveSection(document, home.id, third, -1)).slice(0, 3),
+    ).toEqual([opening, third, second]);
+  });
+
+  it("offers only the sections a page can still take", () => {
+    const offered = addable(rules, home).map((rule) => rule.type);
+    expect(offered).not.toContain("top_banner");
+    expect(offered).not.toContain("fees");
+    for (const section of home.sections)
+      if (ruleFor(rules, section.type)?.max_per_page === 1)
+        expect(offered).not.toContain(section.type);
+  });
+
+  it("sends a new section without the id the editor made up", () => {
+    const rule = ruleFor(rules, "questions");
+    if (!rule) throw new Error("no questions rule");
+    const added = addSection(document, home.id, newSection(rule));
+    const sent = sectionsOf(withoutNewIds(added).pages[0]).at(-1);
+    expect(sent?.type).toBe("questions");
+    expect(sent && "id" in sent).toBe(false);
+    expect(sent?.items?.every((item) => !("id" in item))).toBe(true);
+    expect(ids(0, withoutNewIds(document))).toEqual(ids(0));
+  });
+
+  it("offers the pages the site lacks and adds one ready to publish", () => {
+    expect(addablePages(rules, document, "both")).toEqual([
+      "services",
+      "areas",
+    ]);
+    const withoutOwners = {
+      ...document,
+      pages: document.pages.filter((each) => each.kind !== "owners"),
+    };
+    expect(addablePages(rules, withoutOwners, "landlords")).toContain("owners");
+    expect(addablePages(rules, withoutOwners, "tenants")).toEqual([
+      "services",
+      "areas",
+    ]);
+    const page = newPage(rules, "services");
+    expect(page.sections.map((section) => section.type)).toEqual([
+      "page_title",
+      "services",
+    ]);
+    const added = addPage(document, rules, page);
+    expect(added.pages.map((each) => each.kind)).toEqual([
+      "home",
+      "owners",
+      "services",
+      "about",
+      "contact",
+    ]);
+    expect(documentProblems(added, rules)).toEqual([]);
+    const sent = withoutNewIds(added).pages[2];
+    expect("id" in sent).toBe(false);
+    expect(canRemovePage(page)).toBe(true);
+    expect(canRemovePage(home)).toBe(false);
+    const about = document.pages.find((each) => each.kind === "about");
+    expect(about && canRemovePage(about)).toBe(false);
+  });
+
+  it("starts a new page with every section it needs to go live", () => {
+    const types = (kind: "owners" | "about" | "services" | "areas") =>
+      newPage(rules, kind).sections.map((section) => section.type);
+    expect(types("owners")).toEqual([
+      "page_title",
+      "services",
+      "figures",
+      "management_request",
+    ]);
+    expect(types("about")).toEqual(["page_title", "about", "buildings"]);
+    expect(types("services")).toEqual(["page_title", "services"]);
+    expect(types("areas")).toEqual(["page_title", "areas"]);
+    const services = sectionsOf(newPage(rules, "services"))[1];
+    expect(new Set(services.items?.map((item) => item.service)).size).toBe(
+      services.items?.length,
+    );
+  });
+
+  it("says what a new section still needs before publishing", () => {
+    const rule = ruleFor(rules, "testimonials");
+    if (!rule) throw new Error("no testimonials rule");
+    const errors = sectionErrors(newSection(rule), rules);
+    expect(errors.heading).toBeUndefined();
+    expect(errors["items.0.quote"]).toBeDefined();
+    expect(errors["items.0.permission"]).toBeDefined();
+  });
+
+  it("knows which pages use a picture", () => {
+    expect(picturesUsed(document).get("as_skyline")).toEqual(["Home"]);
+  });
+});
+
+describe("where a publish problem is", () => {
+  it("names the page, the section, the entry and the field", () => {
+    const team = newSection(ruleFor(rules, "team")!);
+    const withTeam = addSection(document, home.id, {
+      ...team,
+      id: "sec_team",
+      items: [{ id: "it_1", name: "Amina" }, { id: "it_2" }],
+    });
+    const at = withTeam.pages[0].sections.length - 1;
+    expect(
+      problemPlace(`pages[0].sections[${at}].items[1].name`, withTeam, rules),
+    ).toEqual({
+      pageId: home.id,
+      sectionId: "sec_team",
+      where: `${home.title}, Team, Person 2, Name`,
+    });
+  });
+
+  it("names a field of the section itself", () => {
+    expect(
+      problemPlace("pages[0].sections[0].fields.heading", document, rules)
+        ?.where,
+    ).toBe(
+      `${home.title}, ${ruleFor(rules, home.sections[0].type)?.name}, Heading`,
+    );
+  });
+
+  it("is null outside the pages", () => {
+    expect(problemPlace("facts.phone", document, rules)).toBeNull();
+  });
+});

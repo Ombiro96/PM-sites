@@ -1,0 +1,962 @@
+{
+  "version": 1,
+  "looks": ["fresh", "classic", "bold", "coast", "estate", "plain"],
+  "backgrounds": ["white", "tinted", "brand"],
+  "page_kinds": ["home", "owners", "services", "areas", "about", "contact"],
+  "page_paths": {
+    "home": "/",
+    "owners": "/for-owners",
+    "services": "/services",
+    "areas": "/areas",
+    "about": "/about",
+    "contact": "/contact"
+  },
+  "action_kinds": {
+    "houses": [],
+    "page": ["page"],
+    "section": ["page", "section"],
+    "whatsapp": ["message"],
+    "call": [],
+    "tenant_login": []
+  },
+  "audiences": ["tenants", "landlords", "both"],
+  "max_sections_per_page": 12,
+  "page": {
+    "title_max": 60,
+    "nav_label_max": 20,
+    "search_description_max": 160,
+    "opening_section": {
+      "home": "top_banner",
+      "owners": "page_title",
+      "services": "page_title",
+      "areas": "page_title",
+      "about": "page_title",
+      "contact": "page_title"
+    },
+    "not_counted_as_content": {
+      "owners": ["management_request", "page_title"],
+      "about": ["page_title"]
+    },
+    "min_content_sections": 2
+  },
+  "button": {
+    "label_min": 2,
+    "label_max": 28,
+    "whatsapp_message_max": 200
+  },
+  "picture": {
+    "alt_max": 120
+  },
+  "standard_services": [
+    "tenant_finding",
+    "rent_collection",
+    "repairs",
+    "owner_statements",
+    "caretaker",
+    "inspections",
+    "lease_paperwork",
+    "utilities_billing"
+  ],
+  "figures": ["buildings", "units", "towns", "houses_to_let"],
+  "sections": [
+    {
+      "type": "page_title",
+      "name": "Page title",
+      "description": "The title at the top of every page except home.",
+      "pages": ["owners", "services", "areas", "about", "contact"],
+      "source": "free",
+      "fields": [
+        {
+          "name": "heading",
+          "kind": "text",
+          "required": true,
+          "min_length": 3,
+          "max_length": 60,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        },
+        {
+          "name": "text",
+          "kind": "text",
+          "required": false,
+          "min_length": 0,
+          "max_length": 160,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        },
+        {
+          "name": "picture",
+          "kind": "picture",
+          "required": false,
+          "min_length": 0,
+          "max_length": 0,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        }
+      ],
+      "items": null,
+      "layouts": [],
+      "backgrounds": [],
+      "always_brand": false,
+      "max_per_page": 1,
+      "layout_picture_counts": [],
+      "layout_item_counts": []
+    },
+    {
+      "type": "top_banner",
+      "name": "Top banner",
+      "description": "Headline, a short introduction and one or two buttons.",
+      "pages": ["home"],
+      "source": "free",
+      "fields": [
+        {
+          "name": "heading",
+          "kind": "text",
+          "required": true,
+          "min_length": 10,
+          "max_length": 80,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        },
+        {
+          "name": "text",
+          "kind": "text",
+          "required": false,
+          "min_length": 0,
+          "max_length": 240,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        },
+        {
+          "name": "primary",
+          "kind": "button",
+          "required": true,
+          "min_length": 0,
+          "max_length": 0,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        },
+        {
+          "name": "secondary",
+          "kind": "button",
+          "required": false,
+          "min_length": 0,
+          "max_length": 0,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        },
+        {
+          "name": "pictures",
+          "kind": "pictures",
+          "required": false,
+          "min_length": 0,
+          "max_length": 0,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 3
+        },
+        {
+          "name": "badge",
+          "kind": "choice",
+          "required": false,
+          "min_length": 0,
+          "max_length": 0,
+          "max_paragraphs": 0,
+          "options": ["houses_available"],
+          "min_count": 0,
+          "max_count": 0
+        }
+      ],
+      "items": null,
+      "layouts": ["split", "photo", "centre", "band", "plain"],
+      "backgrounds": [],
+      "always_brand": false,
+      "max_per_page": 1,
+      "layout_picture_counts": [
+        ["split", [0, 1]],
+        ["photo", [0, 1]],
+        ["centre", [0, 1]],
+        ["band", [0, 2, 3]],
+        ["plain", [0, 1]]
+      ],
+      "layout_item_counts": []
+    },
+    {
+      "type": "houses",
+      "name": "Houses to let",
+      "description": "Vacancies from Bomahut. Updates by itself.",
+      "pages": ["home", "owners", "services", "areas", "about", "contact"],
+      "source": "live",
+      "fields": [
+        {
+          "name": "heading",
+          "kind": "text",
+          "required": true,
+          "min_length": 3,
+          "max_length": 60,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        },
+        {
+          "name": "show",
+          "kind": "choice",
+          "required": false,
+          "min_length": 0,
+          "max_length": 0,
+          "max_paragraphs": 0,
+          "options": [3, 6],
+          "min_count": 0,
+          "max_count": 0
+        }
+      ],
+      "items": null,
+      "layouts": ["cards", "list", "rows"],
+      "backgrounds": ["white", "tinted"],
+      "always_brand": false,
+      "max_per_page": 1,
+      "layout_picture_counts": [],
+      "layout_item_counts": []
+    },
+    {
+      "type": "about",
+      "name": "About",
+      "description": "The company in its own words, with an optional picture.",
+      "pages": ["home", "about"],
+      "source": "manager",
+      "fields": [
+        {
+          "name": "heading",
+          "kind": "text",
+          "required": true,
+          "min_length": 3,
+          "max_length": 80,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        },
+        {
+          "name": "text",
+          "kind": "longtext",
+          "required": true,
+          "min_length": 40,
+          "max_length": 700,
+          "max_paragraphs": 3,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        },
+        {
+          "name": "picture",
+          "kind": "picture",
+          "required": false,
+          "min_length": 0,
+          "max_length": 0,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        }
+      ],
+      "items": null,
+      "layouts": ["picture_left", "picture_right"],
+      "backgrounds": ["white", "tinted"],
+      "always_brand": false,
+      "max_per_page": 1,
+      "layout_picture_counts": [],
+      "layout_item_counts": []
+    },
+    {
+      "type": "services",
+      "name": "Services",
+      "description": "What the manager does for owners.",
+      "pages": ["home", "owners", "services"],
+      "source": "manager",
+      "fields": [
+        {
+          "name": "heading",
+          "kind": "text",
+          "required": true,
+          "min_length": 3,
+          "max_length": 60,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        }
+      ],
+      "items": {
+        "label": "Service",
+        "min_count": 2,
+        "max_count": 8,
+        "fields": [
+          {
+            "name": "title",
+            "kind": "text",
+            "required": true,
+            "min_length": 3,
+            "max_length": 40,
+            "max_paragraphs": 0,
+            "options": [],
+            "min_count": 0,
+            "max_count": 0
+          },
+          {
+            "name": "text",
+            "kind": "text",
+            "required": false,
+            "min_length": 0,
+            "max_length": 140,
+            "max_paragraphs": 0,
+            "options": [],
+            "min_count": 0,
+            "max_count": 0
+          }
+        ],
+        "standard_key": "service",
+        "standard_options": [
+          "tenant_finding",
+          "rent_collection",
+          "repairs",
+          "owner_statements",
+          "caretaker",
+          "inspections",
+          "lease_paperwork",
+          "utilities_billing"
+        ]
+      },
+      "layouts": ["cards", "list"],
+      "backgrounds": ["white", "tinted"],
+      "always_brand": false,
+      "max_per_page": 1,
+      "layout_picture_counts": [],
+      "layout_item_counts": []
+    },
+    {
+      "type": "steps",
+      "name": "How we work",
+      "description": "The steps an owner goes through, in order.",
+      "pages": ["home", "owners"],
+      "source": "manager",
+      "fields": [
+        {
+          "name": "heading",
+          "kind": "text",
+          "required": true,
+          "min_length": 3,
+          "max_length": 60,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        }
+      ],
+      "items": {
+        "label": "Step",
+        "min_count": 3,
+        "max_count": 5,
+        "fields": [
+          {
+            "name": "title",
+            "kind": "text",
+            "required": true,
+            "min_length": 3,
+            "max_length": 40,
+            "max_paragraphs": 0,
+            "options": [],
+            "min_count": 0,
+            "max_count": 0
+          },
+          {
+            "name": "text",
+            "kind": "text",
+            "required": false,
+            "min_length": 0,
+            "max_length": 120,
+            "max_paragraphs": 0,
+            "options": [],
+            "min_count": 0,
+            "max_count": 0
+          }
+        ],
+        "standard_key": "",
+        "standard_options": []
+      },
+      "layouts": [],
+      "backgrounds": ["tinted", "white", "brand"],
+      "always_brand": false,
+      "max_per_page": 1,
+      "layout_picture_counts": [],
+      "layout_item_counts": []
+    },
+    {
+      "type": "figures",
+      "name": "Figures from Bomahut",
+      "description": "Counts taken from the account when the page is drawn.",
+      "pages": ["home", "owners", "about"],
+      "source": "live",
+      "fields": [
+        {
+          "name": "heading",
+          "kind": "text",
+          "required": true,
+          "min_length": 3,
+          "max_length": 60,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        },
+        {
+          "name": "show",
+          "kind": "choices",
+          "required": true,
+          "min_length": 0,
+          "max_length": 0,
+          "max_paragraphs": 0,
+          "options": ["buildings", "units", "towns", "houses_to_let"],
+          "min_count": 2,
+          "max_count": 4
+        }
+      ],
+      "items": null,
+      "layouts": [],
+      "backgrounds": ["brand", "tinted"],
+      "always_brand": false,
+      "max_per_page": 1,
+      "layout_picture_counts": [],
+      "layout_item_counts": []
+    },
+    {
+      "type": "buildings",
+      "name": "Our buildings",
+      "description": "Buildings the manager has chosen to show publicly.",
+      "pages": ["home", "owners", "about"],
+      "source": "live",
+      "fields": [
+        {
+          "name": "heading",
+          "kind": "text",
+          "required": true,
+          "min_length": 3,
+          "max_length": 60,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        },
+        {
+          "name": "show",
+          "kind": "choice",
+          "required": false,
+          "min_length": 0,
+          "max_length": 0,
+          "max_paragraphs": 0,
+          "options": [3, 6],
+          "min_count": 0,
+          "max_count": 0
+        }
+      ],
+      "items": null,
+      "layouts": [],
+      "backgrounds": ["white", "tinted"],
+      "always_brand": false,
+      "max_per_page": 1,
+      "layout_picture_counts": [],
+      "layout_item_counts": []
+    },
+    {
+      "type": "team",
+      "name": "Team",
+      "description": "The people owners and tenants deal with.",
+      "pages": ["home", "about"],
+      "source": "manager",
+      "fields": [
+        {
+          "name": "heading",
+          "kind": "text",
+          "required": true,
+          "min_length": 3,
+          "max_length": 60,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        }
+      ],
+      "items": {
+        "label": "Person",
+        "min_count": 1,
+        "max_count": 8,
+        "fields": [
+          {
+            "name": "name",
+            "kind": "text",
+            "required": true,
+            "min_length": 2,
+            "max_length": 40,
+            "max_paragraphs": 0,
+            "options": [],
+            "min_count": 0,
+            "max_count": 0
+          },
+          {
+            "name": "role",
+            "kind": "text",
+            "required": false,
+            "min_length": 0,
+            "max_length": 40,
+            "max_paragraphs": 0,
+            "options": [],
+            "min_count": 0,
+            "max_count": 0
+          },
+          {
+            "name": "picture",
+            "kind": "picture",
+            "required": false,
+            "min_length": 0,
+            "max_length": 0,
+            "max_paragraphs": 0,
+            "options": [],
+            "min_count": 0,
+            "max_count": 0
+          }
+        ],
+        "standard_key": "",
+        "standard_options": []
+      },
+      "layouts": [],
+      "backgrounds": ["tinted", "white"],
+      "always_brand": false,
+      "max_per_page": 1,
+      "layout_picture_counts": [],
+      "layout_item_counts": []
+    },
+    {
+      "type": "testimonials",
+      "name": "Testimonials",
+      "description": "What clients have said, supplied by the manager.",
+      "pages": ["home", "owners"],
+      "source": "manager",
+      "fields": [
+        {
+          "name": "heading",
+          "kind": "text",
+          "required": true,
+          "min_length": 3,
+          "max_length": 60,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        }
+      ],
+      "items": {
+        "label": "Quote",
+        "min_count": 1,
+        "max_count": 6,
+        "fields": [
+          {
+            "name": "quote",
+            "kind": "text",
+            "required": true,
+            "min_length": 20,
+            "max_length": 240,
+            "max_paragraphs": 0,
+            "options": [],
+            "min_count": 0,
+            "max_count": 0
+          },
+          {
+            "name": "by",
+            "kind": "text",
+            "required": true,
+            "min_length": 3,
+            "max_length": 60,
+            "max_paragraphs": 0,
+            "options": [],
+            "min_count": 0,
+            "max_count": 0
+          },
+          {
+            "name": "permission",
+            "kind": "flag",
+            "required": true,
+            "min_length": 0,
+            "max_length": 0,
+            "max_paragraphs": 0,
+            "options": [],
+            "min_count": 0,
+            "max_count": 0
+          }
+        ],
+        "standard_key": "",
+        "standard_options": []
+      },
+      "layouts": ["single", "cards"],
+      "backgrounds": ["tinted", "white"],
+      "always_brand": false,
+      "max_per_page": 1,
+      "layout_picture_counts": [],
+      "layout_item_counts": [
+        ["single", 1, 1],
+        ["cards", 2, 6]
+      ]
+    },
+    {
+      "type": "areas",
+      "name": "Areas we cover",
+      "description": "The areas served, from the company facts.",
+      "pages": ["home", "areas"],
+      "source": "live",
+      "fields": [
+        {
+          "name": "heading",
+          "kind": "text",
+          "required": true,
+          "min_length": 3,
+          "max_length": 60,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        }
+      ],
+      "items": null,
+      "layouts": [],
+      "backgrounds": ["white", "tinted"],
+      "always_brand": false,
+      "max_per_page": 1,
+      "layout_picture_counts": [],
+      "layout_item_counts": []
+    },
+    {
+      "type": "questions",
+      "name": "Common questions",
+      "description": "Questions with the manager's own answers.",
+      "pages": ["home", "owners", "contact"],
+      "source": "manager",
+      "fields": [
+        {
+          "name": "heading",
+          "kind": "text",
+          "required": true,
+          "min_length": 3,
+          "max_length": 60,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        },
+        {
+          "name": "for",
+          "kind": "choice",
+          "required": true,
+          "min_length": 0,
+          "max_length": 0,
+          "max_paragraphs": 0,
+          "options": ["tenants", "owners"],
+          "min_count": 0,
+          "max_count": 0
+        }
+      ],
+      "items": {
+        "label": "Question",
+        "min_count": 1,
+        "max_count": 10,
+        "fields": [
+          {
+            "name": "question",
+            "kind": "text",
+            "required": true,
+            "min_length": 10,
+            "max_length": 100,
+            "max_paragraphs": 0,
+            "options": [],
+            "min_count": 0,
+            "max_count": 0
+          },
+          {
+            "name": "answer",
+            "kind": "text",
+            "required": true,
+            "min_length": 10,
+            "max_length": 400,
+            "max_paragraphs": 0,
+            "options": [],
+            "min_count": 0,
+            "max_count": 0
+          }
+        ],
+        "standard_key": "",
+        "standard_options": []
+      },
+      "layouts": [],
+      "backgrounds": ["white", "tinted"],
+      "always_brand": false,
+      "max_per_page": 2,
+      "layout_picture_counts": [],
+      "layout_item_counts": []
+    },
+    {
+      "type": "fees",
+      "name": "Fees",
+      "description": "What the manager charges, when they choose to state it.",
+      "pages": ["owners"],
+      "source": "manager",
+      "fields": [
+        {
+          "name": "heading",
+          "kind": "text",
+          "required": true,
+          "min_length": 3,
+          "max_length": 60,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        },
+        {
+          "name": "note",
+          "kind": "text",
+          "required": false,
+          "min_length": 0,
+          "max_length": 160,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        }
+      ],
+      "items": {
+        "label": "Fee",
+        "min_count": 1,
+        "max_count": 6,
+        "fields": [
+          {
+            "name": "label",
+            "kind": "text",
+            "required": true,
+            "min_length": 3,
+            "max_length": 60,
+            "max_paragraphs": 0,
+            "options": [],
+            "min_count": 0,
+            "max_count": 0
+          },
+          {
+            "name": "value",
+            "kind": "text",
+            "required": true,
+            "min_length": 1,
+            "max_length": 40,
+            "max_paragraphs": 0,
+            "options": [],
+            "min_count": 0,
+            "max_count": 0
+          }
+        ],
+        "standard_key": "",
+        "standard_options": []
+      },
+      "layouts": [],
+      "backgrounds": ["white", "tinted"],
+      "always_brand": false,
+      "max_per_page": 1,
+      "layout_picture_counts": [],
+      "layout_item_counts": []
+    },
+    {
+      "type": "management_request",
+      "name": "Management request",
+      "description": "Owners ask the manager to take on their building.",
+      "pages": ["home", "owners"],
+      "source": "free",
+      "fields": [
+        {
+          "name": "heading",
+          "kind": "text",
+          "required": true,
+          "min_length": 3,
+          "max_length": 80,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        },
+        {
+          "name": "text",
+          "kind": "text",
+          "required": false,
+          "min_length": 0,
+          "max_length": 200,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        },
+        {
+          "name": "mode",
+          "kind": "choice",
+          "required": true,
+          "min_length": 0,
+          "max_length": 0,
+          "max_paragraphs": 0,
+          "options": ["form", "whatsapp"],
+          "min_count": 0,
+          "max_count": 0
+        }
+      ],
+      "items": null,
+      "layouts": [],
+      "backgrounds": ["tinted", "white", "brand"],
+      "always_brand": false,
+      "max_per_page": 1,
+      "layout_picture_counts": [],
+      "layout_item_counts": []
+    },
+    {
+      "type": "message_form",
+      "name": "Message form",
+      "description": "A visitor writes to the manager and says who they are.",
+      "pages": ["contact"],
+      "source": "free",
+      "fields": [
+        {
+          "name": "heading",
+          "kind": "text",
+          "required": true,
+          "min_length": 3,
+          "max_length": 60,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        },
+        {
+          "name": "text",
+          "kind": "text",
+          "required": false,
+          "min_length": 0,
+          "max_length": 200,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        }
+      ],
+      "items": null,
+      "layouts": [],
+      "backgrounds": ["tinted", "white"],
+      "always_brand": false,
+      "max_per_page": 1,
+      "layout_picture_counts": [],
+      "layout_item_counts": []
+    },
+    {
+      "type": "contact",
+      "name": "Contact",
+      "description": "Phone, WhatsApp, office, hours and map, from the company facts.",
+      "pages": ["home", "contact"],
+      "source": "live",
+      "fields": [
+        {
+          "name": "heading",
+          "kind": "text",
+          "required": true,
+          "min_length": 3,
+          "max_length": 60,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        }
+      ],
+      "items": null,
+      "layouts": [],
+      "backgrounds": ["white", "tinted"],
+      "always_brand": false,
+      "max_per_page": 1,
+      "layout_picture_counts": [],
+      "layout_item_counts": []
+    },
+    {
+      "type": "call_to_action",
+      "name": "Call-to-action band",
+      "description": "One line and a button, on the brand colour.",
+      "pages": ["home", "owners", "services", "areas", "about", "contact"],
+      "source": "free",
+      "fields": [
+        {
+          "name": "heading",
+          "kind": "text",
+          "required": true,
+          "min_length": 3,
+          "max_length": 60,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        },
+        {
+          "name": "text",
+          "kind": "text",
+          "required": false,
+          "min_length": 0,
+          "max_length": 120,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        },
+        {
+          "name": "button",
+          "kind": "button",
+          "required": true,
+          "min_length": 0,
+          "max_length": 0,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        },
+        {
+          "name": "picture",
+          "kind": "picture",
+          "required": false,
+          "min_length": 0,
+          "max_length": 0,
+          "max_paragraphs": 0,
+          "options": [],
+          "min_count": 0,
+          "max_count": 0
+        }
+      ],
+      "items": null,
+      "layouts": [],
+      "backgrounds": [],
+      "always_brand": true,
+      "max_per_page": 2,
+      "layout_picture_counts": [],
+      "layout_item_counts": []
+    }
+  ]
+}
