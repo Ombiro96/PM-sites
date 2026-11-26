@@ -262,12 +262,15 @@ export async function createSite({
   look,
   brandColour,
   addressName,
+  areas,
 }: {
   audience: Audience;
   answers: Answers;
   look: Look;
   brandColour: string;
   addressName: string;
+  /** The areas the company covers, which the first draft names and lists. */
+  areas: string[];
 }): Promise<CreateResult> {
   const answer = await mutate<{
     website: SentSite | null;
@@ -277,7 +280,7 @@ export async function createSite({
     "websiteCreate",
     {
       audience,
-      answers: JSON.stringify({ ...answers, look }),
+      answers: JSON.stringify({ ...answers, look, areas }),
       brandColour,
       addressName,
     },

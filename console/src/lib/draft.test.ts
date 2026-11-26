@@ -60,7 +60,19 @@ describe("a draft being edited", () => {
   });
 
   it("offers the pages the site lacks and adds one ready to publish", () => {
-    expect(addablePages(rules, document)).toEqual(["services", "areas"]);
+    expect(addablePages(rules, document, "both")).toEqual([
+      "services",
+      "areas",
+    ]);
+    const withoutOwners = {
+      ...document,
+      pages: document.pages.filter((each) => each.kind !== "owners"),
+    };
+    expect(addablePages(rules, withoutOwners, "landlords")).toContain("owners");
+    expect(addablePages(rules, withoutOwners, "tenants")).toEqual([
+      "services",
+      "areas",
+    ]);
     const page = newPage(rules, "services");
     expect(page.sections.map((section) => section.type)).toEqual([
       "page_title",
@@ -81,6 +93,24 @@ describe("a draft being edited", () => {
     expect(canRemovePage(home)).toBe(false);
     const about = document.pages.find((each) => each.kind === "about");
     expect(about && canRemovePage(about)).toBe(false);
+  });
+
+  it("starts a new page with every section it needs to go live", () => {
+    const types = (kind: "owners" | "about" | "services" | "areas") =>
+      newPage(rules, kind).sections.map((section) => section.type);
+    expect(types("owners")).toEqual([
+      "page_title",
+      "services",
+      "figures",
+      "management_request",
+    ]);
+    expect(types("about")).toEqual(["page_title", "about", "buildings"]);
+    expect(types("services")).toEqual(["page_title", "services"]);
+    expect(types("areas")).toEqual(["page_title", "areas"]);
+    const services = sectionsOf(newPage(rules, "services"))[1];
+    expect(new Set(services.items?.map((item) => item.service)).size).toBe(
+      services.items?.length,
+    );
   });
 
   it("says what a new section still needs before publishing", () => {

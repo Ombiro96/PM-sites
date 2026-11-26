@@ -39,6 +39,10 @@ export function exampleSite({
           ...temboHart.facts,
           name: company.displayName,
           logo: company.logoUrl ?? "",
+          areas_served:
+            company.areasServed.length > 0
+              ? company.areasServed
+              : temboHart.facts.areas_served,
           phone: company.phone,
           whatsapp: company.whatsappNumber,
         }

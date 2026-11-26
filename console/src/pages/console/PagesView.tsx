@@ -81,7 +81,7 @@ export function PagesView({
     working.pages.find((each) => each.id === pageId) ??
     working.pages.find((each) => each.kind === addedKind) ??
     working.pages[0];
-  const pageChoices = addablePages(rules, working);
+  const pageChoices = addablePages(rules, working, site.audience);
   const sections = page ? sectionsOf(page) : [];
   const at = sections.findIndex((each) => each.id === selected);
   const section = at >= 0 ? sections[at] : undefined;
