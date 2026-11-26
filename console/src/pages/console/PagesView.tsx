@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { DEFAULT_NAV_LABELS, PAGE_PATHS } from "@/lib/site/pages";
+import { DEFAULT_NAV_LABELS, HOUSES_PATH, PAGE_PATHS } from "@/lib/site/pages";
 import type { PageKind, SiteDocument } from "@/lib/site/types";
 import { Button } from "../../components/fields";
 import { PreviewPanel } from "../../components/PreviewPanel";
@@ -19,6 +19,7 @@ import {
   replaceSection,
   sectionsOf,
 } from "../../lib/draft";
+import { tell } from "../../lib/feedback";
 import { draftSite } from "../../lib/preview";
 import { ruleFor, type Rules } from "../../lib/rules";
 import type { Picture, Site } from "../../lib/site";
@@ -108,6 +109,27 @@ export function PagesView({
     setAdding(false);
   };
 
+  const openPage = (id: string) => {
+    setPageId(id);
+    setAddedKind(null);
+    setSelected("");
+    setAdding(false);
+    setAddingPage(false);
+  };
+
+  /** A menu or footer link clicked in the preview opens that page here, as its tab would. */
+  const followPreviewLink = (clicked: string) => {
+    const path = clicked.replace(/\/+$/, "") || "/";
+    const target = working.pages.find((each) => PAGE_PATHS[each.kind] === path);
+    if (target) openPage(target.id);
+    else if (path === HOUSES_PATH || path.startsWith(`${HOUSES_PATH}/`))
+      tell({
+        tone: "info",
+        title: "Houses to let is not edited here",
+        text: "That page is drawn from your adverts in the Bomahut dashboard.",
+      });
+  };
+
   return (
     <div className="grid gap-8 xl:grid-cols-[27rem_minmax(0,1fr)]">
       <div className="flex flex-col gap-4">
@@ -151,13 +173,7 @@ export function PagesView({
               type="button"
               role="tab"
               aria-selected={each.id === page.id}
-              onClick={() => {
-                setPageId(each.id);
-                setAddedKind(null);
-                setSelected("");
-                setAdding(false);
-                setAddingPage(false);
-              }}
+              onClick={() => openPage(each.id)}
               className={`min-h-11 rounded-lg px-4 text-[15px] font-semibold ${each.id === page.id ? "bg-brand text-white" : "text-ink-muted"}`}
             >
               {each.title}
@@ -318,10 +334,11 @@ export function PagesView({
 
       <PreviewPanel
         site={preview}
-        caption="Click any part of the page to change it. The houses and figures shown are examples."
+        caption="Click any part of the page to change it, or a link in its menu to open that page. The houses and figures shown are examples."
         path={PAGE_PATHS[page.kind]}
         selected={selected}
         onPick={select}
+        onGo={followPreviewLink}
       />
     </div>
   );

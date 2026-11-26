@@ -4,10 +4,12 @@ import {
   companyNameError,
   companyPhoneError,
   companyWhatsappError,
+  type AreaGroup,
   type Company,
 } from "../lib/company";
 import { PICTURE_BYTES_MAX, PICTURE_TYPES } from "../lib/site";
 import { phoneForInput, phoneFromInput } from "../lib/validation";
+import { AreasField } from "./AreasField";
 import { Button, CheckField, PhoneField, TextField } from "./fields";
 
 export type CompanyErrors = Partial<Record<keyof Company, string>>;
@@ -17,6 +19,7 @@ export const NO_COMPANY: Company = {
   phone: "",
   whatsappNumber: "",
   logoUrl: null,
+  areasServed: [],
 };
 
 export function companyErrors(company: Company): CompanyErrors {
@@ -35,10 +38,18 @@ export const trimmedCompany = (company: Company): Company => ({
   phone: company.phone.trim(),
   whatsappNumber: company.whatsappNumber.trim(),
   logoUrl: company.logoUrl,
+  areasServed: company.areasServed,
 });
 
 export const sameCompany = (one: Company, other: Company) =>
   JSON.stringify(trimmedCompany(one)) === JSON.stringify(trimmedCompany(other));
+
+/** Whether the name and numbers, the details a manager consents to showing, are the same. */
+export const samePublicDetails = (one: Company, other: Company) =>
+  sameCompany(
+    { ...one, logoUrl: null, areasServed: [] },
+    { ...other, logoUrl: null, areasServed: [] },
+  );
 
 /** The manager's consent to the details being public. `again` when it was given before for other details. */
 export type Consent = {
@@ -156,6 +167,7 @@ export function CompanyFields({
   errors,
   consent,
   logo,
+  areas,
   onChange,
   afterName,
 }: {
@@ -163,6 +175,8 @@ export function CompanyFields({
   errors: CompanyErrors;
   /** Given where a logo can be chosen. */
   logo?: LogoChoice;
+  /** Given where the areas covered can be chosen: the places on offer, or why they could not be fetched. */
+  areas?: { groups: AreaGroup[] | null; problem?: string };
   /** Left out when there is nothing new to consent to. */
   consent?: Consent;
   onChange: (changes: Partial<Company>) => void;
@@ -201,6 +215,14 @@ export function CompanyFields({
           onChange({ whatsappNumber: phoneFromInput(value, dialCode) })
         }
       />
+      {areas ? (
+        <AreasField
+          value={company.areasServed}
+          groups={areas.groups}
+          problem={areas.problem}
+          onChange={(areasServed) => onChange({ areasServed })}
+        />
+      ) : null}
       {consent ? (
         <div className="bg-brand-soft mb-5 rounded-xl px-3.5">
           <CheckField

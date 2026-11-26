@@ -7,12 +7,18 @@ import {
   NO_COMPANY,
   NO_LOGO_CHANGE,
   sameCompany,
+  samePublicDetails,
   trimmedCompany,
   type CompanyErrors,
   type LogoChange,
 } from "../../components/CompanyFields";
 import { Button, FormError, SubmitButton } from "../../components/fields";
-import { saveCompany, type Company } from "../../lib/company";
+import {
+  readAreaGroups,
+  saveCompany,
+  type AreaGroup,
+  type Company,
+} from "../../lib/company";
 import type { Site } from "../../lib/site";
 
 /** The backend keeps a consent for good. The console asks again whenever the details change. */
@@ -38,9 +44,30 @@ export function DetailsView({
   const [consentError, setConsentError] = useState<string>();
   const [problem, setProblem] = useState("");
   const [busy, setBusy] = useState(false);
+  const [areaGroups, setAreaGroups] = useState<AreaGroup[] | null>(null);
+  const [areasProblem, setAreasProblem] = useState<string>();
 
-  const changed = !sameCompany(details, company ?? NO_COMPANY);
-  const dirty = changed || logo.file !== null || logo.removed;
+  useEffect(() => {
+    let active = true;
+    readAreaGroups()
+      .then((found) => active && setAreaGroups(found))
+      .catch((error: unknown) => {
+        if (active)
+          setAreasProblem(
+            error instanceof Error ? error.message : String(error),
+          );
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Consent is about the name and numbers only; the logo and the areas need none.
+  const changed = !samePublicDetails(details, company ?? NO_COMPANY);
+  const dirty =
+    !sameCompany(details, company ?? NO_COMPANY) ||
+    logo.file !== null ||
+    logo.removed;
   useEffect(() => {
     onDirty(dirty);
     return () => onDirty(false);
@@ -123,6 +150,7 @@ export function DetailsView({
         company={details}
         errors={errors}
         logo={{ ...logo, onChange: setLogo }}
+        areas={{ groups: areaGroups, problem: areasProblem }}
         consent={
           asks
             ? {

@@ -184,6 +184,7 @@ describe("the example website", () => {
         phone: "0712 345 678",
         whatsappNumber: "",
         logoUrl: "https://example.com/logo.jpg",
+        areasServed: [],
       },
     });
     expect(site.facts.name).toBe("ABC Properties");

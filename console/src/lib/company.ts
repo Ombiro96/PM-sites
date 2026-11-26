@@ -8,13 +8,20 @@ export type Company = {
   whatsappNumber: string;
   /** Where the saved logo is. Null without one. */
   logoUrl: string | null;
+  /** Names of the areas the company works in, listed on its website. */
+  areasServed: string[];
 };
 
 export const COMPANY_NAME_MAX = 100;
+/** The most areas the backend keeps for one company. */
+export const AREAS_MAX = 12;
+
+/** A part of a country and the places in it a company can say it covers. */
+export type AreaGroup = { country: string; name: string; areas: string[] };
 
 type Saved = { ok: true; company: Company } | { ok: false; message: string };
 
-const FIELDS = "displayName phone whatsappNumber logoUrl";
+const FIELDS = "displayName phone whatsappNumber logoUrl areasServed";
 
 const READ = `
   query {
@@ -25,8 +32,8 @@ const READ = `
 `;
 
 const SAVE = `
-  mutation SaveAgencyProfile($displayName: String, $phone: String, $whatsappNumber: String, $confirmPublic: Boolean, $file: Upload, $removeLogo: Boolean) {
-    saveAgencyProfile(displayName: $displayName, phone: $phone, whatsappNumber: $whatsappNumber, confirmPublic: $confirmPublic, logo: $file, removeLogo: $removeLogo) {
+  mutation SaveAgencyProfile($displayName: String, $phone: String, $whatsappNumber: String, $confirmPublic: Boolean, $file: Upload, $removeLogo: Boolean, $areasServed: [String!]) {
+    saveAgencyProfile(displayName: $displayName, phone: $phone, whatsappNumber: $whatsappNumber, confirmPublic: $confirmPublic, logo: $file, removeLogo: $removeLogo, areasServed: $areasServed) {
       success
       message
       agencyProfile {
@@ -47,7 +54,7 @@ export async function readCompany(): Promise<Company | null> {
  * A `logo` file replaces the saved one and "remove" clears it; without either the saved logo stays.
  */
 export async function saveCompany(
-  { displayName, phone, whatsappNumber }: Company,
+  { displayName, phone, whatsappNumber, areasServed }: Company,
   confirmPublic = false,
   logo?: File | "remove",
 ): Promise<Saved> {
@@ -64,6 +71,7 @@ export async function saveCompany(
       phone,
       whatsappNumber,
       confirmPublic,
+      areasServed,
       file: null,
       removeLogo: logo === "remove",
     },
@@ -76,6 +84,21 @@ export async function saveCompany(
     ok: false,
     message: result?.message ?? "We could not save your details.",
   };
+}
+
+/** The places Bomahut's property manager directory offers, which a company picks its areas from. */
+export async function readAreaGroups(): Promise<AreaGroup[]> {
+  const data = await graphql<{
+    directoryRegionGroups:
+      { country: string; name: string; regions: { name: string }[] }[] | null;
+  }>("query { directoryRegionGroups { country name regions { name } } }");
+  return (data.directoryRegionGroups ?? []).map(
+    ({ country, name, regions }) => ({
+      country,
+      name,
+      areas: regions.map((region) => region.name),
+    }),
+  );
 }
 
 export function companyNameError(value: string): string | undefined {

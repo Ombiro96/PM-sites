@@ -12,6 +12,8 @@ export const PREVIEW_SITE = "preview-site";
 export const PREVIEW_DRAWN = "preview-drawn";
 /** Sent by the frame when a section is clicked while the console is editing. */
 export const PREVIEW_PICK = "preview-pick";
+/** Sent by the frame when a link outside any section is clicked while the console is editing, with its path. */
+export const PREVIEW_GO = "preview-go";
 /** Not a real address: the frame answers listings calls with made-up houses. */
 export const EXAMPLE_API_BASE = "http://mock.local/api";
 
@@ -104,7 +106,7 @@ export function draftSite({
       latitude: null,
       longitude: null,
       social_links: {},
-      areas_served: [],
+      areas_served: company?.areasServed ?? [],
     },
     figures: temboHart.figures,
     pictures: Object.fromEntries(
