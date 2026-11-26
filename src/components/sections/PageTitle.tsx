@@ -6,7 +6,7 @@ import { resolvePicture } from "@/lib/site/pictures";
 import type { PageTitleSection } from "@/lib/site/types";
 import { opensWithPhoto } from "@/lib/site/wording";
 
-/** The title at the top of every page except home. Photo looks put the picture behind it. */
+/** The title at the top of every page except home. A picture, when given, goes behind it. */
 export function PageTitle({ section }: { section: PageTitleSection }) {
   const site = useSite();
   const page = findPage(site.document, useContext(PageKindContext));
